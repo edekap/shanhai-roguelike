@@ -1,0 +1,14 @@
+# 构建产物
+apk/
+sdk/
+gradle-home/
+Microsoft/
+
+# 临时文件
+*.apk
+__pycache__/
+*.pyc
+
+# 系统文件
+Thumbs.db
+.DS_Store
