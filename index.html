@@ -638,6 +638,65 @@
     letter-spacing: 1px;
     line-height: 1.6;
   }
+  #rotateHint .rh-steps {
+    font-size: 12px;
+    color: #6b7785;
+    line-height: 1.9;
+    max-width: 280px;
+    margin-top: 6px;
+  }
+  #rotateHint .rh-steps b { color: #ffd970; }
+  #rotateHint .rh-btn {
+    margin-top: 8px;
+    padding: 10px 28px;
+    background: linear-gradient(135deg, #ffd970, #f0a500);
+    color: #1a1a1a;
+    border: none;
+    border-radius: 22px;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255, 217, 112, 0.3);
+  }
+  #rotateHint .rh-btn:active { transform: scale(0.96); }
+  #rotateHint .rh-divider {
+    width: 60px;
+    height: 1px;
+    background: #2a3441;
+    margin: 4px 0;
+  }
+  /* 首页全屏/添加到主屏提示 */
+  #homeFullscreenTip {
+    display: none;
+    margin-top: 12px;
+    padding: 8px 14px;
+    background: rgba(255, 217, 112, 0.08);
+    border: 1px solid rgba(255, 217, 112, 0.3);
+    border-radius: 10px;
+    font-size: 11px;
+    color: #b8c2cc;
+    letter-spacing: 1px;
+    line-height: 1.7;
+    max-width: 320px;
+    text-align: center;
+  }
+  #homeFullscreenTip.show { display: block; }
+  #homeFullscreenTip b { color: #ffd970; }
+  #fullscreenBtn {
+    display: none;
+    margin: 8px auto 0;
+    padding: 8px 22px;
+    background: rgba(255, 217, 112, 0.15);
+    color: #ffd970;
+    border: 1px solid #ffd970;
+    border-radius: 18px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    cursor: pointer;
+  }
+  #fullscreenBtn.show { display: block; }
+  #fullscreenBtn:active { transform: scale(0.96); }
 </style>
 </head>
 <body>
@@ -645,6 +704,13 @@
   <div class="rh-icon"></div>
   <div class="rh-title">请旋转设备</div>
   <div class="rh-sub">游戏需要横屏体验<br>请将手机横置后开始游戏</div>
+  <div class="rh-divider"></div>
+  <div class="rh-steps">
+    <b>微信用户：</b>请点右上角 <b>···</b> → 选 <b>"在浏览器打开"</b><br>
+    <b>浏览器用户：</b>请点下方按钮全屏播放<br>
+    <b>最佳体验：</b>添加到主屏幕，像 App 一样玩
+  </div>
+  <button class="rh-btn" id="rhFullscreenBtn">⛶ 全屏播放</button>
 </div>
 <div id="gameContainer">
   <canvas id="gameCanvas" width="1600" height="1000"></canvas>
@@ -7198,6 +7264,8 @@ function showMainMenu(){
       </div>
       <div class="subtitle" style="margin-top:10px;font-size:12px">当前难度：${diff.icon} ${diff.name} | 时间到自动进下一关</div>
       <div class="subtitle" style="color:#bc8cff;font-size:11px">📱 手机端：左下虚拟摇杆，右下射击/技能按钮，自动瞄准</div>
+      <button id="fullscreenBtn">⛶ 全屏播放（无遮挡）</button>
+      <div id="homeFullscreenTip"></div>
       <div style="margin-top:14px;font-family:'STKaiti','KaiTi',serif;font-size:13px;letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
 
       <details style="margin:10px auto 20px;max-width:680px;padding:10px 14px;border:1px solid rgba(212,160,23,0.3);border-radius:10px;background:rgba(22,27,34,0.7);font-size:12px;color:#8b949e;text-align:left;backdrop-filter:blur(8px)">
@@ -7235,6 +7303,8 @@ function showMainMenu(){
   if(bookBtn)bookBtn.addEventListener('click',()=>showShanHaiBook(false));
   // 主菜单内容可能溢出，确保从顶部开始展示
   ov.scrollTop = 0;
+  // 显示手机端全屏/添加到主屏幕提示
+  try{ showHomeTipIfMobile(); }catch(e){}
   // 难度选择
   ov.querySelectorAll('[data-diff]').forEach(el=>{
     el.addEventListener('click',()=>{saveData.difficulty=el.dataset.diff;saveSave();showMainMenu();});
@@ -8577,6 +8647,7 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
 let isTouchDevice = window.matchMedia ? window.matchMedia('(pointer: coarse)').matches : false;
 
 // 竖屏旋转提示：仅手机端在竖屏时显示遮罩
+const isInWechat = /MicroMessenger/i.test(navigator.userAgent);
 function updateRotateHint(){
   const hint = document.getElementById('rotateHint');
   if(!hint) return;
@@ -8593,6 +8664,62 @@ window.addEventListener('orientationchange', updateRotateHint);
 window.addEventListener('resize', updateRotateHint);
 window.addEventListener('load', updateRotateHint);
 setTimeout(updateRotateHint, 300); // 初始延迟检测，避免某些机型取值不准
+
+// 全屏播放（解决浏览器地址栏遮挡问题）
+function toggleFullscreen(){
+  const el = document.documentElement;
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+  if(!isFs){
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.webkitEnterFullscreen;
+    if(req) req.call(el);
+  }else{
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if(exit) exit.call(document);
+  }
+}
+document.addEventListener('fullscreenchange', () => { lastTime = 0; });
+document.addEventListener('webkitfullscreenchange', () => { lastTime = 0; });
+// 遮罩内全屏按钮
+(function(){
+  const btn = document.getElementById('rhFullscreenBtn');
+  if(btn) btn.addEventListener('click', toggleFullscreen);
+})();
+
+// 首页提示：在浏览器/微信打开时，提示全屏或添加到主屏幕
+function showHomeTipIfMobile(){
+  if(!isTouchDevice) return;
+  // 微信内：提示在浏览器打开
+  if(isInWechat){
+    const tip = document.getElementById('homeFullscreenTip');
+    if(tip){
+      tip.innerHTML = '📲 点右上角 <b>···</b> → <b>在浏览器打开</b>，体验更佳';
+      tip.classList.add('show');
+    }
+    return;
+  }
+  // 非微信浏览器：显示全屏按钮 + 添加到主屏幕提示
+  const btn = document.getElementById('fullscreenBtn');
+  if(btn){
+    btn.classList.add('show');
+    btn.addEventListener('click', toggleFullscreen);
+  }
+  // iOS Safari 提示添加到主屏幕
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  if(isIOS && !isStandalone){
+    const tip = document.getElementById('homeFullscreenTip');
+    if(tip){
+      tip.innerHTML = ' IOS 最佳体验：<br>点底部 <b>分享 ↗</b> → <b>添加到主屏幕</b><br>像 App 一样全屏玩，无地址栏';
+      tip.classList.add('show');
+    }
+  }else if(!isStandalone){
+    const tip = document.getElementById('homeFullscreenTip');
+    if(tip){
+      tip.innerHTML = ' Android 最佳体验：<br>点浏览器菜单 <b>⋮</b> → <b>添加到主屏幕</b><br>像 App 一样全屏玩，无地址栏';
+      tip.classList.add('show');
+    }
+  }
+}
 // 运行时二次确认：只有真正发生过 touchstart 才启用触摸控制
 let touchConfirmed = false;
 let touchMoveX = 0, touchMoveY = 0; // 摇杆方向 (-1 to 1)
