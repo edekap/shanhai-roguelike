@@ -590,9 +590,62 @@
     /* 副标题在横屏隐藏省空间 */
     .sj-col-left > .subtitle { display: none; }
   }
+
+  /* 竖屏旋转提示遮罩 - 仅手机端显示 */
+  #rotateHint {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #0d1117;
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+    text-align: center;
+  }
+  #rotateHint.show { display: flex; }
+  #rotateHint .rh-icon {
+    width: 72px; height: 110px;
+    border: 4px solid #ffd970;
+    border-radius: 12px;
+    position: relative;
+    animation: rhRotate 1.8s ease-in-out infinite;
+  }
+  #rotateHint .rh-icon::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 18px; height: 3px;
+    background: #ffd970;
+    border-radius: 2px;
+  }
+  @keyframes rhRotate {
+    0%, 40% { transform: rotate(0deg); }
+    60%, 100% { transform: rotate(90deg); }
+  }
+  #rotateHint .rh-title {
+    font-size: 22px;
+    color: #ffd970;
+    font-weight: bold;
+    letter-spacing: 4px;
+  }
+  #rotateHint .rh-sub {
+    font-size: 13px;
+    color: #8d9ba8;
+    letter-spacing: 1px;
+    line-height: 1.6;
+  }
 </style>
 </head>
 <body>
+<div id="rotateHint">
+  <div class="rh-icon"></div>
+  <div class="rh-title">请旋转设备</div>
+  <div class="rh-sub">游戏需要横屏体验<br>请将手机横置后开始游戏</div>
+</div>
 <div id="gameContainer">
   <canvas id="gameCanvas" width="1600" height="1000"></canvas>
   <div id="ui">
@@ -8522,6 +8575,24 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
 // ==================== 手机端触摸控制 ====================
 // 使用 pointer:coarse 检测纯触摸设备（手机/平板），避免触屏笔记本误判
 let isTouchDevice = window.matchMedia ? window.matchMedia('(pointer: coarse)').matches : false;
+
+// 竖屏旋转提示：仅手机端在竖屏时显示遮罩
+function updateRotateHint(){
+  const hint = document.getElementById('rotateHint');
+  if(!hint) return;
+  const isPortrait = window.matchMedia('(orientation: portrait)').matches
+    || (window.innerHeight > window.innerWidth);
+  // 仅触摸设备 + 竖屏 时显示
+  if(isTouchDevice && isPortrait){
+    hint.classList.add('show');
+  }else{
+    hint.classList.remove('show');
+  }
+}
+window.addEventListener('orientationchange', updateRotateHint);
+window.addEventListener('resize', updateRotateHint);
+window.addEventListener('load', updateRotateHint);
+setTimeout(updateRotateHint, 300); // 初始延迟检测，避免某些机型取值不准
 // 运行时二次确认：只有真正发生过 touchstart 才启用触摸控制
 let touchConfirmed = false;
 let touchMoveX = 0, touchMoveY = 0; // 摇杆方向 (-1 to 1)
