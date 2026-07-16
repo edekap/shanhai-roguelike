@@ -8687,37 +8687,47 @@ document.addEventListener('webkitfullscreenchange', () => { lastTime = 0; });
 
 // 首页提示：在浏览器/微信打开时，提示全屏或添加到主屏幕
 function showHomeTipIfMobile(){
-  if(!isTouchDevice) return;
-  // 微信内：提示在浏览器打开
-  if(isInWechat){
-    const tip = document.getElementById('homeFullscreenTip');
-    if(tip){
-      tip.innerHTML = '📲 点右上角 <b>···</b> → <b>在浏览器打开</b>，体验更佳';
-      tip.classList.add('show');
-    }
-    return;
-  }
-  // 非微信浏览器：显示全屏按钮 + 添加到主屏幕提示
-  const btn = document.getElementById('fullscreenBtn');
-  if(btn){
-    btn.classList.add('show');
-    btn.addEventListener('click', toggleFullscreen);
-  }
-  // iOS Safari 提示添加到主屏幕
+  const tip = document.getElementById('homeFullscreenTip');
+  if(!tip) return;
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-  if(isIOS && !isStandalone){
-    const tip = document.getElementById('homeFullscreenTip');
-    if(tip){
-      tip.innerHTML = ' IOS 最佳体验：<br>点底部 <b>分享 ↗</b> → <b>添加到主屏幕</b><br>像 App 一样全屏玩，无地址栏';
-      tip.classList.add('show');
+  let html = '';
+
+  // 微信内：提示在浏览器打开（iOS/Android 都适用）
+  if(isInWechat){
+    if(isIOS){
+      html += '📲 微信内打不开，请按以下步骤：<br>';
+      html += '① 点右上角 <b>···</b> → <b>在 Safari 中打开</b><br>';
+      html += '② 在 Safari 里点底部 <b>分享 ↗</b> → <b>添加到主屏幕</b><br>';
+      html += '③ 回桌面点图标，全屏横屏畅玩';
+    }else{
+      html += '📲 微信内打不开，请按以下步骤：<br>';
+      html += '① 点右上角 <b>···</b> → <b>在浏览器打开</b><br>';
+      html += '② 在浏览器里点菜单 <b>⋮</b> → <b>添加到主屏幕</b><br>';
+      html += '③ 回桌面点图标，全屏横屏畅玩';
     }
-  }else if(!isStandalone){
-    const tip = document.getElementById('homeFullscreenTip');
-    if(tip){
-      tip.innerHTML = ' Android 最佳体验：<br>点浏览器菜单 <b>⋮</b> → <b>添加到主屏幕</b><br>像 App 一样全屏玩，无地址栏';
-      tip.classList.add('show');
+  }else if(isStandalone){
+    // 已经是主屏幕模式，不用提示
+    return;
+  }else if(isTouchDevice){
+    // 非微信手机浏览器：显示全屏按钮
+    const btn = document.getElementById('fullscreenBtn');
+    if(btn){
+      btn.classList.add('show');
+      btn.addEventListener('click', toggleFullscreen);
     }
+    if(isIOS){
+      html += ' IOS 最佳体验：<br>点底部 <b>分享 ↗</b> → <b>添加到主屏幕</b><br>像 App 一样全屏玩，无地址栏';
+    }else{
+      html += ' Android 最佳体验：<br>点浏览器菜单 <b>⋮</b> → <b>添加到主屏幕</b><br>像 App 一样全屏玩，无地址栏';
+    }
+  }else{
+    return; // 电脑端不提示
+  }
+
+  if(html){
+    tip.innerHTML = html;
+    tip.classList.add('show');
   }
 }
 // 运行时二次确认：只有真正发生过 touchstart 才启用触摸控制
