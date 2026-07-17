@@ -1067,7 +1067,7 @@ const TALENTS = [
   { id:'critdmg',name:'暴击伤害',icon:'🔥',desc:'暴击伤害+20%',maxLevel:3,costPerLevel:2 },
   { id:'regen',name:'生命回复',icon:'💚',desc:'每关开始回复+1',maxLevel:3,costPerLevel:2 },
   // 分支天赋（二选一）- 解决后期子弹分散打不到Boss的问题
-  { id:'ricochet',name:'子弹反弹',icon:'🔄',desc:'子弹击中敌人后弹射到附近敌人(每级+1次,50%伤害)',maxLevel:2,costPerLevel:1,exclusiveWith:'homing',branch:'辅助' },
+  { id:'ricochet',name:'子弹反弹',icon:'🔄',desc:'子弹撞墙后反弹(每级+1次反弹)',maxLevel:2,costPerLevel:1,exclusiveWith:'homing',branch:'辅助' },
   { id:'homing',name:'子弹追踪',icon:'🧲',desc:'子弹追踪最近敌人(每级+1.5追踪强度)',maxLevel:2,costPerLevel:1,exclusiveWith:'ricochet',branch:'辅助' },
   // 高级天赋（二选一,2点）- 击中叠加层数,有上限,衰减
   { id:'frenzy',name:'战斗狂',icon:'💢',desc:'击中敌人叠加攻速(每层-3%,上限15%,1.5秒未击中衰减)',maxLevel:1,costPerLevel:2,exclusiveWith:'rage',branch:'高级',advanced:true },
@@ -2349,7 +2349,6 @@ class Player {
     this.bulletHoming=0; this.bulletSize=CONFIG.PLAYER.BULLET_SIZE;
     this.bounce=0; this.shield=0; this.maxShield=5;
     // 新天赋相关属性
-    this.bulletRicochet=0;       // 子弹反弹天赋（击中敌人后弹射到附近敌人）
     this.combatFuryStacks=0;     // 战斗狂当前层数
     this.combatFuryMax=0;        // 战斗狂最大层数（天赋等级×5,每层-3%cd,上限15%）
     this.combatFuryTimer=0;      // 战斗狂衰减计时器
@@ -2422,7 +2421,8 @@ class Player {
     this.critDamage+=getTalentBonus('critdmg')*0.2;
     this.regenPerLevel=getTalentBonus('regen');
     // 新天赋：子弹反弹 / 子弹追踪（互斥）
-    this.bulletRicochet=getTalentBonus('ricochet');      // 每级+1次反弹
+    // 子弹反弹：子弹撞墙后反弹(每级+1次),利用Bullet类自带的bounce机制
+    this.bounce+=getTalentBonus('ricochet');             // 每级+1次撞墙反弹
     this.bulletHoming+=getTalentBonus('homing')*1.5;     // 每级+1.5追踪强度（明显追踪）
     // 高级天赋：战斗狂 / 愤怒（互斥,2点）- 击中叠加层数有上限,衰减
     this.combatFuryMax=getTalentBonus('frenzy')*5;       // 战斗狂：5层上限,每层-3%cd(共-15%)
@@ -3377,25 +3377,8 @@ class Enemy {
           spawnParticles(this.x,this.y,'#bc8cff',6);
         }
       }
-      // 天赋：子弹反弹（击中敌人后弹射到附近敌人,每级+1次,50%伤害）
-      if(player&&player.bulletRicochet>0&&bullet&&!bullet._ricocheted){
-        const remaining=player.bulletRicochet-(bullet._ricochetCount||0);
-        if(remaining>0){
-          let nearest=null,nd=220;
-          for(const e of enemies){if(!e.alive||e===this||bullet.hitEnemies.has(e))continue; const d=dist(this.x,this.y,e.x,e.y); if(d<nd){nd=d;nearest=e;}}
-          if(boss&&boss.alive&&boss!==this&&!bullet.hitEnemies.has(boss)){const d=dist(this.x,this.y,boss.x,boss.y); if(d<nd*1.5)nearest=boss;}
-          if(nearest){
-            bullet._ricochetCount=(bullet._ricochetCount||0)+1;
-            if(bullet._ricochetCount>=player.bulletRicochet)bullet._ricocheted=true;
-            const a=Math.atan2(nearest.y-this.y,nearest.x-this.x);
-            const nb=new Bullet(this.x,this.y,a,{damage:bullet.damage*0.5,size:bullet.size*0.85,speed:bullet.speed,pierce:0});
-            nb._ricochetCount=bullet._ricochetCount; nb._ricocheted=bullet._ricocheted;
-            nb._relicFrost=bullet._relicFrost;
-            bullets.push(nb);
-            spawnParticles(this.x,this.y,'#ffd970',5);
-          }
-        }
-      }
+      // 天赋：子弹反弹（撞墙反弹）已在Bullet.update中通过bounce属性实现,
+      // 天赋值通过fireBullets传入bullet.bounce,此处无需额外处理
       // 高级天赋：战斗狂/愤怒 - 击中敌人叠加层数（1.5秒未击中衰减,在Player.update中处理）
       if(player){
         if(player.combatFuryMax>0){
@@ -4716,24 +4699,7 @@ class Boss {
     }
     if(bullet&&bullet.elementEffects?.ice&&this.applyIceEffect)this.applyIceEffect(bullet.elementEffects.ice);
     if(bullet&&bullet.specialEffects?.fireball){const eff=bullet.specialEffects.fireball; fireEffects.push({x:this.x,y:this.y,radius:eff.radius,damage:eff.burnDmg,life:eff.burnDur,maxLife:eff.burnDur,burnDmg:eff.burnDmg,tick:0,chain:eff.chain||0});}
-    // 天赋：子弹反弹（Boss版 - 弹射到附近敌人,每级+1次,50%伤害）
-    if(player&&player.bulletRicochet>0&&bullet&&!bullet._ricocheted){
-      const remaining=player.bulletRicochet-(bullet._ricochetCount||0);
-      if(remaining>0){
-        let nearest=null,nd=260;
-        for(const e of enemies){if(!e.alive||e===this||bullet.hitEnemies.has(e))continue; const d=dist(this.x,this.y,e.x,e.y); if(d<nd){nd=d;nearest=e;}}
-        if(nearest){
-          bullet._ricochetCount=(bullet._ricochetCount||0)+1;
-          if(bullet._ricochetCount>=player.bulletRicochet)bullet._ricocheted=true;
-          const a=Math.atan2(nearest.y-this.y,nearest.x-this.x);
-          const nb=new Bullet(this.x,this.y,a,{damage:bullet.damage*0.5,size:bullet.size*0.85,speed:bullet.speed,pierce:0});
-          nb._ricochetCount=bullet._ricochetCount; nb._ricocheted=bullet._ricocheted;
-          nb._relicFrost=bullet._relicFrost;
-          bullets.push(nb);
-          spawnParticles(this.x,this.y,'#ffd970',5);
-        }
-      }
-    }
+    // 天赋：子弹反弹（撞墙反弹）已在Bullet.update中通过bounce属性实现,此处无需额外处理
     // 高级天赋：战斗狂/愤怒 - 击中Boss也叠加层数
     if(player){
       if(player.combatFuryMax>0){
@@ -8163,7 +8129,6 @@ function showMainMenu(){
           <button class="feature-btn fb-green" id="ranchBtn"><div class="fb-icon">🐔</div><div class="fb-name">牧场</div><div class="fb-tag">放养·产蛋</div></button>
           <button class="feature-btn fb-purple" id="bondBtn"><div class="fb-icon">🔗</div><div class="fb-name">羁绊</div><div class="fb-tag">被动加成</div></button>
           <button class="feature-btn fb-blue" id="pediaBtn"><div class="fb-icon">📖</div><div class="fb-name">图鉴</div><div class="fb-tag">成就记录</div></button>
-          ${saveData.hasShanHaiBook?'<button class="feature-btn" id="bookBtn" style="background:linear-gradient(135deg,#8b0000,#ffd700);border-color:#ffd700"><div class="fb-icon">📖</div><div class="fb-name">山海故事</div><div class="fb-tag">背景故事</div></button>':''}
         </div>
       </div>
 
@@ -8200,6 +8165,7 @@ function showMainMenu(){
       <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0;flex-wrap:wrap">
         <span class="subtitle" style="font-size:11px;margin:0">难度：${diff.icon} ${diff.name}</span>
         <button id="fullscreenBtn" style="margin:0;padding:4px 10px;font-size:11px">⛶ 全屏播放</button>
+        ${saveData.hasShanHaiBook?'<button id="bookBtn" style="margin:0;padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#8b0000,#ffd700);color:#fff;border:1px solid #ffd700;border-radius:6px;cursor:pointer">📖 山海故事</button>':''}
       </div>
       <div id="homeFullscreenTip"></div>
       <div style="margin:4px 0;font-family:'STKaiti','KaiTi',serif;font-size:11px;letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
@@ -8257,30 +8223,34 @@ function showMainMenu(){
   if(bookBtn)bookBtn.addEventListener('click',()=>showShanHaiBook(false));
   // 主菜单内容可能溢出，确保从顶部开始展示
   ov.scrollTop = 0;
-  // 修复手机端滑动导致顶部按钮消失：主菜单状态下锁定overlay滚动，
-  // details/弹窗内部自带滚动不受影响。移除旧监听再绑定，避免重复。
+  // 修复手机端滑动导致顶部按钮消失：仅触摸设备在主菜单状态下锁定overlay滚动,
+  // 电脑端不锁定(视口足够,允许自由滚动查看底部教程/作者),
+  // details/弹窗内部自带滚动不受影响。
   if(!ov._menuScrollLock){
     ov._menuScrollLock=true;
-    ov.addEventListener('touchmove',(e)=>{
-      // 仅当主菜单显示时锁定（其他菜单如背包/图鉴仍可滚动）
-      if(gameState==='menu' && !ov.classList.contains('hidden')){
-        // 若触摸发生在可滚动元素内部(details/弹窗)则放行
-        let node=e.target;
-        while(node && node!==ov){
-          if(node.tagName==='DETAILS'||node.tagName==='SUMMARY'||node.id==='noticeOverlay'){
-            return;
+    const _isTouch = window.matchMedia ? window.matchMedia('(pointer: coarse)').matches : false;
+    if(_isTouch){
+      ov.addEventListener('touchmove',(e)=>{
+        // 仅当主菜单显示时锁定（其他菜单如背包/图鉴仍可滚动）
+        if(gameState==='menu' && !ov.classList.contains('hidden')){
+          // 若触摸发生在可滚动元素内部(details/弹窗)则放行
+          let node=e.target;
+          while(node && node!==ov){
+            if(node.tagName==='DETAILS'||node.tagName==='SUMMARY'||node.id==='noticeOverlay'){
+              return;
+            }
+            node=node.parentNode;
           }
-          node=node.parentNode;
+          e.preventDefault();
         }
-        e.preventDefault();
-      }
-    },{passive:false});
-    // 同时监听scroll事件强制归零（防止地址栏收缩导致的微小滚动）
-    ov.addEventListener('scroll',()=>{
-      if(gameState==='menu' && !ov.classList.contains('hidden') && ov.scrollTop>0){
-        ov.scrollTop=0;
-      }
-    });
+      },{passive:false});
+      // 同时监听scroll事件强制归零（防止地址栏收缩导致的微小滚动）
+      ov.addEventListener('scroll',()=>{
+        if(gameState==='menu' && !ov.classList.contains('hidden') && ov.scrollTop>0){
+          ov.scrollTop=0;
+        }
+      });
+    }
   }
   // 显示手机端全屏/添加到主屏幕提示
   try{ showHomeTipIfMobile(); }catch(e){}
