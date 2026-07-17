@@ -474,13 +474,18 @@
   /* 暂停按钮（手机左上角） */
   #pauseBtn { display: none; position: absolute; top: calc(8px + env(safe-area-inset-top, 0px)); left: calc(10px + env(safe-area-inset-left, 0px)); z-index: 20; width: 38px; height: 38px; border-radius: 50%; background: rgba(22,27,34,0.7); border: 1px solid rgba(212,160,23,0.5); color: #ffd970; font-size: 18px; align-items: center; justify-content: center; pointer-events: auto; user-select: none; -webkit-user-select: none; backdrop-filter: blur(8px); }
   #pauseBtn:active { transform: scale(0.9); }
-  #joystickZone { position: absolute; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: calc(20px + env(safe-area-inset-left, 0px)); width: 140px; height: 140px; pointer-events: auto; }
-  #joystickBase { position: absolute; width: 120px; height: 120px; border-radius: 50%; background: rgba(22,27,34,0.4); border: 2px solid rgba(212,160,23,0.4); top: 10px; left: 10px; }
-  #joystickThumb { position: absolute; width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, rgba(212,160,23,0.8), rgba(165,40,56,0.6)); border: 2px solid rgba(255,217,112,0.6); top: 42px; left: 42px; box-shadow: 0 0 12px rgba(212,160,23,0.4); transition: transform 0.05s; }
-  #aimJoystickZone { position: absolute; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); right: calc(20px + env(safe-area-inset-right, 0px)); width: 140px; height: 140px; pointer-events: auto; }
-  #aimJoystickBase { position: absolute; width: 120px; height: 120px; border-radius: 50%; background: rgba(22,27,34,0.4); border: 2px solid rgba(248,81,73,0.4); top: 10px; left: 10px; }
-  #aimJoystickThumb { position: absolute; width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, rgba(248,81,73,0.8), rgba(165,40,56,0.6)); border: 2px solid rgba(255,137,122,0.6); top: 42px; left: 42px; box-shadow: 0 0 12px rgba(248,81,73,0.4); transition: transform 0.05s; }
-  #skillBtn { position: absolute; bottom: calc(170px + env(safe-area-inset-bottom, 0px)); right: calc(50px + env(safe-area-inset-right, 0px)); width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, rgba(188,140,255,0.7), rgba(122,63,176,0.5)); border: 3px solid rgba(188,140,255,0.7); color: #fff; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; pointer-events: auto; user-select: none; -webkit-user-select: none; box-shadow: 0 0 16px rgba(188,140,255,0.3); }
+  #joystickZone { position: absolute; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: calc(30px + env(safe-area-inset-left, 0px)); width: 120px; height: 120px; pointer-events: auto; }
+  #joystickBase { position: absolute; width: 104px; height: 104px; border-radius: 50%; background: rgba(22,27,34,0.4); border: 2px solid rgba(212,160,23,0.4); top: 8px; left: 8px; }
+  #joystickThumb { position: absolute; width: 48px; height: 48px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, rgba(212,160,23,0.8), rgba(165,40,56,0.6)); border: 2px solid rgba(255,217,112,0.6); top: 36px; left: 36px; box-shadow: 0 0 12px rgba(212,160,23,0.4); transition: transform 0.05s; }
+  #aimJoystickZone { position: absolute; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); right: calc(30px + env(safe-area-inset-right, 0px)); width: 110px; height: 110px; pointer-events: auto; }
+  #aimJoystickBase { position: absolute; width: 94px; height: 94px; border-radius: 50%; background: rgba(22,27,34,0.35); border: 2px solid rgba(248,81,73,0.4); top: 8px; left: 8px; }
+  #aimJoystickThumb { position: absolute; width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, rgba(248,81,73,0.8), rgba(165,40,56,0.6)); border: 2px solid rgba(255,137,122,0.6); top: 33px; left: 33px; box-shadow: 0 0 12px rgba(248,81,73,0.4); transition: transform 0.05s; }
+  /* iPad/平板大屏：摇杆更靠中间，避免角落太远玩着难受 */
+  @media (min-width: 1024px) and (orientation: landscape), (min-device-width: 768px) and (orientation: landscape) {
+    #joystickZone { left: calc(12% + env(safe-area-inset-left, 0px)); }
+    #aimJoystickZone { right: calc(12% + env(safe-area-inset-right, 0px)); }
+  }
+  #skillBtn { position: absolute; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); right: calc(45px + env(safe-area-inset-right, 0px)); width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, rgba(188,140,255,0.7), rgba(122,63,176,0.5)); border: 3px solid rgba(188,140,255,0.7); color: #fff; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; pointer-events: auto; user-select: none; -webkit-user-select: none; box-shadow: 0 0 16px rgba(188,140,255,0.3); }
   #skillBtn.cooldown { opacity: 0.4; }
   #skillBtn:active { transform: scale(0.92); }
 
@@ -9874,7 +9879,7 @@ const joystickThumb = document.getElementById('joystickThumb');
 let joystickActive = false;
 let joystickStartX = 0, joystickStartY = 0;
 let joystickTouchId = null; // 跟踪触摸点 identifier，防止两摇杆互相抢
-const joystickRadius = 50; // 摇杆活动半径
+const joystickRadius = 42; // 摇杆活动半径（缩小后）
 
 function handleJoystickStart(e){
   e.preventDefault();
@@ -9937,7 +9942,7 @@ let aimJoystickActive = false;
 let aimJoystickStartX = 0, aimJoystickStartY = 0;
 let aimJoystickX = 0, aimJoystickY = 0; // 射击方向 (-1 to 1)
 let aimJoystickTouchId = null; // 跟踪触摸点 identifier，防止两摇杆互相抢
-const aimJoystickRadius = 50;
+const aimJoystickRadius = 38;
 
 function handleAimJoystickStart(e){
   e.preventDefault();
