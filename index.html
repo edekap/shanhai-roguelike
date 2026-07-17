@@ -88,6 +88,10 @@
   .skill-fill { height: 100%; background: linear-gradient(90deg, #7a3fb0, #bc8cff, #d2a8ff); transition: width 0.1s ease; border-radius: 4px; box-shadow: 0 0 10px rgba(188,140,255,0.6), inset 0 1px 0 rgba(255,255,255,0.3); }
   .timer-bar { width: 200px; height: 9px; background: #1a1f2e; border-radius: 5px; overflow: hidden; margin-top: 4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,160,23,0.2); }
   .timer-fill { height: 100%; background: linear-gradient(90deg, #4a9b8e, #3fb950, #f0883e, #a52838); transition: width 0.3s ease; border-radius: 5px; box-shadow: 0 0 8px rgba(212,160,23,0.4), inset 0 1px 0 rgba(255,255,255,0.25); }
+  /* 经验条：细且半透明，不遮挡视野 */
+  .xp-bar { width: 140px; height: 5px; background: rgba(26,31,46,0.7); border-radius: 3px; overflow: hidden; margin: 2px auto 0; box-shadow: inset 0 1px 1px rgba(0,0,0,0.6); }
+  .xp-fill { height: 100%; background: linear-gradient(90deg, #58a6ff, #bc8cff, #ffd970); transition: width 0.3s ease; border-radius: 3px; box-shadow: 0 0 6px rgba(188,140,255,0.5); }
+  .xp-label { font-size: 10px; color: #ffd970; margin-top: 1px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); letter-spacing: 0.5px; }
   #overlay, #upgradeOverlay, #talentOverlay, #charOverlay, #weaponOverlay, #petOverlay, #rouletteOverlay, #craftOverlay, #gearOverlay, #bondOverlay, #pediaOverlay, #adventureOverlay, #bossCaptureOverlay, #bagOverlay, #artifactOverlay {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
@@ -152,9 +156,10 @@
   .sec-btn:hover { border-color: #ffd970; color: #ffd970; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(212,160,23,0.3), inset 0 1px 0 rgba(255,255,255,0.1); }
   .panel-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
   .menu-buttons { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-bottom: 18px; }
-  .controls { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 13px; color: #b0a090; align-items: center; }
-  .key { background: linear-gradient(180deg, #2a3142, #1a1f2e); border: 1px solid rgba(212,160,23,0.4); border-radius: 5px; padding: 3px 9px; font-size: 12px; color: #ffd970; text-align: center; font-weight: 600; box-shadow: inset 0 -1px 0 rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.3); }
-  .desc { text-align: left; color: #b0a090; }
+  .controls { display: flex; flex-wrap: wrap; gap: 6px 8px; font-size: 12px; color: #b0a090; align-items: center; justify-content: center; }
+  .controls .ctrl-item { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; background: rgba(22,27,34,0.6); border: 1px solid rgba(212,160,23,0.2); border-radius: 14px; }
+  .key { background: linear-gradient(180deg, #2a3142, #1a1f2e); border: 1px solid rgba(212,160,23,0.4); border-radius: 5px; padding: 2px 7px; font-size: 11px; color: #ffd970; text-align: center; font-weight: 600; box-shadow: inset 0 -1px 0 rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.3); white-space: nowrap; }
+  .desc { text-align: left; color: #b0a090; font-size: 11px; white-space: nowrap; }
   .coin-display { margin-bottom: 18px; font-size: 22px; color: #f0a838; font-weight: bold; text-shadow: 0 0 10px rgba(240,168,56,0.4); }
   .coin-icon { font-size: 24px; }
   #finalScore { font-size: 56px; color: #ffd970; margin: 12px 0; font-weight: 900; text-shadow: 0 0 24px rgba(212,160,23,0.6); letter-spacing: 3px; }
@@ -210,6 +215,13 @@
   .adventure-event:hover { border-color: #ffd970; transform: translateY(-4px); box-shadow: 0 12px 28px rgba(212,160,23,0.25); }
   .rarity-common { color: #b0a090; } .rarity-rare { color: #58a6ff; } .rarity-epic { color: #bc8cff; } .rarity-legendary { color: #ffd970; }
   .section-title { font-size: 17px; color: #ffd970; margin: 12px 0 8px; text-align: left; width: 100%; max-width: 600px; font-weight: bold; letter-spacing: 1.5px; }
+  /* 通用翻页导航：大按钮手机友好 */
+  .paged-nav { display:flex; align-items:center; justify-content:center; gap:14px; margin:8px auto 10px; padding:6px 10px; max-width:560px; flex-wrap:wrap; }
+  .paged-nav .pg-btn { min-width:72px; padding:8px 14px; font-size:14px; border-radius:10px; cursor:pointer; background:linear-gradient(180deg,#2a3142,#1a1f2e); border:1px solid rgba(212,160,23,0.5); color:#ffd970; font-weight:bold; box-shadow:0 2px 6px rgba(0,0,0,0.3); transition:all 0.15s; }
+  .paged-nav .pg-btn:active { transform:scale(0.96); }
+  .paged-nav .pg-btn:disabled { opacity:0.35; cursor:not-allowed; }
+  .paged-nav .pg-info { font-size:13px; color:#ffd970; padding:4px 12px; background:rgba(22,27,34,0.7); border:1px solid rgba(212,160,23,0.3); border-radius:8px; min-width:96px; text-align:center; }
+  .paged-tabs { display:flex; gap:6px; justify-content:center; margin:8px auto 6px; flex-wrap:wrap; }
   .info-text { font-size: 13px; color: #b0a090; line-height: 1.7; max-width: 600px; margin-bottom: 14px; }
   .capture-btn { padding: 12px 32px; font-size: 16px; border-radius: 22px; cursor: pointer; margin: 6px; border: none; font-weight: bold; letter-spacing: 1px; transition: all 0.2s; }
   .capture-yes { background: linear-gradient(135deg, #d4a017, #a52838); color: #fff8e0; box-shadow: 0 4px 14px rgba(165,40,56,0.4); }
@@ -705,12 +717,20 @@
   <div class="rh-title">请旋转设备</div>
   <div class="rh-sub">游戏需要横屏体验<br>请将手机横置后开始游戏</div>
   <div class="rh-divider"></div>
-  <div class="rh-steps">
-    <b>微信用户：</b>请点右上角 <b>···</b> → 选 <b>"在浏览器打开"</b><br>
-    <b>浏览器用户：</b>请点下方按钮全屏播放<br>
-    <b>最佳体验：</b>添加到主屏幕，像 App 一样玩
+  <div class="rh-steps" style="max-width:340px;text-align:left">
+    <b>🍎 iOS 用户最佳方式：</b><br>
+    ① 用 <b>Safari</b> 打开本页面<br>
+    ② 点底部 <b>分享 ↗</b> → <b>添加到主屏幕</b><br>
+    ③ 回桌面点图标，全屏横屏畅玩<br>
+    <br>
+    <b>🤖 安卓用户最佳方式：</b><br>
+    ① 用 <b>Chrome/Edge</b> 打开本页面<br>
+    ② 点菜单 <b>⋮</b> → <b>添加到主屏幕</b><br>
+    ③ 回桌面点图标，全屏横屏畅玩<br>
+    <br>
+    <b>💬 微信用户：</b>请先点右上角 <b>···</b> → <b>在浏览器打开</b>
   </div>
-  <button class="rh-btn" id="rhFullscreenBtn">⛶ 全屏播放</button>
+  <button class="rh-btn" id="rhFullscreenBtn">⛶ 暂不添加，直接全屏播放</button>
 </div>
 <div id="gameContainer">
   <canvas id="gameCanvas" width="1600" height="1000"></canvas>
@@ -726,6 +746,8 @@
     </div>
     <div class="ui-panel ui-panel-center" style="text-align:center">
       <div class="ui-label" id="waveLabel">第1关 波次1</div>
+      <div class="xp-label">Lv.<span id="xpLevel">1</span> · <span id="xpText">0/6</span></div>
+      <div class="xp-bar"><div class="xp-fill" id="xpBar" style="width:0%"></div></div>
       <div class="ui-value" id="scoreText">0</div>
       <div class="timer-bar"><div class="timer-fill" id="timerBar" style="width:100%"></div></div>
       <div style="font-size:10px;color:#8b949e;margin-top:1px" id="timerText">30s</div>
@@ -827,15 +849,29 @@
 // Fisher-Yates 洗牌算法，保证均匀随机分布
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
+// 局外玩家等级（基于累积经验 totalXp，每 500 XP 升 1 级）
+// 用于首页长期进度展示，与局内 xpLevel 不同
+function getPlayerLevelInfo(){
+  const xp=(saveData&&saveData.totalXp)||0;
+  const needed=500;
+  const level=Math.floor(xp/needed)+1;
+  const inLevel=xp%needed;
+  return {level,xp,inLevel,needed};
+}
+
 // ==================== 存档系统 ====================
 let saveData = {
   totalScore: 0, talentPoints: 0, talents: {},
+  // 局外经验系统：累积获得的总经验，每1000经验奖励1天赋点
+  totalXp: 0, totalXpClaimed: 0, // totalXp: 累积经验；totalXpClaimed: 已兑换天赋点的经验量
   currentCharacter: 'default', unlockedCharacters: ['default'],
   ownedWeapons: { pistol: 1 }, currentWeapon: 'pistol',
   weaponCrafts: {},
   ownedPets: [], selectedPet: null,
-  bonusClicks: 3,        // +800分按钮剩余次数
+  bonusClicks: 3,        // +300分按钮剩余次数（降低避免开局即可买顶级装备）
   difficulty: 'normal',  // normal/hard/hell/godslayer
+  difficultyCleared: { normal:false, hard:false, hell:false, godslayer:false }, // 各难度Boss试炼通关标记（用于解锁后续难度）
+  cheatRevealed: false, // 弑神难度试炼通关后揭示作弊方法
   ranchPets: [],         // 牧场中的宠物索引列表
   eggs: [],              // 蛋列表 {type:'normal'|'epic', def:bossIdx}
   // 装备系统
@@ -858,6 +894,16 @@ let saveData = {
 
 function loadSave() {
   try {
+    // ==================== 一次性清档机制 ====================
+    // 修改 CLEAR_SAVE_VERSION 字符串即可触发一次清档（同一版本号只清一次）
+    const CLEAR_SAVE_VERSION = '2026-07-18-v1';
+    const savedClearVer = localStorage.getItem('pixelShooterClearVer');
+    if (savedClearVer !== CLEAR_SAVE_VERSION) {
+      // 清除存档（仅本次版本触发）
+      localStorage.removeItem('pixelShooterSave_v2');
+      localStorage.setItem('pixelShooterClearVer', CLEAR_SAVE_VERSION);
+      console.log('[清档] 已清除旧存档，版本:', CLEAR_SAVE_VERSION);
+    }
     const s = localStorage.getItem('pixelShooterSave_v2');
     if (s) {
       const d = JSON.parse(s);
@@ -876,9 +922,57 @@ function loadSave() {
     if(!saveData.equippedSkins)saveData.equippedSkins={};
     if(!saveData.ownedArtifacts)saveData.ownedArtifacts=[];
     if(saveData.equippedArtifact===undefined)saveData.equippedArtifact=null;
+    if(!saveData.difficultyCleared)saveData.difficultyCleared={normal:false,hard:false,hell:false,godslayer:false};
+    if(saveData.cheatRevealed===undefined)saveData.cheatRevealed=false;
   } catch(e) {}
 }
 function saveSave() { try { localStorage.setItem('pixelShooterSave_v2', JSON.stringify(saveData)); } catch(e) {} }
+
+// ==================== 更新公告 ====================
+const LATEST_NOTICE_VERSION = '2026-07-18-v3';
+const NOTICE_CONTENT = [
+  { icon: '🌟', title: '天赋系统扩展', desc: '新增「子弹反弹/子弹追踪」分支天赋和「战斗狂/愤怒」高级天赋，支持重置天赋返还点数。' },
+  { icon: '📜', title: '装备词条说明', desc: '装备菜单新增专属词条功效总览，传说/神话词条效果一目了然。' },
+  { icon: '🎁', title: '新手礼包升级', desc: '新手礼包内容加码，前期更快上手。' },
+  { icon: '⚖️', title: '武器平衡调整', desc: '对所有武器进行了平衡性调整，让各梯度武器强度更合理。' },
+  { icon: '🩸', title: '生存能力平衡', desc: '调整了吸血和护盾相关机制，让战斗更有节奏感。' },
+  { icon: '🐉', title: 'Boss挑战调整', desc: 'Boss相关能力进行了平衡性调整，挑战体验更有层次。' },
+  { icon: '🏠', title: '首页重新排版', desc: '首页布局优化，操作指南改为横向排列，视觉更清爽。' },
+  { icon: '📖', title: '菜单翻页优化', desc: '图鉴/装备/宠物菜单改为翻页式，手机端切换更便捷。' },
+  { icon: '📱', title: '手机端提示', desc: '黑屏旋转遮罩中新增iOS/安卓最佳使用方式说明。' },
+  { icon: '🐛', title: 'Bug修复', desc: '修复了试炼跳关、复活失效、横扫范围异常等多个问题。' }
+];
+function showUpdateNotice() {
+  try {
+    const lastNotice = localStorage.getItem('pixelShooterNoticeVer') || '';
+    if (lastNotice === LATEST_NOTICE_VERSION) return; // 已读最新公告
+  } catch(e) { return; }
+  // 构建公告弹窗
+  let html = `<div id="noticeOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99998;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)">`;
+  html += `<div style="background:linear-gradient(180deg,#1a1408,#2a1f10);border:2px solid #ffd700;border-radius:14px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;padding:20px 22px;box-shadow:0 0 40px rgba(255,215,0,0.3);font-family:STKaiti,KaiTi,serif">`;
+  html += `<h2 style="color:#ffd700;text-align:center;letter-spacing:3px;margin:0 0 6px">📜 更新公告</h2>`;
+  html += `<div style="text-align:center;color:#bc8cff;font-size:12px;margin-bottom:14px">版本 ${LATEST_NOTICE_VERSION} · 山海经·roug</div>`;
+  html += `<div style="display:flex;flex-direction:column;gap:10px">`;
+  for (const item of NOTICE_CONTENT) {
+    html += `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(212,160,23,0.3);border-radius:8px">`;
+    html += `<div style="font-size:20px;flex-shrink:0">${item.icon}</div>`;
+    html += `<div style="flex:1"><div style="color:#ffd970;font-size:13px;font-weight:bold;margin-bottom:3px">${item.title}</div><div style="color:#b0a090;font-size:11px;line-height:1.5">${item.desc}</div></div>`;
+    html += `</div>`;
+  }
+  html += `</div>`;
+  html += `<button id="noticeCloseBtn" style="margin-top:16px;width:100%;padding:10px;background:linear-gradient(180deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:STKaiti,KaiTi,serif">✦ 已阅读，进入游戏 ✦</button>`;
+  html += `</div></div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  const closeBtn = document.getElementById('noticeCloseBtn');
+  const closeFn = (e) => {
+    if (e) e.preventDefault();
+    const el = document.getElementById('noticeOverlay');
+    if (el) el.remove();
+    try { localStorage.setItem('pixelShooterNoticeVer', LATEST_NOTICE_VERSION); } catch(e) {}
+  };
+  closeBtn.addEventListener('click', closeFn);
+  closeBtn.addEventListener('touchstart', closeFn, { passive: false });
+}
 
 // ==================== 配置 ====================
 const CONFIG = {
@@ -887,28 +981,50 @@ const CONFIG = {
   WAVES_PER_LEVEL: 5,
   LEVEL_TIME: 30, BOSS_TIME: 50,
   ENEMY_TYPES: {
-    grunt:     { size: 16, speed: 70,  health: 2, score: 6,  color: '#7fb069', shape: 'blob',     tier: 1 },  // 小妖：绿色史莱姆
-    runner:    { size: 13, speed: 130, health: 2, score: 9,  color: '#9d7fd1', shape: 'imp',      tier: 1 },  // 魍魉：紫色小鬼
-    tank:      { size: 24, speed: 45,  health: 6, score: 18, color: '#8a8a8a', shape: 'golem',    tier: 2 },  // 石灵：灰色石头人
-    shooter:   { size: 18, speed: 55,  health: 3, score: 15, color: '#c4a8ff', shape: 'shaman',   tier: 2, shoots: true, shootCooldown: 2.2 }, // 巫祝
-    giant:     { size: 32, speed: 35,  health: 12,score: 38, color: '#a52838', shape: 'oni',      tier: 3 },  // 巨灵：红色鬼
-    spiky:     { size: 20, speed: 95,  health: 3, score: 14, color: '#ff6b9d', shape: 'spider',   tier: 2 },  // 蝎精
-    invincible:{ size: 19, speed: 65,  health: 5, score: 18, color: '#4fc3f7', shape: 'turtle',   tier: 2, invincibleTime: 3 }, // 玄龟
-    taunt:     { size: 28, speed: 32,  health: 16,score: 34, color: '#b0a090', shape: 'troll',    tier: 3, taunt: true },  // 山魈
-    bomber:    { size: 17, speed: 175, health: 2, score: 14, color: '#ff9248', shape: 'firechild',tier: 2, suicidal: true },  // 烈火童
-    splitter:  { size: 38, speed: 30,  health: 30,score: 60, color: '#1a8a5c', shape: 'slime',    tier: 3, splits: 2, splitInto: 'splitterSmall' }, // 裂变巨怪：血超级厚，死后分裂
-    splitterSmall: { size: 22, speed: 60, health: 8, score: 18, color: '#3cb371', shape: 'slime', tier: 2, splits: 2, splitInto: 'grunt' } // 分裂小怪
+    grunt:     { size: 16, speed: 70,  health: 2, score: 6,  xp: 2, color: '#7fb069', shape: 'blob',     tier: 1 },  // 小妖：绿色史莱姆
+    runner:    { size: 13, speed: 130, health: 2, score: 9,  xp: 2, color: '#9d7fd1', shape: 'imp',      tier: 1 },  // 魍魉：紫色小鬼
+    tank:      { size: 24, speed: 45,  health: 6, score: 18, xp: 4, color: '#8a8a8a', shape: 'golem',    tier: 2 },  // 石灵：灰色石头人
+    shooter:   { size: 18, speed: 55,  health: 3, score: 15, xp: 3, color: '#c4a8ff', shape: 'shaman',   tier: 2, shoots: true, shootCooldown: 2.2 }, // 巫祝
+    giant:     { size: 32, speed: 35,  health: 12,score: 38, xp: 8, color: '#a52838', shape: 'oni',      tier: 3 },  // 巨灵：红色鬼
+    spiky:     { size: 20, speed: 95,  health: 3, score: 14, xp: 3, color: '#ff6b9d', shape: 'spider',   tier: 2 },  // 蝎精
+    invincible:{ size: 19, speed: 65,  health: 5, score: 18, xp: 3, color: '#4fc3f7', shape: 'turtle',   tier: 2, invincibleTime: 3 }, // 玄龟
+    taunt:     { size: 28, speed: 32,  health: 16,score: 34, xp: 8, color: '#b0a090', shape: 'troll',    tier: 3, taunt: true },  // 山魈
+    bomber:    { size: 17, speed: 175, health: 2, score: 14, xp: 3, color: '#ff9248', shape: 'firechild',tier: 2, suicidal: true },  // 烈火童
+    splitter:  { size: 38, speed: 30,  health: 30,score: 60, xp: 12,color: '#1a8a5c', shape: 'slime',    tier: 3, splits: 2, splitInto: 'splitterSmall' }, // 裂变巨怪：血超级厚，死后分裂
+    splitterSmall: { size: 22, speed: 60, health: 8, score: 18, xp: 3, color: '#3cb371', shape: 'slime', tier: 2, splits: 2, splitInto: 'grunt' } // 分裂小怪
   }
 };
 
 // ==================== 难度系统 ====================
 const DIFFICULTIES = {
-  normal:    { name:'普通', icon:'🌱', enemyHpMul:1, enemyDmgMul:1, enemyCountMul:1, enemySpdMul:1, bossHpMul:1, bossCount:1, bossAtkMul:1, bossTrialHpMul:1, color:'#3fb950', spawnIntervalMul:1, enemyArmor:0, waveHpGrow:0.05, bossDmgCap:0 },
-  hard:      { name:'困难', icon:'🔥', enemyHpMul:3, enemyDmgMul:1.8, enemyCountMul:1.6, enemySpdMul:1.3, bossHpMul:6, bossCount:1, bossAtkMul:1.4, bossTrialHpMul:2, color:'#f0883e', spawnIntervalMul:0.85, enemyArmor:0.1, waveHpGrow:0.08, bossDmgCap:0.04 },
-  hell:      { name:'地狱', icon:'💀', enemyHpMul:5.5, enemyDmgMul:2.8, enemyCountMul:2.2, enemySpdMul:1.6, bossHpMul:14, bossCount:1, bossAtkMul:1.8, bossTrialHpMul:3, color:'#f85149', spawnIntervalMul:0.7, enemyArmor:0.2, waveHpGrow:0.12, bossDmgCap:0.03 },
-  godslayer: { name:'弑神', icon:'⚔️', enemyHpMul:18, enemyDmgMul:6, enemyCountMul:7, enemySpdMul:2.5, bossHpMul:35, bossCount:2, bossAtkMul:2.8, bossTrialHpMul:5, color:'#bc8cff', spawnIntervalMul:0.35, enemyArmor:0.35, waveHpGrow:0.20, bossDmgCap:0.022 }
+  // waveHpGrow: 线性成长系数；waveHpGrow2: 平方项系数（后期加速）
+  // HP公式：base × (1 + waveBonus×grow + waveBonus²×grow2) × enemyHpMul
+  // 普通模式第8关第5波(waveBonus=39): 1+3.9+6.08=10.98倍血量（原仅2.95倍）
+  normal:    { name:'普通', icon:'🌱', enemyHpMul:1, enemyDmgMul:1, enemyCountMul:1, enemySpdMul:1, bossHpMul:1.3, bossCount:1, bossAtkMul:1, bossTrialHpMul:1.5, color:'#3fb950', spawnIntervalMul:1, enemyArmor:0, waveHpGrow:0.10, waveHpGrow2:0.004, bossDmgCap:0 },
+  hard:      { name:'困难', icon:'🔥', enemyHpMul:3, enemyDmgMul:1.8, enemyCountMul:1.6, enemySpdMul:1.3, bossHpMul:7, bossCount:1, bossAtkMul:1.4, bossTrialHpMul:2.5, color:'#f0883e', spawnIntervalMul:0.85, enemyArmor:0.1, waveHpGrow:0.13, waveHpGrow2:0.006, bossDmgCap:0.04 },
+  hell:      { name:'地狱', icon:'💀', enemyHpMul:5.5, enemyDmgMul:2.8, enemyCountMul:2.2, enemySpdMul:1.6, bossHpMul:16, bossCount:1, bossAtkMul:1.8, bossTrialHpMul:3.5, color:'#f85149', spawnIntervalMul:0.7, enemyArmor:0.2, waveHpGrow:0.16, waveHpGrow2:0.008, bossDmgCap:0.03 },
+  godslayer: { name:'弑神', icon:'⚔️', enemyHpMul:18, enemyDmgMul:6, enemyCountMul:7, enemySpdMul:2.5, bossHpMul:40, bossCount:2, bossAtkMul:2.8, bossTrialHpMul:5, color:'#bc8cff', spawnIntervalMul:0.35, enemyArmor:0.35, waveHpGrow:0.22, waveHpGrow2:0.012, bossDmgCap:0.022 }
 };
 function getDifficulty(){ return DIFFICULTIES[saveData.difficulty]||DIFFICULTIES.normal; }
+// ==================== 难度解锁系统 ====================
+// 难度解锁顺序：normal → hard → hell → godslayer
+const DIFFICULTY_ORDER = ['normal','hard','hell','godslayer'];
+// 检查某难度是否已解锁（normal永远解锁，其他需通关前一难度的Boss试炼）
+function isDifficultyUnlocked(key){
+  if(key==='normal')return true;
+  const idx=DIFFICULTY_ORDER.indexOf(key);
+  if(idx<=0)return true;
+  const prevKey=DIFFICULTY_ORDER[idx-1];
+  return !!(saveData.difficultyCleared && saveData.difficultyCleared[prevKey]);
+}
+// 获取解锁某难度所需的提示文字
+function getDifficultyUnlockHint(key){
+  if(key==='normal')return '';
+  const idx=DIFFICULTY_ORDER.indexOf(key);
+  const prevKey=DIFFICULTY_ORDER[idx-1];
+  const prevName=DIFFICULTIES[prevKey].name;
+  return `需先通过${prevName}难度Boss试炼解锁`;
+}
 
 // ==================== 天赋 ====================
 const TALENTS = [
@@ -920,7 +1036,13 @@ const TALENTS = [
   { id:'pierce',name:'穿透强化',icon:'🏹',desc:'穿透+1敌人',maxLevel:3,costPerLevel:2 },
   { id:'crit',name:'暴击几率',icon:'💥',desc:'暴击率+10%',maxLevel:5,costPerLevel:1 },
   { id:'critdmg',name:'暴击伤害',icon:'🔥',desc:'暴击伤害+20%',maxLevel:3,costPerLevel:2 },
-  { id:'regen',name:'生命回复',icon:'💚',desc:'每关开始回复+1',maxLevel:3,costPerLevel:2 }
+  { id:'regen',name:'生命回复',icon:'💚',desc:'每关开始回复+1',maxLevel:3,costPerLevel:2 },
+  // 分支天赋（二选一）- 解决后期子弹分散打不到Boss的问题
+  { id:'ricochet',name:'子弹反弹',icon:'🔄',desc:'子弹击中敌人后弹射到附近敌人(每级+1次,50%伤害)',maxLevel:2,costPerLevel:1,exclusiveWith:'homing',branch:'辅助' },
+  { id:'homing',name:'子弹追踪',icon:'🧲',desc:'子弹追踪最近敌人(每级+1.5追踪强度)',maxLevel:2,costPerLevel:1,exclusiveWith:'ricochet',branch:'辅助' },
+  // 高级天赋（二选一,2点）- 击中叠加层数,有上限,衰减
+  { id:'frenzy',name:'战斗狂',icon:'💢',desc:'击中敌人叠加攻速(每层-3%,上限15%,1.5秒未击中衰减)',maxLevel:1,costPerLevel:2,exclusiveWith:'rage',branch:'高级',advanced:true },
+  { id:'rage',name:'愤怒',icon:'😡',desc:'击中敌人叠加伤害(每层+3%,上限15%,1.5秒未击中衰减)',maxLevel:1,costPerLevel:2,exclusiveWith:'frenzy',branch:'高级',advanced:true }
 ];
 function getTalentLevel(id){ return saveData.talents[id]||0; }
 function getTalentBonus(id){ return getTalentLevel(id); }
@@ -928,6 +1050,8 @@ function upgradeTalent(id){
   const t=TALENTS.find(t=>t.id===id); if(!t)return false;
   const lv=getTalentLevel(id); if(lv>=t.maxLevel)return false;
   if(saveData.talentPoints<t.costPerLevel)return false;
+  // 互斥检查：如果已升级了对方天赋,则不允许升级
+  if(t.exclusiveWith && getTalentLevel(t.exclusiveWith)>0)return false;
   saveData.talentPoints-=t.costPerLevel; saveData.talents[id]=lv+1; saveSave(); return true;
 }
 function resetTalents(){
@@ -987,20 +1111,20 @@ function selectCharacter(id){ if(!saveData.unlockedCharacters.includes(id))retur
 
 // ==================== 武器系统 ====================
 const WEAPONS = {
-  pistol: { name:'手枪',icon:'🔫',bulletCount:1,bulletSize:5,bulletDamage:1,fireCooldown:0.22,bulletSpeed:520,pierce:0,spread:0,critBonus:0,price:0,upgradePrice:400,tier:1,desc:'均衡入门武器·单发直射' },
-  bow: { name:'神臂弓',icon:'🏹',bulletCount:1,bulletSize:6,bulletDamage:2,fireCooldown:0.16,bulletSpeed:680,pierce:1,spread:0,critBonus:0.25,price:1200,upgradePrice:700,tier:2,desc:'快速高暴击穿透·箭矢形' },
-  shotgun: { name:'散弹枪',icon:'💥',bulletCount:5,bulletSize:4,bulletDamage:0.8,fireCooldown:0.42,bulletSpeed:440,pierce:0,spread:0.42,critBonus:0.2,price:1800,upgradePrice:900,tier:2,desc:'近战散射5发·扇形喷射' },
-  sniper: { name:'狙击枪',icon:'🎯',bulletCount:1,bulletSize:10,bulletDamage:7,fireCooldown:0.45,bulletSpeed:750,pierce:3,spread:0,critBonus:0.2,price:3500,upgradePrice:1800,tier:3,desc:'高伤远程穿透·细长光束' },
-  hammer:{ name:'震天锤',icon:'🔨',bulletCount:3,bulletSize:14,bulletDamage:3.5,fireCooldown:0.7,bulletSpeed:300,pierce:3,spread:0.55,critBonus:0.05,price:5000,upgradePrice:2500,tier:3,desc:'慢速重击·命中范围爆炸(AOE)' },
-  crossbow:{ name:'诸葛连弩',icon:'🏹',bulletCount:3,bulletSize:5,bulletDamage:1.2,fireCooldown:0.14,bulletSpeed:600,pierce:1,spread:0.15,critBonus:0.15,price:7000,upgradePrice:3500,tier:4,desc:'三连发快速穿透·箭矢连射' },
-  thunder:{ name:'雷神炮',icon:'⚡',bulletCount:1,bulletSize:9,bulletDamage:7,fireCooldown:0.3,bulletSpeed:700,pierce:4,spread:0,critBonus:0.3,price:10000,upgradePrice:5000,tier:4,desc:'闪电链攻击·命中后跳跃2个敌人' },
-  voidbow:{ name:'虚空之弓',icon:'🌌',bulletCount:2,bulletSize:7,bulletDamage:4,fireCooldown:0.18,bulletSpeed:650,pierce:3,spread:0.08,critBonus:0.25,price:15000,upgradePrice:7500,tier:5,desc:'终极武器·双发穿透+虚空裂缝持续伤害' },
-  xingtiangeqi:{ name:'刑天干戚',icon:'⚔️',bulletCount:3,bulletSize:13,bulletDamage:12,fireCooldown:0.46,bulletSpeed:520,pierce:99,spread:0.28,critBonus:0.45,price:0,upgradePrice:12000,tier:7,desc:'最终Boss刑天专属·回旋干戚(飞出后折返)+击杀回血+战意增伤+血怒(残血伤害翻倍)+战魂护盾(命中叠加护盾)' }
+  pistol: { name:'手枪',icon:'🔫',bulletCount:1,bulletSize:5,bulletDamage:1.2,fireCooldown:0.22,bulletSpeed:520,pierce:0,spread:0,critBonus:0,price:0,upgradePrice:400,tier:1,desc:'均衡入门武器·单发直射' },
+  bow: { name:'神臂弓',icon:'🏹',bulletCount:1,bulletSize:6,bulletDamage:1.5,fireCooldown:0.20,bulletSpeed:680,pierce:1,spread:0,critBonus:0.20,price:1200,upgradePrice:700,tier:2,desc:'快速高暴击穿透·箭矢形' },
+  shotgun: { name:'散弹枪',icon:'💥',bulletCount:5,bulletSize:4,bulletDamage:1.4,fireCooldown:0.45,bulletSpeed:440,pierce:0,spread:0.35,critBonus:0.15,price:1800,upgradePrice:900,tier:2,desc:'近战散射5发·扇形喷射(贴脸爆发)' },
+  hammer:{ name:'震天锤',icon:'🔨',bulletCount:3,bulletSize:14,bulletDamage:2.5,fireCooldown:0.75,bulletSpeed:300,pierce:2,spread:0.55,critBonus:0.05,price:3500,upgradePrice:1800,tier:3,desc:'慢速重击·命中范围爆炸(AOE)' },
+  sniper: { name:'狙击枪',icon:'🎯',bulletCount:1,bulletSize:10,bulletDamage:5,fireCooldown:0.5,bulletSpeed:750,pierce:2,spread:0,critBonus:0.15,price:5000,upgradePrice:2500,tier:3,desc:'高伤远程穿透·细长光束' },
+  voidbow:{ name:'虚空之弓',icon:'🌌',bulletCount:1,bulletSize:7,bulletDamage:2.8,fireCooldown:0.22,bulletSpeed:650,pierce:2,spread:0.08,critBonus:0.20,price:7000,upgradePrice:3500,tier:4,desc:'穿透+虚空裂缝持续伤害·终极武器' },
+  crossbow:{ name:'诸葛连弩',icon:'🏹',bulletCount:3,bulletSize:5,bulletDamage:0.9,fireCooldown:0.19,bulletSpeed:600,pierce:1,spread:0.15,critBonus:0.10,price:9000,upgradePrice:4500,tier:4,desc:'三连发快速穿透·箭矢连射' },
+  thunder:{ name:'雷神炮',icon:'⚡',bulletCount:1,bulletSize:9,bulletDamage:6.1,fireCooldown:0.35,bulletSpeed:700,pierce:3,spread:0,critBonus:0.25,price:14000,upgradePrice:7000,tier:5,desc:'闪电链攻击·命中后跳跃2个敌人·当前最强武器' },
+  xingtiangeqi:{ name:'刑天干戚',icon:'⚔️',bulletCount:3,bulletSize:13,bulletDamage:9,fireCooldown:0.5,bulletSpeed:520,pierce:8,spread:0.28,critBonus:0.35,price:0,upgradePrice:12000,tier:7,desc:'最终Boss刑天专属·回旋干戚(飞出后折返)+击杀回血+战意增伤+血怒(残血伤害翻倍)+战魂护盾(命中叠加护盾)' }
 };
 const WEAPON_STAGE_MULTI = [
   { dmgMul:1.0, cdMul:1.0, extraPierce:0, extraBullet:0, sizeMul:1.0 },
-  { dmgMul:1.2, cdMul:0.9, extraPierce:1, extraBullet:0, sizeMul:1.1 },
-  { dmgMul:1.5, cdMul:0.8, extraPierce:1, extraBullet:1, sizeMul:1.2 }
+  { dmgMul:1.15, cdMul:0.92, extraPierce:1, extraBullet:0, sizeMul:1.08 },
+  { dmgMul:1.35, cdMul:0.85, extraPierce:1, extraBullet:0, sizeMul:1.15 }
 ];
 function getWeaponStage(weaponId){ return Math.max(0,(saveData.ownedWeapons[weaponId]||0)-1); }
 function getWeaponStats(weaponId){
@@ -1051,39 +1175,40 @@ const ELEMENT_UPGRADES = {
 };
 
 // ==================== 基础升级 ====================
+// 全面优化：重命名更有特色，新增策略性选项，删除平淡无用的
+// 移除护盾/回血类（玩家反馈太闷），改为攻击/机制类强化
 const BASE_UPGRADES = [
-  {id:'damage',name:'伤害提升',icon:'⚔️',desc:'子弹伤害+1',rarity:'common',apply:p=>p.bulletDamage+=1},
-  {id:'firerate',name:'射速提升',icon:'⚡',desc:'射击冷却-20%',rarity:'common',apply:p=>p.fireCooldown*=0.8},
-  {id:'speed',name:'移速提升',icon:'👟',desc:'移动速度+15%',rarity:'common',apply:p=>p.speed*=1.15},
-  {id:'health',name:'生命提升',icon:'❤️',desc:'最大生命+2并回满',rarity:'common',apply:p=>{p.maxHealth+=2;p.health=p.maxHealth;}},
+  // === 普通（基础数值）===
+  {id:'damage',name:'利刃',icon:'⚔️',desc:'子弹伤害+1',rarity:'common',apply:p=>p.bulletDamage+=1},
+  {id:'firerate',name:'疾射',icon:'⚡',desc:'射击冷却-12%',rarity:'common',apply:p=>p.fireCooldown*=0.88},
+  {id:'speed',name:'轻灵',icon:'👟',desc:'移动速度+12%',rarity:'common',apply:p=>p.speed*=1.12},
+  {id:'health',name:'强韧',icon:'❤️',desc:'最大生命+2并回满',rarity:'common',apply:p=>{p.maxHealth+=2;p.health=p.maxHealth;}},
+  {id:'bulletspeed',name:'风之祝福',icon:'💨',desc:'子弹速度+30%',rarity:'common',apply:p=>p.bulletSpeed*=1.30},
+  {id:'magnet',name:'聚灵',icon:'🌀',desc:'拾取范围+100',rarity:'common',apply:p=>p.magnetRange=(p.magnetRange||60)+100},
+
+  // === 稀有（机制增强）===
   {id:'multishot',name:'多重射击',icon:'🎯',desc:'额外+1发子弹',rarity:'rare',apply:p=>{p.bulletCount+=1;p.bulletSpread+=0.12;}},
-  {id:'pierce',name:'子弹穿透',icon:'🏹',desc:'穿透+1敌人',rarity:'rare',apply:p=>p.bulletPierce+=1},
-  {id:'homing',name:'追踪子弹',icon:'🧲',desc:'子弹轻微追踪',rarity:'rare',apply:p=>p.bulletHoming+=0.8},
-  {id:'bigbullet',name:'巨型子弹',icon:'🔵',desc:'子弹更大伤害+1',rarity:'rare',apply:p=>{p.bulletSize+=4;p.bulletDamage+=1;}},
-  {id:'bounce',name:'弹射子弹',icon:'🔄',desc:'弹射+1次',rarity:'epic',apply:p=>p.bounce+=1},
-  {id:'regen',name:'生命回复',icon:'💚',desc:'回复3生命',rarity:'common',apply:p=>{p.health=Math.min(p.health+3,p.maxHealth);}},
-  {id:'crit',name:'暴击专精',icon:'💥',desc:'暴击率+15%',rarity:'rare',apply:p=>p.critChance=(p.critChance||0)+0.15},
-  {id:'critdmg',name:'暴击伤害',icon:'🔥',desc:'暴击伤害+50%',rarity:'epic',apply:p=>p.critDamage=(p.critDamage||2)+0.5},
-  {id:'shield',name:'能量护盾',icon:'🛡️',desc:'获得3护盾',rarity:'rare',apply:p=>p.shield=Math.min((p.shield||0)+3,p.maxShield||5)},
-  // 新增爽感升级
-  {id:'lifesteal',name:'吸血之刃',icon:'🩸',desc:'攻击有8%概率回1血',rarity:'epic',apply:p=>p.lifesteal=(p.lifesteal||0)+0.08},
-  {id:'bulletspeed',name:'风之祝福',icon:'💨',desc:'子弹速度+40%',rarity:'common',apply:p=>p.bulletSpeed*=1.4},
+  {id:'pierce',name:'穿透',icon:'🏹',desc:'穿透+1敌人',rarity:'rare',apply:p=>p.bulletPierce+=1},
+  {id:'homing',name:'追踪',icon:'🧲',desc:'子弹轻微追踪',rarity:'rare',apply:p=>p.bulletHoming+=0.8},
+  {id:'bigbullet',name:'巨型子弹',icon:'🔵',desc:'子弹更大+伤害1',rarity:'rare',apply:p=>{p.bulletSize+=4;p.bulletDamage+=1;}},
+  {id:'crit',name:'暴击专精',icon:'💥',desc:'暴击率+12%',rarity:'rare',apply:p=>p.critChance=(p.critChance||0)+0.12},
+  {id:'thorns',name:'反伤护甲',icon:'🌵',desc:'被撞反弹2伤害',rarity:'rare',apply:p=>p.thorns=(p.thorns||0)+2},
+  {id:'explode',name:'爆破子弹',icon:'💢',desc:'子弹命中爆炸(范围伤害)',rarity:'rare',apply:p=>p.bulletExplode=(p.bulletExplode||0)+1},
+
+  // === 史诗（强力机制）===
+  {id:'bounce',name:'弹射',icon:'🔄',desc:'弹射+1次',rarity:'epic',apply:p=>p.bounce+=1},
+  {id:'critdmg',name:'致命一击',icon:'🔥',desc:'暴击伤害+40%',rarity:'epic',apply:p=>p.critDamage=(p.critDamage||2)+0.4},
   {id:'minion',name:'召唤灵仆',icon:'👻',desc:'召唤一只灵仆助战',rarity:'epic',apply:p=>{minions.push(new Minion(p.x,p.y));}},
-  {id:'thorns',name:'反伤护甲',icon:'🌵',desc:'被撞时反弹1伤害',rarity:'rare',apply:p=>p.thorns=(p.thorns||0)+1},
-  {id:'magnet',name:'吸引光环',icon:'🌀',desc:'拾取范围+80',rarity:'common',apply:p=>p.magnetRange=(p.magnetRange||60)+80},
-  {id:'berserk',name:'狂暴之力',icon:'😡',desc:'生命低于30%时伤害翻倍',rarity:'legendary',unique:true,apply:p=>p.berserk=true},
-  {id:'quickfoot',name:'疾跑',icon:'🏃',desc:'受伤后1秒移速翻倍',rarity:'rare',unique:true,apply:p=>p.quickfoot=true},
-  {id:'doubletap',name:'双发',icon:'🔫',desc:'每次射击额外发射1发(无消耗)',rarity:'legendary',unique:true,apply:p=>p.doubleTap=true}
+  {id:'revive',name:'不死之身',icon:'💀',desc:'复活次数+1(半血复活，整局限2次)',rarity:'epic',apply:p=>{p.revives=(p.revives||0)+1; p._reviveUpgradesTaken=(p._reviveUpgradesTaken||0)+1;}}
 ];
 
 function getAvailableUpgrades(){
   if(!player)return BASE_UPGRADES;
   const ups=BASE_UPGRADES.filter(u=>{
-    // 唯一升级：已拥有则不再出现
-    if(u.unique){
-      if(u.id==='berserk'&&player.berserk)return false;
-      if(u.id==='quickfoot'&&player.quickfoot)return false;
-      if(u.id==='doubletap'&&player.doubleTap)return false;
+    // 不死之身：整局最多出现2次（避免无限复活堆叠超模）
+    if(u.id==='revive'){
+      const revivesOwned=player._reviveUpgradesTaken||0;
+      if(revivesOwned>=2)return false;
     }
     return true;
   });
@@ -1333,22 +1458,22 @@ const GEAR_NAMES = {
 };
 // 装备属性池
 const GEAR_STAT_POOL = [
-  { id:'damage',   name:'伤害',   icon:'⚔️', min:1, max:3, apply:(p,v)=>p.bulletDamage+=v },
-  { id:'maxhp',    name:'生命',   icon:'❤️', min:1, max:4, apply:(p,v)=>{p.maxHealth+=v;p.health+=v;} },
-  { id:'speed',    name:'移速',   icon:'👟', min:5, max:20, apply:(p,v)=>p.speed+=v },
-  { id:'firerate', name:'射速',   icon:'⚡', min:0.05, max:0.15, apply:(p,v)=>p.baseFireCooldown*=(1-v) },
-  { id:'crit',     name:'暴击率', icon:'💥', min:0.05, max:0.20, apply:(p,v)=>p.critChance+=v },
-  { id:'critdmg',  name:'暴击伤害',icon:'🔥', min:0.3, max:1.0, apply:(p,v)=>p.critDamage+=v },
-  { id:'pierce',   name:'穿透',   icon:'🏹', min:1, max:2, apply:(p,v)=>p.bulletPierce+=v },
-  { id:'shield',   name:'护盾',   icon:'🛡️', min:1, max:3, apply:(p,v)=>{p.shield+=v;p.maxShield+=v;} },
-  { id:'regen',    name:'回血/关',icon:'💚', min:1, max:3, apply:(p,v)=>p.regenPerLevel=(p.regenPerLevel||0)+v },
-  { id:'lifesteal',name:'吸血',   icon:'🩸', min:0.03, max:0.10, apply:(p,v)=>p.lifesteal=(p.lifesteal||0)+v }
+  { id:'damage',   name:'伤害',   icon:'⚔️', min:1, max:2, apply:(p,v)=>p.bulletDamage+=v },
+  { id:'maxhp',    name:'生命',   icon:'❤️', min:1, max:2, apply:(p,v)=>{p.maxHealth+=v;p.health+=v;} },
+  { id:'speed',    name:'移速',   icon:'👟', min:3, max:10, apply:(p,v)=>p.speed+=v },
+  { id:'firerate', name:'射速',   icon:'⚡', min:0.03, max:0.08, apply:(p,v)=>p.baseFireCooldown*=(1-v) },
+  { id:'crit',     name:'暴击率', icon:'💥', min:0.03, max:0.10, apply:(p,v)=>p.critChance+=v },
+  { id:'critdmg',  name:'暴击伤害',icon:'🔥', min:0.2, max:0.5, apply:(p,v)=>p.critDamage+=v },
+  { id:'pierce',   name:'穿透',   icon:'🏹', min:1, max:1, apply:(p,v)=>p.bulletPierce+=v },
+  { id:'shield',   name:'护盾',   icon:'🛡️', min:1, max:2, apply:(p,v)=>{p.shield+=v;p.maxShield+=v;} },
+  { id:'regen',    name:'回血/关',icon:'💚', min:1, max:2, apply:(p,v)=>p.regenPerLevel=(p.regenPerLevel||0)+v }
+  // 吸血已从装备词条中移除，仅神话套装(4件红装)给一点点
 ];
 // 传说(金)专属词条池 - 新颖机制而非纯数值
 const GEAR_LEGENDARY_AFFIXES = [
   { id:'burn',   name:'灼烧附魔', icon:'🔥', desc:'子弹附带灼烧伤害', apply:(p)=>{if(!p.specialEffects)p.specialEffects={};if(!p.specialEffects.fireball)p.specialEffects.fireball={radius:40,burnDmg:0.5,burnDur:2,chain:0};else p.specialEffects.fireball.burnDmg+=0.3;} },
   { id:'thorns', name:'荆棘反伤', icon:'🌵', desc:'受击反弹伤害', apply:(p)=>p.thornsDmg=(p.thornsDmg||0)+1 },
-  { id:'shieldregen', name:'护盾再生', icon:'🔄', desc:'每关恢复护盾', apply:(p)=>p.shieldRegen=(p.shieldRegen||0)+2 },
+  { id:'shieldregen', name:'护盾再生', icon:'🔄', desc:'每关恢复护盾', apply:(p)=>p.shieldRegen=(p.shieldRegen||0)+1 },
   { id:'pierce_all', name:'穿透强化', icon:'🏹', desc:'子弹额外穿透', apply:(p)=>p.bulletPierce+=2 },
   { id:'magnet', name:'磁力范围', icon:'🧲', desc:'拾取范围大幅增加', apply:(p)=>p.magnetRange=(p.magnetRange||60)+120 },
   { id:'dodge',  name:'闪避', icon:'💨', desc:'15%几率闪避伤害', apply:(p)=>p.dodgeChance=(p.dodgeChance||0)+0.15 }
@@ -1356,7 +1481,7 @@ const GEAR_LEGENDARY_AFFIXES = [
 // 神话(红)专属词条池 - 更强大的独特效果
 const GEAR_MYTHIC_AFFIXES = [
   { id:'lightning', name:'闪电链', icon:'⚡', desc:'子弹触发闪电链', apply:(p)=>{if(!p.elementEffects)p.elementEffects={};if(!p.elementEffects.lightning)p.elementEffects.lightning={chain:2,damage:3};else p.elementEffects.lightning.chain+=1;} },
-  { id:'shieldmax', name:'永恒护盾', icon:'🛡️', desc:'获得永久护盾+护盾免疫一次伤害', apply:(p)=>{p.shield+=5;p.maxShield+=5;p.shieldImmune=(p.shieldImmune||0)+1;} },
+  { id:'shieldmax', name:'永恒护盾', icon:'🛡️', desc:'获得永久护盾+护盾免疫一次伤害', apply:(p)=>{p.shield+=3;p.maxShield+=3;p.shieldImmune=(p.shieldImmune||0)+1;} },
   { id:'multishot', name:'双发', icon:'🎯', desc:'每次射击额外发射子弹', apply:(p)=>p.multishot=(p.multishot||0)+1 },
   { id:'execute', name:'处决', icon:'💀', desc:'对30%血以下敌人秒杀', apply:(p)=>p.executeThreshold=(p.executeThreshold||0)+0.3 },
   { id:'rampage', name:'狂暴', icon:'⚔️', desc:'击杀后2秒攻速翻倍', apply:(p)=>p.rampageOnKill=true },
@@ -1436,11 +1561,11 @@ function applyGearStats(p){
   if(legendaryCount>=3){p.baseFireCooldown*=0.7; p.critChance+=0.1;}
   // 4件金装套装：解锁"金色圣光"——每5秒恢复2点生命
   if(legendaryCount>=4){p.goldHalo=true; p.regenPerLevel=(p.regenPerLevel||0)+3;}
-  // 4件红装（神话）套装特效：全属性大幅提升
+  // 4件红装（神话）套装特效：全属性大幅提升（吸血大幅削弱：0.08→0.03，且为唯一吸血来源）
   if(mythicCount>=4){
-    p.bulletDamage*=2; p.speed*=1.5; p.maxHealth=Math.ceil(p.maxHealth*1.5); p.health=p.maxHealth;
-    p.critChance=(p.critChance||0)+0.3; p.critDamage=(p.critDamage||2)+1;
-    p.bulletPierce+=3; p.lifesteal=(p.lifesteal||0)+0.15;
+    p.bulletDamage*=1.6; p.speed*=1.3; p.maxHealth=Math.ceil(p.maxHealth*1.3); p.health=p.maxHealth;
+    p.critChance=(p.critChance||0)+0.2; p.critDamage=(p.critDamage||2)+0.5;
+    p.bulletPierce+=2; p.lifesteal=(p.lifesteal||0)+0.03;
   }
 }
 // 装备合成：3件同品质→50%几率升一阶
@@ -1513,6 +1638,11 @@ const ACHIEVEMENTS = [
   { id:'hardWin', name:'勇者', icon:'🔥', desc:'在困难难度击败Boss', check:f=>f.hardCleared, reward:200 },
   { id:'hellWin', name:'地狱行者', icon:'💀', desc:'在地狱难度击败Boss', check:f=>f.hellCleared, reward:500 },
   { id:'godslayer', name:'弑神', icon:'⚡', desc:'在弑神难度击败Boss', check:f=>f.godCleared, reward:1500 },
+  // Boss试炼难度通关类
+  { id:'trialNormal', name:'试炼初成', icon:'🌱', desc:'通过普通难度Boss试炼', check:f=>f.trialNormalCleared, reward:500 },
+  { id:'trialHard', name:'试炼精进', icon:'🔥', desc:'通过困难难度Boss试炼', check:f=>f.trialHardCleared, reward:1000 },
+  { id:'trialHell', name:'试炼苦行', icon:'💀', desc:'通过地狱难度Boss试炼', check:f=>f.trialHellCleared, reward:2000 },
+  { id:'trialGodslayer', name:'试炼封神', icon:'⚔️', desc:'通过弑神难度Boss试炼', check:f=>f.trialGodslayerCleared, reward:5000 },
   // 挑战类
   { id:'trialClear', name:'试炼通关', icon:'🎯', desc:'完成一次Boss试炼', check:f=>f.trialCleared, reward:400 },
   { id:'superBoss', name:'弑圣', icon:'🌟', desc:'击败超级Boss', check:f=>f.superKills>=1, reward:600 },
@@ -1552,26 +1682,30 @@ function showAchievementNotifications(achievements){
 }
 
 // ==================== 奇遇事件 ====================
+// 全面重做：去掉护盾/回血类（玩家反馈太闷），换成更有趣的策略性事件
+// 保留"10秒无敌"已删除，所有事件都是策略性选择
 const ADVENTURE_EVENTS = [
   { desc:'怪物移速减慢30%', icon:'🐌', apply:()=>{ globalSlow=0.7; globalSlowTimer=15; } },
-  { desc:'获得10秒无敌', icon:'🛡️', apply:()=>{ if(player)player.invincible=10; } },
   { desc:'复活次数+1', icon:'💀', apply:()=>{ if(player)player.revives=(player.revives||0)+1; } },
   { desc:'子弹伤害+2', icon:'⚔️', apply:()=>{ if(player)player.bulletDamage+=2; } },
   { desc:'射速+30%', icon:'⚡', apply:()=>{ if(player)player.fireCooldown*=0.7; } },
-  { desc:'回复满血', icon:'❤️', apply:()=>{ if(player)player.health=player.maxHealth; } },
-  { desc:'获得5护盾', icon:'🔷', apply:()=>{ if(player)player.shield=Math.min((player.shield||0)+5,10); } },
   { desc:'后续Boss血量x2(风险)', icon:'👹', apply:()=>{ bossHpMul*=2; } },
   { desc:'移速+25%', icon:'👟', apply:()=>{ if(player)player.speed*=1.25; } },
-  { desc:'暴击率+20%', icon:'💥', apply:()=>{ if(player)player.critChance+=0.2; } }
+  { desc:'暴击率+20%', icon:'💥', apply:()=>{ if(player)player.critChance+=0.2; } },
+  // === 新增策略性事件 ===
+  { desc:'获得1.5倍伤害(持续15秒)', icon:'🔥', apply:()=>{ if(player){player._adventureDmgBoost=1.5; player._adventureDmgBoostTime=15; pushFloatingText(player.x,player.y-40,'1.5x伤害!','#ff6347',2);} } },
+  { desc:'子弹分裂(命中分裂2发)', icon:'🔀', apply:()=>{ if(player)player.bulletSplit=(player.bulletSplit||0)+1; } },
+  { desc:'连击重置延长(连击+5秒)', icon:'🎯', apply:()=>{ if(comboTimer>0)comboTimer+=5; } },
+  { desc:'攻击范围扩大(穿透+1)', icon:'🏹', apply:()=>{ if(player)player.bulletPierce=(player.bulletPierce||0)+1; } }
 ];
 
 // ==================== 武器打造词条 ====================
 const CRAFT_MODIFIERS = [
   { id:'dmg',  name:'伤害', icon:'⚔️', rarities:[{r:'common',v:1},{r:'rare',v:2},{r:'epic',v:3}] },
-  { id:'cd',   name:'射速', icon:'⚡', rarities:[{r:'common',v:0.05},{r:'rare',v:0.1},{r:'epic',v:0.15}] },
-  { id:'size', name:'子弹大小', icon:'🔵', rarities:[{r:'common',v:2},{r:'rare',v:4},{r:'epic',v:6}] },
-  { id:'crit', name:'暴击率', icon:'💥', rarities:[{r:'common',v:0.05},{r:'rare',v:0.1},{r:'epic',v:0.15}] },
-  { id:'pierce',name:'穿透', icon:'🏹', rarities:[{r:'rare',v:1},{r:'epic',v:2}] },
+  { id:'cd',   name:'射速', icon:'⚡', rarities:[{r:'common',v:0.04},{r:'rare',v:0.08},{r:'epic',v:0.12}] },
+  { id:'size', name:'子弹大小', icon:'🔵', rarities:[{r:'common',v:1.5},{r:'rare',v:3},{r:'epic',v:5}] },
+  { id:'crit', name:'暴击率', icon:'💥', rarities:[{r:'common',v:0.04},{r:'rare',v:0.08},{r:'epic',v:0.12}] },
+  { id:'pierce',name:'穿透', icon:'🏹', rarities:[{r:'rare',v:1},{r:'epic',v:1}] },
   { id:'count',name:'子弹数', icon:'🎯', rarities:[{r:'epic',v:1}] }
 ];
 function rollCraft(){
@@ -1744,7 +1878,168 @@ function playSound(type){
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.5);
       break;
     }
+    case 'hit': { // 击中敌人：短促柔和的"啪"声（低音量，不刺耳）
+      const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(180,t); o.frequency.exponentialRampToValueAtTime(80,t+0.08);
+      g.gain.setValueAtTime(0.08,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.08);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t+0.08);
+      // 加一点低通噪声增加质感
+      const noise=audioCtx.createBufferSource();
+      const buf=audioCtx.createBuffer(1,882,44100);
+      const data=buf.getChannelData(0); for(let i=0;i<882;i++)data[i]=(Math.random()*2-1)*0.3;
+      noise.buffer=buf; const ng=audioCtx.createGain(); const filter=audioCtx.createBiquadFilter();
+      filter.type='lowpass'; filter.frequency.value=400;
+      ng.gain.setValueAtTime(0.04,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.06);
+      noise.connect(filter); filter.connect(ng); ng.connect(master); noise.start(t);
+      break;
+    }
+    case 'kill': { // 击杀敌人：清脆"啵"声（柔和，不刺耳）
+      const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(440,t); o.frequency.exponentialRampToValueAtTime(220,t+0.12);
+      g.gain.setValueAtTime(0.1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t+0.15);
+      break;
+    }
+    case 'bossSpawn': { // Boss出场：低沉庄严的号角声
+      const o1=audioCtx.createOscillator(),o2=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      o1.type='sawtooth'; o2.type='triangle';
+      o1.frequency.setValueAtTime(110,t); o1.frequency.linearRampToValueAtTime(55,t+1.5);
+      o2.frequency.setValueAtTime(165,t); o2.frequency.linearRampToValueAtTime(82,t+1.5);
+      g.gain.setValueAtTime(0.001,t); g.gain.linearRampToValueAtTime(0.35,t+0.1); g.gain.setValueAtTime(0.35,t+1.0); g.gain.exponentialRampToValueAtTime(0.001,t+1.8);
+      o1.connect(g); o2.connect(g); g.connect(master);
+      o1.start(t); o2.start(t); o1.stop(t+1.8); o2.stop(t+1.8);
+      // 低频鼓点
+      setTimeout(()=>{
+        if(!audioCtx)return; const t2=audioCtx.currentTime;
+        const o=audioCtx.createOscillator(); const og=audioCtx.createGain();
+        o.type='sine'; o.frequency.setValueAtTime(60,t2); o.frequency.exponentialRampToValueAtTime(30,t2+0.3);
+        og.gain.setValueAtTime(0.5,t2); og.gain.exponentialRampToValueAtTime(0.001,t2+0.4);
+        o.connect(og); og.connect(master); o.start(t2); o.stop(t2+0.4);
+      },200);
+      break;
+    }
+    case 'bossHit': { // 击中Boss：低沉有力的"咚"声（比击中怪更厚实）
+      const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(180,t); o.frequency.exponentialRampToValueAtTime(70,t+0.12);
+      g.gain.setValueAtTime(0.28,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t+0.12);
+      // 加中频增加打击感
+      const o2=audioCtx.createOscillator(); const g2=audioCtx.createGain();
+      o2.type='triangle'; o2.frequency.setValueAtTime(420,t); o2.frequency.exponentialRampToValueAtTime(180,t+0.08);
+      g2.gain.setValueAtTime(0.14,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.08);
+      o2.connect(g2); g2.connect(master); o2.start(t); o2.stop(t+0.08);
+      // 高频"啪"增加锐度
+      const o3=audioCtx.createOscillator(); const g3=audioCtx.createGain();
+      o3.type='square'; o3.frequency.setValueAtTime(880,t);
+      g3.gain.setValueAtTime(0.05,t); g3.gain.exponentialRampToValueAtTime(0.001,t+0.04);
+      o3.connect(g3); g3.connect(master); o3.start(t); o3.stop(t+0.04);
+      break;
+    }
+    case 'explode': { // 爆炸：低频"轰"+ 高频"嘶"
+      // 低频轰鸣
+      const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(80,t); o.frequency.exponentialRampToValueAtTime(30,t+0.2);
+      g.gain.setValueAtTime(0.2,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t+0.2);
+      // 高频嘶嘶（噪音模拟）
+      const o2=audioCtx.createOscillator(); const g2=audioCtx.createGain();
+      o2.type='sawtooth'; o2.frequency.setValueAtTime(1200,t); o2.frequency.exponentialRampToValueAtTime(200,t+0.12);
+      g2.gain.setValueAtTime(0.08,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+      o2.connect(g2); g2.connect(master); o2.start(t); o2.stop(t+0.12);
+      break;
+    }
   }
+}
+
+// ==================== 背景音乐系统 ====================
+
+// 程序化生成的循环BGM：使用简单的五声音阶旋律 + 低音线，营造山海经古风氛围
+let bgmGain=null, bgmNodes=[], bgmPlaying=false, bgmTimer=null, bgmMode='normal';
+const BGM_SCALE=[261.63,293.66,329.63,392.00,440.00]; // C D E G A (中国五声音阶宫调)
+const BGM_BASS=[130.81,146.83,164.81,196.00,220.00]; // 低音线
+// 试炼激昂BGM：小调色彩 + 更快节奏 + 鼓点，营造紧张战斗氛围
+const BGM_TRIAL_SCALE=[220.00,261.63,293.66,329.63,392.00]; // A C D E G (小调色彩)
+const BGM_TRIAL_BASS=[110.00,130.81,146.83,164.81,196.00]; // 更低沉的低音
+
+function startBGM(mode){
+  if(!audioCtx)return;
+  // 如果已在播放同模式BGM，不重启
+  if(bgmPlaying&&bgmMode===mode)return;
+  // 切换模式：先停旧BGM再启新BGM
+  if(bgmPlaying){ stopBGMInternal(); }
+  bgmPlaying=true;
+  bgmMode=mode||'normal';
+  bgmGain=audioCtx.createGain();
+  bgmGain.gain.value=bgmMode==='trial'?0.07:0.06; // 试炼BGM略大声
+  bgmGain.connect(audioCtx.destination);
+  scheduleBGM();
+}
+
+function stopBGM(){
+  bgmPlaying=false;
+  if(bgmTimer){clearTimeout(bgmTimer); bgmTimer=null;}
+  for(const n of bgmNodes){try{n.stop();}catch(e){}}
+  bgmNodes=[];
+  if(bgmGain){try{bgmGain.disconnect();}catch(e){} bgmGain=null;}
+}
+
+// 内部停止（不重置bgmPlaying状态，用于模式切换）
+function stopBGMInternal(){
+  if(bgmTimer){clearTimeout(bgmTimer); bgmTimer=null;}
+  for(const n of bgmNodes){try{n.stop();}catch(e){}}
+  bgmNodes=[];
+  if(bgmGain){try{bgmGain.disconnect();}catch(e){} bgmGain=null;}
+}
+
+function scheduleBGM(){
+  if(!bgmPlaying||!audioCtx)return;
+  const t=audioCtx.currentTime;
+  const isTrial=bgmMode==='trial';
+  const beatLen=isTrial?0.35:0.5; // 试炼BPM更快（~170BPM vs 120BPM）
+  const scale=isTrial?BGM_TRIAL_SCALE:BGM_SCALE;
+  const bass=isTrial?BGM_TRIAL_BASS:BGM_BASS;
+  // 主旋律：每拍一个音
+  for(let i=0;i<4;i++){
+    const noteFreq=scale[Math.floor(Math.random()*scale.length)];
+    const noteStart=t+i*beatLen;
+    const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+    o.type=isTrial?'square':'triangle'; // 试炼用方波更激烈
+    o.frequency.value=noteFreq;
+    g.gain.setValueAtTime(0,noteStart);
+    g.gain.linearRampToValueAtTime(0.4,noteStart+0.05);
+    g.gain.exponentialRampToValueAtTime(0.001,noteStart+beatLen*0.9);
+    o.connect(g); g.connect(bgmGain);
+    o.start(noteStart); o.stop(noteStart+beatLen);
+    bgmNodes.push(o);
+  }
+  // 低音线：每2拍一个低音
+  for(let i=0;i<2;i++){
+    const noteFreq=bass[Math.floor(Math.random()*bass.length)];
+    const noteStart=t+i*beatLen*2;
+    const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+    o.type='sine'; o.frequency.value=noteFreq;
+    g.gain.setValueAtTime(0,noteStart);
+    g.gain.linearRampToValueAtTime(0.5,noteStart+0.1);
+    g.gain.exponentialRampToValueAtTime(0.001,noteStart+beatLen*1.8);
+    o.connect(g); g.connect(bgmGain);
+    o.start(noteStart); o.stop(noteStart+beatLen*2);
+    bgmNodes.push(o);
+  }
+  // 试炼模式：加鼓点（每拍一个低频鼓）
+  if(isTrial){
+    for(let i=0;i<4;i++){
+      const noteStart=t+i*beatLen;
+      const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(80,noteStart); o.frequency.exponentialRampToValueAtTime(40,noteStart+0.1);
+      g.gain.setValueAtTime(0.3,noteStart); g.gain.exponentialRampToValueAtTime(0.001,noteStart+0.12);
+      o.connect(g); g.connect(bgmGain);
+      o.start(noteStart); o.stop(noteStart+0.12);
+      bgmNodes.push(o);
+    }
+  }
+  // 调度下一段
+  bgmTimer=setTimeout(scheduleBGM,isTrial?1400:2000);
 }
 // Boss音效映射
 function playBossSound(bossIdx){
@@ -1850,10 +2145,13 @@ let activeRelics=[];            // 当前局内激活的遗物
 let bossTimeChallenge=null;     // Boss时间挑战 {time, maxTime, active}
 let bossVariant=false;          // 当前Boss是否为变异体
 let pendingEndlessNext=false;   // 无尽Boss击败后等待玩家选完强化再进入下一波
+let pendingProceedNext=false;  // Boss击败后触发了升级，等玩家选完强化再进入下一关
+let pendingTrialNext=false;    // 试炼Boss击败后触发了升级，等玩家选完强化再继续试炼流程
+let prevGameState='fighting';  // 升级面板出现前的游戏状态（用于选完强化后恢复）
 // Roguelike遗物定义
 const RELIC_DEFS = [
   { id:'bounce',    name:'弹射子弹', icon:'🎯', desc:'子弹击中敌人后弹射到附近敌人', rarity:'rare' },
-  { id:'killheal',  name:'吸血诅咒', icon:'🩸', desc:'击杀敌人恢复1点生命', rarity:'rare' },
+  { id:'xpboost',   name:'智者之书', icon:'📖', desc:'击杀经验+50%', rarity:'rare' },
   { id:'critchain', name:'暴击连击', icon:'💥', desc:'暴击后2秒内下次暴击伤害+50%', rarity:'epic' },
   { id:'frost',     name:'冰霜附魔', icon:'❄️', desc:'子弹附带减速效果', rarity:'rare' },
   { id:'explode',   name:'爆破子弹', icon:'🎆', desc:'子弹击中时产生小爆炸', rarity:'epic' },
@@ -1875,11 +2173,14 @@ let adventureEnemyTimer=15;
 let pendingBossCapture=null;
 // 新增：Boss试炼/超级Boss复仇/弑神双Boss状态
 let bossTrialMode=false;       // 是否处于Boss试炼模式
+let _lastRunWasTrial=false;    // 上一局是否为试炼模式（gameOver 显示结算时用，避免 bossTrialMode 被提前重置导致 wasTrial 失效）
+let _showCheatReveal=false;   // 弑神难度试炼首次通关后标记，触发作弊方法揭示弹窗
 let bossTrialIndex=0;          // Boss试炼当前索引(0-5)
 let trialBossOrder=[0,1,2,3,4,5]; // 试炼Boss顺序（随机打乱）
 let pendingSuperRevenge=false; // 普通Boss死后是否触发超级Boss复仇
 let pendingFinalBoss=false;   // 超级Boss死后是否触发刑天最终Boss
 let resumeTrialAfterFinalBoss=false; // 刑天结束后是否继续试炼流程
+let trialXingtianTriggered=false; // 本次试炼中刑天是否已触发过（限制最多一次）
 let godslayerBossesLeft=0;     // 弑神难度剩余Boss数量
 
 const keys={};
@@ -2018,6 +2319,14 @@ class Player {
     this.bulletCount=1; this.bulletSpread=0; this.bulletPierce=0;
     this.bulletHoming=0; this.bulletSize=CONFIG.PLAYER.BULLET_SIZE;
     this.bounce=0; this.shield=0; this.maxShield=5;
+    // 新天赋相关属性
+    this.bulletRicochet=0;       // 子弹反弹天赋（击中敌人后弹射到附近敌人）
+    this.combatFuryStacks=0;     // 战斗狂当前层数
+    this.combatFuryMax=0;        // 战斗狂最大层数（天赋等级×5,每层-3%cd,上限15%）
+    this.combatFuryTimer=0;      // 战斗狂衰减计时器
+    this.rageFuryStacks=0;       // 愤怒当前层数
+    this.rageFuryMax=0;          // 愤怒最大层数（天赋等级×5,每层+3%dmg,上限15%）
+    this.rageFuryTimer=0;        // 愤怒衰减计时器
     this.critChance=0; this.critDamage=2; this.baseCritChance=0;
     this.skillCooldown=0; this.maxSkillCooldown=10;
     this.elementTiers={}; this.elementEffects={}; this.finalUpgrades=[];
@@ -2031,6 +2340,46 @@ class Player {
     // 皮肤特效状态
     this.skinTrailTimer=0; // 传说皮肤粒子拖尾计时
     this.skinAfterimages=[]; // 史诗皮肤走路残影
+    // 经验值系统：升一级才能选一次强化，越高级需要的经验越多
+    // 公式：xpToNext = floor(8 * 1.4^(level-1))，1→2需8xp，5→6需30xp，10→11需115xp
+    // 早期升级快建立爽感，后期慢下来但不至于太 grind
+    this.xp=0; this.xpLevel=1; this.xpToNext=this.computeXpToNext(1);
+  }
+  // 计算升下一级所需经验（指数增长，1.4倍系数让升级速度合理）
+  computeXpToNext(level){ return Math.floor(8*Math.pow(1.4,level-1)); }
+  // 获得经验值，满经验自动触发升级
+  gainXp(amount){
+    if(!player||amount<=0)return;
+    this.xp+=amount;
+    // 局外经验累积：所有获得的经验都累积到局外，每1000经验奖励1天赋点
+    saveData.totalXp=(saveData.totalXp||0)+amount;
+    let leveledUp=false;
+    while(this.xp>=this.xpToNext){
+      this.xp-=this.xpToNext;
+      this.xpLevel++;
+      this.xpToNext=this.computeXpToNext(this.xpLevel);
+      leveledUp=true;
+      // 每升一级获得1天赋点（局外天赋系统，不再由得分获得）
+      saveData.talentPoints=(saveData.talentPoints||0)+1;
+    }
+    // 局外经验里程碑奖励：每1000经验额外+1天赋点
+    const milestoneXp=Math.floor((saveData.totalXp||0)/1000)*1000;
+    if(milestoneXp>(saveData.totalXpClaimed||0)){
+      const bonus=Math.floor((milestoneXp-(saveData.totalXpClaimed||0))/1000);
+      saveData.talentPoints=(saveData.talentPoints||0)+bonus;
+      saveData.totalXpClaimed=milestoneXp;
+      saveSave(); // 持久化里程碑奖励
+      pushFloatingText(this.x,this.y-80,`🏆 里程碑奖励! +${bonus}天赋点`,'#bc8cff',2);
+    }
+    if(leveledUp){
+      pushFloatingText(this.x,this.y-50,`升级! Lv.${this.xpLevel} (+1天赋点)`,'#ffd700',2);
+      playSound('levelUp');
+      spawnParticles(this.x,this.y,'#ffd700',30);
+      saveSave(); // 持久化天赋点
+      // 触发强化选择面板（暂停游戏）
+      showUpgradeScreen();
+    }
+    updateUI();
   }
   applyTalents(){
     this.bulletDamage+=getTalentBonus('damage');
@@ -2043,6 +2392,12 @@ class Player {
     this.critChance+=getTalentBonus('crit')*0.1;
     this.critDamage+=getTalentBonus('critdmg')*0.2;
     this.regenPerLevel=getTalentBonus('regen');
+    // 新天赋：子弹反弹 / 子弹追踪（互斥）
+    this.bulletRicochet=getTalentBonus('ricochet');      // 每级+1次反弹
+    this.bulletHoming+=getTalentBonus('homing')*1.5;     // 每级+1.5追踪强度（明显追踪）
+    // 高级天赋：战斗狂 / 愤怒（互斥,2点）- 击中叠加层数有上限,衰减
+    this.combatFuryMax=getTalentBonus('frenzy')*5;       // 战斗狂：5层上限,每层-3%cd(共-15%)
+    this.rageFuryMax=getTalentBonus('rage')*5;           // 愤怒：5层上限,每层+3%dmg(共+15%)
   }
   applyCharacterPassive(){
     const c=getCurrentCharacter();
@@ -2065,12 +2420,15 @@ class Player {
   }
   applyCrafts(){
     const crafts=saveData.weaponCrafts[saveData.currentWeapon]||[];
-    // 递减机制：同id词条叠加时，第N个效果递减为 1/(N) 的效果（避免5词条全堆同一种过于强力）
+    // 强化递减机制：同id词条叠加时效果急剧递减，避免堆叠超模
+    // 第1个100%，第2个30%，第3个15%，第4个8%，第5个4%（5个同id词条总效果=1.57倍单词条）
+    const DIMINISHING=[1.0, 0.3, 0.15, 0.08, 0.04];
     const counter={};
     for(const c of crafts){
       counter[c.id]=(counter[c.id]||0)+1;
       const stackIdx=counter[c.id]; // 第几个同类词条
-      const eff=c.value/stackIdx; // 递减：第1个100%，第2个50%，第3个33%...
+      const effMul=DIMINISHING[Math.min(stackIdx-1, DIMINISHING.length-1)];
+      const eff=c.value*effMul;
       if(c.id==='dmg')this.bulletDamage+=eff;
       else if(c.id==='cd')this.baseFireCooldown*=(1-eff);
       else if(c.id==='size')this.bulletSize+=eff;
@@ -2103,6 +2461,8 @@ class Player {
     this.x=clamp(this.x,this.size,CONFIG.WIDTH-this.size);
     this.y=clamp(this.y,this.size,CONFIG.HEIGHT-this.size);
     this.angle=Math.atan2(mouse.y-this.y,mouse.x-this.x);
+    // 奇遇临时伤害增益倒计时
+    if(this._adventureDmgBoostTime>0){this._adventureDmgBoostTime-=dt; if(this._adventureDmgBoostTime<=0){this._adventureDmgBoost=1;}}
     // 狂暴：击杀后攻速翻倍
     let actualFireCd=this.fireCooldown;
     if(this.rampageTimer&&this.rampageTimer>0){this.rampageTimer-=dt; actualFireCd-=dt*2;}
@@ -2149,6 +2509,13 @@ class Player {
     }
     // Roguelike遗物：暴击连击计时器
     if(this._relicCritChainTime&&this._relicCritChainTime>0){this._relicCritChainTime-=dt; if(this._relicCritChainTime<0)this._relicCritChainTime=0;}
+    // 战斗狂/愤怒层数衰减：1.5秒未击中敌人则清空
+    if(this.combatFuryMax>0){
+      if(this.combatFuryTimer>0){this.combatFuryTimer-=dt; if(this.combatFuryTimer<=0)this.combatFuryStacks=0;}
+    }
+    if(this.rageFuryMax>0){
+      if(this.rageFuryTimer>0){this.rageFuryTimer-=dt; if(this.rageFuryTimer<=0)this.rageFuryStacks=0;}
+    }
   }
   updateSpecials(dt){
     for(const[aid,effect]of Object.entries(this.specialEffects||{})){
@@ -2184,6 +2551,8 @@ class Player {
   }
   shoot(){
     this.fireCooldown=this.baseFireCooldown;
+    // 高级天赋：战斗狂（击中叠加攻速,每层-3%cd,上限15%）- 影响下次射击的冷却
+    if(this.combatFuryMax>0&&this.combatFuryStacks>0){this.fireCooldown*=1-0.03*this.combatFuryStacks;}
     this.fireBullets(this.angle);
     // 双发：额外发射一次（无冷却消耗）
     if(this.doubleTap){this.fireBullets(this.angle+0.08);}
@@ -2202,6 +2571,8 @@ class Player {
   fireBullets(baseAngle){
     // 狂暴：生命低于30%伤害翻倍
     let dmgMul=(this.berserk&&this.health<this.maxHealth*0.3)?2:1;
+    // 奇遇临时伤害增益
+    if(this._adventureDmgBoost&&this._adventureDmgBoost>1)dmgMul*=this._adventureDmgBoost;
     // Roguelike遗物：狂战士（生命低于50%伤害+30%）
     if(this._relicBerserker&&this.health<this.maxHealth*0.5)dmgMul*=1.3;
     // 刑天干戚战意增伤：每层+5%伤害（最多3层=+15%）
@@ -2212,6 +2583,9 @@ class Player {
       const rageMul=1+(1-hpPct)*0.5; // 满血1x，残血1.5x
       dmgMul*=rageMul;
     }
+    // 高级天赋：愤怒（击中叠加伤害,每层+3%,上限15%）
+    if(this.rageFuryMax>0&&this.rageFuryStacks>0){dmgMul*=1+0.03*this.rageFuryStacks;}
+    // 战斗狂攻速加成已在 shoot() 中应用到 this.fireCooldown
     // Roguelike遗物：暴击连击（暴击伤害+50%）
     let critMul=this.critDamage;
     if(this._relicCritChainTime&&this._relicCritChainTime>0){critMul*=1.5;}
@@ -2222,7 +2596,7 @@ class Player {
       const bx=this.x+Math.cos(ba)*(this.size+4), by=this.y+Math.sin(ba)*(this.size+4);
       const isCrit=Math.random()<this.critChance;
       const dmg=isCrit?this.bulletDamage*critMul*dmgMul:this.bulletDamage*dmgMul;
-      bullets.push(new Bullet(bx,by,ba,{speed:this.bulletSpeed,damage:dmg,pierce:this.bulletPierce,homing:this.bulletHoming,size:this.bulletSize,bounce:this.bounce,isCrit,elementEffects:{...this.elementEffects},finalUpgrades:[...this.finalUpgrades],specialEffects:{...this.specialEffects},finalSpecials:[...this.finalSpecials],lifesteal:this.lifesteal||0,weaponId:this.weaponId,chainCount:this.weaponId==='thunder'?2:0,voidTrail:this.weaponId==='voidbow',boomerang:this.weaponId==='xingtiangeqi',originX:this.x,originY:this.y,boomerangMaxDist:380+this.bulletSize*2}));
+      bullets.push(new Bullet(bx,by,ba,{speed:this.bulletSpeed,damage:dmg,pierce:this.bulletPierce,homing:this.bulletHoming,size:this.bulletSize,bounce:this.bounce,isCrit,elementEffects:{...this.elementEffects},finalUpgrades:[...this.finalUpgrades],specialEffects:{...this.specialEffects},finalSpecials:[...this.finalSpecials],lifesteal:this.lifesteal||0,weaponId:this.weaponId,chainCount:this.weaponId==='thunder'?2:0,voidTrail:this.weaponId==='voidbow',boomerang:this.weaponId==='xingtiangeqi',originX:this.x,originY:this.y,boomerangMaxDist:380+this.bulletSize*2,bulletExplode:this.bulletExplode||0,bulletSplit:this.bulletSplit||0}));
     }
   }
   useSkill(){
@@ -2230,7 +2604,7 @@ class Player {
     if(c.id==='default'){
       for(let i=0;i<24;i++){
         const a=(i/24)*Math.PI*2;
-        bullets.push(new Bullet(this.x+Math.cos(a)*(this.size+4),this.y+Math.sin(a)*(this.size+4),a,{speed:this.bulletSpeed*0.9,damage:this.bulletDamage,size:this.bulletSize,elementEffects:{...this.elementEffects},finalUpgrades:[...this.finalUpgrades],specialEffects:{...this.specialEffects},finalSpecials:[...this.finalSpecials],weaponId:this.weaponId}));
+        bullets.push(new Bullet(this.x+Math.cos(a)*(this.size+4),this.y+Math.sin(a)*(this.size+4),a,{speed:this.bulletSpeed*0.9,damage:this.bulletDamage,size:this.bulletSize,elementEffects:{...this.elementEffects},finalUpgrades:[...this.finalUpgrades],specialEffects:{...this.specialEffects},finalSpecials:[...this.finalSpecials],weaponId:this.weaponId,bulletExplode:this.bulletExplode||0}));
       }
       spawnParticles(this.x,this.y,'#58a6ff',30);
       pushFloatingText(this.x,this.y-30,'弹幕风暴!','#58a6ff',1);
@@ -2298,8 +2672,9 @@ class Player {
     spawnParticles(this.x,this.y,'#f85149',15); updateUI();
     playSound('hurt');
     if(this.health<=0){
-      if(this.revives>0&&revivesUsed<this.revives){this.revives--; this.health=Math.ceil(this.maxHealth*0.5); this.invincible=2; spawnParticles(this.x,this.y,'#3fb950',40); pushFloatingText(this.x,this.y-30,'复活!','#3fb950',1.5);}
-      else triggerDeathAnimation();
+      if(!tryRevive(this)){
+        triggerDeathAnimation();
+      }
     }
   }
   heal(a){this.health=Math.min(this.health+a,this.maxHealth); spawnParticles(this.x,this.y,'#3fb950',15); updateUI();}
@@ -2552,6 +2927,12 @@ class Bullet {
     this.boomerangPhase=0; // 0=飞出, 1=返回
     this.originX=opts.originX||x; // 起点X
     this.originY=opts.originY||y; // 起点Y
+    // 奇遇/强化：爆破子弹（命中爆炸）
+    this.bulletExplode=opts.bulletExplode||0;
+    // 奇遇：子弹分裂（命中分裂出额外子弹，剩余可分裂次数）
+    this.bulletSplit=opts.bulletSplit||0;
+    // 分裂代数，防止伤害无限继承
+    this.splitGen=opts.splitGen||0;
   }
   update(dt){
     // 诸葛连弩/神臂弓等高速武器减少trail长度以优化性能
@@ -2798,11 +3179,59 @@ class EnemyBullet {
 
 // ==================== 掉落物 ====================
 class Drop {
-  constructor(x,y,type){this.x=x;this.y=y;this.type=type;this.size=12;this.alive=true;this.lifetime=10;this.wobble=rand(0,Math.PI*2);this.bobOffset=0;}
-  update(dt){this.lifetime-=dt;this.wobble+=dt*3;this.bobOffset=Math.sin(this.wobble)*3;if(this.lifetime<=0){this.alive=false;return;}const range=(player?.magnetRange||60);if(player&&dist(this.x,this.y,player.x,player.y)<range)this.pickup();}
-  pickup(){this.alive=false;if(this.type==='health'){player.heal(2);pushFloatingText(this.x,this.y-10,'+2 HP','#3fb950',1);}else if(this.type==='shield'){player.addShield(2);pushFloatingText(this.x,this.y-10,'+2 护盾','#58a6ff',1);}else if(this.type==='coin'){score+=18;pushFloatingText(this.x,this.y-10,'+18','#f0883e',1);updateUI();}spawnParticles(this.x,this.y,this.getColor(),10);}
-  getColor(){return this.type==='health'?'#3fb950':this.type==='shield'?'#58a6ff':'#f0883e';}
-  draw(){ctx.save();ctx.translate(this.x,this.y+this.bobOffset);const c=this.getColor(),a=this.lifetime<3?(Math.sin(this.lifetime*8)*0.3+0.7):1;ctx.globalAlpha=a;ctx.shadowColor=c;ctx.shadowBlur=10;if(this.type==='health'){ctx.fillStyle=c;ctx.fillRect(-4,-8,8,16);ctx.fillRect(-8,-4,16,8);}else if(this.type==='shield'){ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(0,-10);ctx.lineTo(10,-5);ctx.lineTo(8,8);ctx.lineTo(0,12);ctx.lineTo(-8,8);ctx.lineTo(-10,-5);ctx.closePath();ctx.fill();}else{ctx.fillStyle=c;ctx.beginPath();ctx.arc(0,0,this.size*0.7,0,Math.PI*2);ctx.fill();}ctx.restore();}
+  constructor(x,y,type,amount){
+    this.x=x;this.y=y;this.type=type;this.amount=amount||0;
+    this.size= this.type==='xp'?10:12; this.alive=true;this.lifetime=10;
+    this.wobble=rand(0,Math.PI*2);this.bobOffset=0;
+    // 经验球被吸引但不会被立即拾取，给玩家主动拾取的体验
+    this.xpPullRange=80; // 经验球吸引范围（小于磁铁范围，避免全屏吸）
+  }
+  update(dt){
+    this.lifetime-=dt;this.wobble+=dt*3;this.bobOffset=Math.sin(this.wobble)*3;
+    if(this.lifetime<=0){this.alive=false;return;}
+    if(!player||!player.alive)return;
+    const d=dist(this.x,this.y,player.x,player.y);
+    // 经验球：进入吸引范围后飞向玩家，玩家触碰才拾取
+    if(this.type==='xp'){
+      if(d<this.xpPullRange){
+        // 飞向玩家
+        const sp=240*dt;
+        const a=Math.atan2(player.y-this.y,player.x-this.x);
+        this.x+=Math.cos(a)*sp; this.y+=Math.sin(a)*sp;
+      }
+      if(d<player.size+this.size){ this.pickup(); }
+    }else{
+      // 其他掉落物：磁铁范围内立即拾取
+      const range=(player?.magnetRange||60);
+      if(d<range)this.pickup();
+    }
+  }
+  pickup(){
+    this.alive=false;
+    if(this.type==='health'){player.heal(2);pushFloatingText(this.x,this.y-10,'+2 HP','#3fb950',1);}
+    else if(this.type==='shield'){player.addShield(2);pushFloatingText(this.x,this.y-10,'+2 护盾','#58a6ff',1);}
+    else if(this.type==='coin'){score+=18;pushFloatingText(this.x,this.y-10,'+18','#f0883e',1);updateUI();}
+    else if(this.type==='xp'){player.gainXp(this.amount);}
+    spawnParticles(this.x,this.y,this.getColor(),10);
+  }
+  getColor(){return this.type==='health'?'#3fb950':this.type==='shield'?'#58a6ff':this.type==='xp'?'#bc8cff':'#f0883e';}
+  draw(){
+    ctx.save();ctx.translate(this.x,this.y+this.bobOffset);
+    const c=this.getColor(),a=this.lifetime<3?(Math.sin(this.lifetime*8)*0.3+0.7):1;
+    ctx.globalAlpha=a;ctx.shadowColor=c;ctx.shadowBlur=12;
+    if(this.type==='health'){ctx.fillStyle=c;ctx.fillRect(-4,-8,8,16);ctx.fillRect(-8,-4,16,8);}
+    else if(this.type==='shield'){ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(0,-10);ctx.lineTo(10,-5);ctx.lineTo(8,8);ctx.lineTo(0,12);ctx.lineTo(-8,8);ctx.lineTo(-10,-5);ctx.closePath();ctx.fill();}
+    else if(this.type==='xp'){
+      // 经验球：紫色发光球体 + 内部高光
+      const pulse=1+Math.sin(Date.now()/200)*0.1;
+      ctx.fillStyle=c;ctx.beginPath();ctx.arc(0,0,this.size*0.8*pulse,0,Math.PI*2);ctx.fill();
+      // 内部高光
+      ctx.fillStyle='rgba(255,255,255,0.6)';ctx.beginPath();ctx.arc(-this.size*0.25,-this.size*0.25,this.size*0.25,0,Math.PI*2);ctx.fill();
+      // 中心星形（小）
+      ctx.fillStyle='#ffd970';ctx.beginPath();ctx.arc(0,0,this.size*0.2,0,Math.PI*2);ctx.fill();
+    }else{ctx.fillStyle=c;ctx.beginPath();ctx.arc(0,0,this.size*0.7,0,Math.PI*2);ctx.fill();}
+    ctx.restore();
+  }
 }
 
 // ==================== 敌人 ====================
@@ -2833,8 +3262,12 @@ class Enemy {
     const td=CONFIG.ENEMY_TYPES[type]; this.type=type; this.size=td.size;
     const diff=getDifficulty();
     this.baseSpeed=td.speed*diff.enemySpdMul; this.speed=this.baseSpeed*(1+waveBonus*0.05);
-    this.maxHealth=Math.ceil(td.health*(1+waveBonus*(diff.waveHpGrow||0.15))*diff.enemyHpMul); this.health=this.maxHealth;
-    this.score=td.score; this.color=td.color; this.shape=td.shape; this.tier=td.tier;
+    // HP成长曲线：线性+平方项（后期血量加速增长，匹配玩家强度）
+    // 公式：base × (1 + waveBonus×grow + waveBonus²×grow2) × enemyHpMul
+    const grow=diff.waveHpGrow||0.10;
+    const grow2=diff.waveHpGrow2||0.004;
+    this.maxHealth=Math.ceil(td.health*(1+waveBonus*grow+waveBonus*waveBonus*grow2)*diff.enemyHpMul); this.health=this.maxHealth;
+    this.score=td.score; this.xp=td.xp||1; this.color=td.color; this.shape=td.shape; this.tier=td.tier;
     this.shoots=td.shoots||false; this.shootCooldown=td.shootCooldown||0;
     this.shootTimer=this.shootCooldown?rand(1,this.shootCooldown):0;
     this.invincibleTime=td.invincibleTime||0; this.taunt=td.taunt||false; this.suicidal=td.suicidal||false;
@@ -2872,6 +3305,9 @@ class Enemy {
   applyIceEffect(eff){if(eff.slow){this.slowFactor=1-eff.slow;this.slowTimer=eff.slowDur;}if(eff.freezeChance&&Math.random()<eff.freezeChance){this.frozen=true;this.frozenTimer=1.5;}}
   takeDamage(dmg,bullet){
     if(this.invincibleTime>0){spawnParticles(this.x,this.y,'#79c0ff',3); return;} // 无敌期间不受伤害
+    // 击中音效（节流：每个怪0.05秒最多触发1次，避免音效叠加刺耳）
+    const now=performance.now();
+    if(!this._lastHitSnd||now-this._lastHitSnd>50){ playSound('hit'); this._lastHitSnd=now; }
     // 处决：低血量直接秒杀
     if(player&&player.executeThreshold&&this.health>0&&this.health<=this.maxHealth*player.executeThreshold&&!this.secondBar){
       this.health=0; spawnParticles(this.x,this.y,'#ff4444',20); pushFloatingText(this.x,this.y-15,'处决!','#ff4444',0.8);
@@ -2912,6 +3348,36 @@ class Enemy {
           spawnParticles(this.x,this.y,'#bc8cff',6);
         }
       }
+      // 天赋：子弹反弹（击中敌人后弹射到附近敌人,每级+1次,50%伤害）
+      if(player&&player.bulletRicochet>0&&bullet&&!bullet._ricocheted){
+        const remaining=player.bulletRicochet-(bullet._ricochetCount||0);
+        if(remaining>0){
+          let nearest=null,nd=220;
+          for(const e of enemies){if(!e.alive||e===this||bullet.hitEnemies.has(e))continue; const d=dist(this.x,this.y,e.x,e.y); if(d<nd){nd=d;nearest=e;}}
+          if(boss&&boss.alive&&boss!==this&&!bullet.hitEnemies.has(boss)){const d=dist(this.x,this.y,boss.x,boss.y); if(d<nd*1.5)nearest=boss;}
+          if(nearest){
+            bullet._ricochetCount=(bullet._ricochetCount||0)+1;
+            if(bullet._ricochetCount>=player.bulletRicochet)bullet._ricocheted=true;
+            const a=Math.atan2(nearest.y-this.y,nearest.x-this.x);
+            const nb=new Bullet(this.x,this.y,a,{damage:bullet.damage*0.5,size:bullet.size*0.85,speed:bullet.speed,pierce:0});
+            nb._ricochetCount=bullet._ricochetCount; nb._ricocheted=bullet._ricocheted;
+            nb._relicFrost=bullet._relicFrost;
+            bullets.push(nb);
+            spawnParticles(this.x,this.y,'#ffd970',5);
+          }
+        }
+      }
+      // 高级天赋：战斗狂/愤怒 - 击中敌人叠加层数（1.5秒未击中衰减,在Player.update中处理）
+      if(player){
+        if(player.combatFuryMax>0){
+          player.combatFuryStacks=Math.min(player.combatFuryMax,player.combatFuryStacks+1);
+          player.combatFuryTimer=1.5;
+        }
+        if(player.rageFuryMax>0){
+          player.rageFuryStacks=Math.min(player.rageFuryMax,player.rageFuryStacks+1);
+          player.rageFuryTimer=1.5;
+        }
+      }
       // Roguelike遗物：爆破子弹
       if(hasRelic('explode')&&!bullet._relicExploded){
         bullet._relicExploded=true;
@@ -2942,6 +3408,11 @@ class Enemy {
     comboCount++; comboTimer=2.0; if(comboCount>comboMax)comboMax=comboCount;
     const comboBonus=comboCount>=5?Math.floor(this.score*(1+comboCount*0.05)):this.score;
     score+=comboBonus;
+    // 经验值系统：自爆怪击杀也掉落经验球（遗物"智者之书"+50%）
+    if(this.xp>0){
+      const _xpAmt = hasRelic('xpboost') ? Math.ceil(this.xp*1.5) : this.xp;
+      drops.push(new Drop(this.x,this.y,'xp',_xpAmt));
+    }
     if(!this.isAdventure){enemiesRemaining--;} updateUI();
     spawnParticles(this.x,this.y,'#f0883e',40);
     pushFloatingText(this.x,this.y,`+${comboBonus}${comboCount>=5?` x${comboCount}`:''}`,comboCount>=10?'#ffd700':comboCount>=5?'#bc8cff':'#f0883e',1);
@@ -2960,6 +3431,13 @@ class Enemy {
     // Roguelike遗物：贪欲之眼
     if(hasRelic('treasure')){gain=Math.ceil(gain*1.5);}
     score+=gain;
+    // 击杀音效
+    playSound('kill');
+    // 经验值系统：击杀怪物掉落经验球，玩家拾取才获得经验（遗物"智者之书"+50%）
+    if(this.xp>0){
+      const _xpAmt = hasRelic('xpboost') ? Math.ceil(this.xp*1.5) : this.xp;
+      drops.push(new Drop(this.x,this.y,'xp',_xpAmt));
+    }
     if(!this.isAdventure){enemiesRemaining--;} updateUI();
     spawnParticles(this.x,this.y,this.color,20+this.size);
     pushFloatingText(this.x,this.y,`+${gain}${comboCount>=5?` x${comboCount}`:''}`,comboCount>=10?'#ffd700':comboCount>=5?'#bc8cff':'#f0883e',1);
@@ -2973,11 +3451,10 @@ class Enemy {
         }
       }
     }
-    // Roguelike遗物：吸血诅咒
-    if(hasRelic('killheal')&&player){player.health=Math.min(player.maxHealth,player.health+1); spawnParticles(player.x,player.y,'#3fb950',4);}
-    // 刑天干戚专属：击杀回血+战意增伤
+    // 吸血来源已全面移除（仅神话套装4件红装给一点点）
+    // 刑天干戚专属：击杀回血+战意增伤（吸血削弱：+2→+1）
     if(killingBullet&&killingBullet.weaponId==='xingtiangeqi'&&player){
-      const heal=2;
+      const heal=1;
       player.health=Math.min(player.maxHealth,player.health+heal);
       spawnParticles(player.x,player.y,'#ff4500',5);
       pushFloatingText(player.x,player.y-30,`+${heal}`,'#ff4500',0.8);
@@ -3285,14 +3762,14 @@ class Boss {
     this.name=this.bossType.name; this.color=this.bossType.color;
     this.size=(isSuper?62:50)+level*6;
     const diff=getDifficulty();
-    let baseHp=(80+level*40)*bossHpMul*diff.bossHpMul;
+    let baseHp=(120+level*55)*bossHpMul*diff.bossHpMul;
     if(isSuper) baseHp*=3; // 超级Boss血量3倍
     this.maxHealth=baseHp; this.health=this.maxHealth;
     this.armor=(diff.enemyArmor||0)*0.5; // Boss护甲为小怪的一半
     this.speed=(40+level*5)*(isSuper?0.85:1); this.alive=true; this.phase=1; this.attackTimer=2;
     this.moveAngle=0; this.targetX=CONFIG.WIDTH/2; this.targetY=CONFIG.HEIGHT*0.42;
     this.wobble=0; this.hitFlash=0;
-    this.attackPattern=0; this.rage=false; this.specialCooldown=5; this.special2Cooldown=8;
+    this.attackPattern=0; this.rage=false; this.specialCooldown=3; this.special2Cooldown=6;
     this.isCharging=false; this.chargeDirection={x:0,y:0}; this.chargeTimer=0;
     this.warningTime=0; this.warningType=null; this.warningData=null; this.warningIsSpecial2=false;
     this.slowFactor=1; this.slowTimer=0; this.frozen=false; this.frozenTimer=0;
@@ -3351,7 +3828,7 @@ class Boss {
         this.jumping=false; this.y=this.jumpToY;
         // 落地冲击波
         spawnParticles(this.x,this.y,'#daa520',60);
-        if(player&&dist(this.x,this.y,player.x,player.y)<180)applyDirectDamage(player,2,'🪨落地冲击!',this.color);
+        if(player&&dist(this.x,this.y,player.x,player.y)<180)applyDirectDamage(player,3,'🪨落地冲击!',this.color);
         for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;enemyBullets.push(new EnemyBullet(this.x,this.y,a,220,9,'#cd5c5c'));}
       }
       return;
@@ -3416,10 +3893,10 @@ class Boss {
     // 难度影响：高难度下Boss特殊攻击更频繁（额外加快）
     const diffKey=saveData.difficulty;
     const specialSpdMul=(diffKey==='hard')?0.85:(diffKey==='hell')?0.7:(diffKey==='godslayer')?0.55:1;
-    if(this.attackTimer<=0){this.doAttack(); this.attackTimer=(this.rage?(this.isSuper?0.9:1.2):(this.isSuper?1.4:1.8-this.level*0.1))/getDifficulty().bossAtkMul*trialSpd;}
-    if(this.specialCooldown<=0&&!this.isCharging&&this.warningTime<=0&&!this.jumping){this.startSpecialAttack(); this.specialCooldown=(this.rage?(this.isSuper?5:6):(this.isSuper?7:9))/getDifficulty().bossAtkMul*specialSpdMul*trialSpd;}
+    if(this.attackTimer<=0){this.doAttack(); this.attackTimer=(this.rage?(this.isSuper?0.8:1.0):(this.isSuper?1.2:1.5-this.level*0.08))/getDifficulty().bossAtkMul*trialSpd;}
+    if(this.specialCooldown<=0&&!this.isCharging&&this.warningTime<=0&&!this.jumping){this.startSpecialAttack(); this.specialCooldown=(this.rage?(this.isSuper?4:5):(this.isSuper?6:7))/getDifficulty().bossAtkMul*specialSpdMul*trialSpd;}
     // 第二特殊攻击（光波/多区域等互动型）
-    if(this.special2Cooldown<=0&&!this.isCharging&&this.warningTime<=0&&!this.jumping){this.startSpecial2Attack(); this.special2Cooldown=(this.rage?(this.isSuper?8:10):(this.isSuper?11:13))/getDifficulty().bossAtkMul*specialSpdMul*trialSpd;}
+    if(this.special2Cooldown<=0&&!this.isCharging&&this.warningTime<=0&&!this.jumping){this.startSpecial2Attack(); this.special2Cooldown=(this.rage?(this.isSuper?7:8):(this.isSuper?9:10))/getDifficulty().bossAtkMul*specialSpdMul*trialSpd;}
     // 安全区全屏攻击：绿色预警圈=安全区，玩家须站在圈内躲避全屏伤害
     if(this.safeZoneActive){
       this.safeZoneData.timer-=dt;
@@ -3541,11 +4018,14 @@ class Boss {
     playSound('bossSkill');
     // 全屏红色闪光
     flashScreen('#8b0000',0.4);
-    // 干戚横扫：全屏伤害（干戚横扫整个战场，无处可躲）
-    // 直接扣血绕过无敌帧，确保伤害不丢失
+    // 干戚横扫：仅对扫击范围内的玩家造成伤害（修复：原为全屏伤害bug）
     if(player&&player.alive){
-      applyDirectDamage(player,12,'⚔️干戚横扫!','#f85149');
-      spawnParticles(player.x,player.y,'#f85149',40);
+      const dx=player.x-this.x, dy=player.y-this.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<=d.radius){
+        applyDirectDamage(player,12,'⚔️干戚横扫!','#f85149');
+        spawnParticles(player.x,player.y,'#f85149',40);
+      }
     }
     // 专属横扫特效：半月形挥砍轨迹（明显的刀光弧线，绕boss一圈）
     // 用halberdSweepEffect标记，在fireEffects绘制中专门处理
@@ -3729,7 +4209,7 @@ class Boss {
         spawnParticles(fx,fy,'#a855f7',12);
         // 生成时给玩家一次性伤害
         if(player&&player.alive&&dist(fx,fy,player.x,player.y)<75){
-          applyDirectDamage(player,2,'维度裂隙!','#a855f7');
+          applyDirectDamage(player,3,'维度裂隙!','#a855f7');
         }
       }
       this.invulnerable=true; this.invulnerableTimer=1.5;
@@ -3763,7 +4243,7 @@ class Boss {
     if(player&&player.alive){
       const distToSafe=dist(player.x,player.y,d.x,d.y);
       if(distToSafe>d.radius){
-        applyDirectDamage(player,3,'💥全屏伤害!','#ff4500'); // 全屏伤害3点（绕过无敌帧）
+        applyDirectDamage(player,4,'💥全屏伤害!','#ff4500'); // 全屏伤害3点（绕过无敌帧）
         spawnParticles(player.x,player.y,'#f85149',30);
         pushFloatingText(player.x,player.y-30,'全屏伤害!','#f85149',1.5);
       }else{
@@ -3836,7 +4316,7 @@ class Boss {
       if(data&&data.positions)for(const p of data.positions){
         spawnParticles(p.x,p.y,this.color,30);
         fireEffects.push({x:p.x,y:p.y,radius:p.radius,damage:0.5,life:2,maxLife:2,burnDmg:0.5,tick:0,chain:0});
-        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,1,'🔥火雨!',this.color);
+        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,2,'🔥火雨!',this.color);
         for(let i=0;i<2;i++){const a=(i/2)*Math.PI*2;enemyBullets.push(new EnemyBullet(p.x,p.y,a,140,6,this.color));}
       }
     }else if(sp==='poisonSwamp'){
@@ -3844,7 +4324,7 @@ class Boss {
       if(data&&data.positions)for(const p of data.positions){
         spawnParticles(p.x,p.y,this.color,30);
         fireEffects.push({x:p.x,y:p.y,radius:p.radius,damage:0.4,life:3,maxLife:3,burnDmg:0.4,tick:0,chain:0});
-        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,1,'☠️毒沼!',this.color);
+        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,2,'☠️毒沼!',this.color);
       }
     }else if(sp==='groundShock'){
       // 朱厌震地冲击：跳跃后落地产生冲击波
@@ -3859,7 +4339,7 @@ class Boss {
             if(!this.alive||gameState!=='boss')return;
             spawnParticles(p.x,p.y,this.color,35);
             fireEffects.push({x:p.x,y:p.y,radius:p.radius,damage:0.8,life:4,maxLife:4,burnDmg:0.8,tick:0,chain:0});
-            if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,2,'🪨巨石!',this.color);
+            if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,3,'🪨巨石!',this.color);
             for(let j=0;j<3;j++){const a=(j/3)*Math.PI*2;enemyBullets.push(new EnemyBullet(p.x,p.y,a,160,8,this.color));}
           },i*400);
         });
@@ -3881,7 +4361,7 @@ class Boss {
             // 落地爆炸效果
             fireEffects.push({x:fx,y:fy,radius:90,damage:0,life:1.0,maxLife:1.0,burnDmg:0,tick:0,chain:0,hammerBlast:true});
             // 判定时用玩家当前位置与落点比较，玩家移开则免伤
-            if(player&&dist(fx,fy,player.x,player.y)<90)applyDirectDamage(player,2,'💥爆炸!','#ff4500');
+            if(player&&dist(fx,fy,player.x,player.y)<90)applyDirectDamage(player,3,'💥爆炸!','#ff4500');
             for(let i=0;i<4;i++){const a=(i/4)*Math.PI*2;enemyBullets.push(new EnemyBullet(fx,fy,a,180,9,this.color));}
           },500);
         }
@@ -3911,7 +4391,7 @@ class Boss {
       if(data&&data.positions)for(const p of data.positions){
         spawnParticles(p.x,p.y,this.color,30);
         fireEffects.push({x:p.x,y:p.y,radius:p.radius,damage:0.5,life:2.5,maxLife:2.5,burnDmg:0.5,tick:0,chain:0,waterRift:true});
-        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,1,'💧暴雨!',this.color);
+        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,2,'💧暴雨!',this.color);
         for(let i=0;i<2;i++){const a=(i/2)*Math.PI*2;enemyBullets.push(new EnemyBullet(p.x,p.y,a,150,7,this.color));}
       }
     }else if(sp==='voidRift'){
@@ -3928,7 +4408,7 @@ class Boss {
           fireEffects.push({x:fx,y:fy,radius:35,damage:1.0,life:3,maxLife:3,burnDmg:1.0,tick:0,chain:0,voidRift:true,playerHazard:true});
           // 首次生成时给玩家一次性伤害判定
           if(player&&player.alive&&dist(fx,fy,player.x,player.y)<35){
-            applyDirectDamage(player,1,'虚空裂隙!','#a855f7');
+            applyDirectDamage(player,2,'虚空裂隙!','#a855f7');
           }
         }
       }
@@ -3999,7 +4479,7 @@ class Boss {
       if(data&&data.positions)for(const p of data.positions){
         spawnParticles(p.x,p.y,this.color,35);
         fireEffects.push({x:p.x,y:p.y,radius:p.radius,damage:0.6,life:2.5,maxLife:2.5,burnDmg:0.6,tick:0,chain:0});
-        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,2,'💥俯冲轰炸!',this.color);
+        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,3,'💥俯冲轰炸!',this.color);
         // 少量溅射弹（非弹幕海）
         for(let i=0;i<3;i++){const a=(i/3)*Math.PI*2;enemyBullets.push(new EnemyBullet(p.x,p.y,a,120,7,this.color));}
       }
@@ -4011,7 +4491,7 @@ class Boss {
       // 朱厌巨石弹幕：同时打击所有预警区域
       if(data&&data.positions)for(const p of data.positions){
         spawnParticles(p.x,p.y,'#daa520',30);
-        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,2,'🪨巨石弹幕!','#cd5c5c');
+        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,3,'🪨巨石弹幕!','#cd5c5c');
         for(let i=0;i<2;i++){const a=(i/2)*Math.PI*2;enemyBullets.push(new EnemyBullet(p.x,p.y,a,140,8,'#cd5c5c'));}
       }
     }else if(sp==='lightBeam'){
@@ -4029,7 +4509,7 @@ class Boss {
       this.y=clamp(data.y+rand(-30,30),this.size,CONFIG.HEIGHT-this.size);
       spawnParticles(oldX,oldY,this.color,30);
       spawnParticles(this.x,this.y,this.color,50);
-      if(player&&dist(this.x,this.y,player.x,player.y)<data.radius+player.size)applyDirectDamage(player,2,'🌪️风刃!',this.color);
+      if(player&&dist(this.x,this.y,player.x,player.y)<data.radius+player.size)applyDirectDamage(player,3,'🌪️风刃!',this.color);
       // 8方向风刃
       for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2;enemyBullets.push(new EnemyBullet(this.x,this.y,a,220,7,this.color));}
       // 范围爆炸视觉
@@ -4043,7 +4523,7 @@ class Boss {
       if(data&&data.positions)for(const p of data.positions){
         spawnParticles(p.x,p.y,this.color,30);
         fireEffects.push({x:p.x,y:p.y,radius:p.radius,damage:0.8,life:2,maxLife:2,burnDmg:0.8,tick:0,chain:0,voidRift:true});
-        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,2,'🌀虚空裂缝!',this.color);
+        if(player&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,3,'🌀虚空裂缝!',this.color);
       }
       // 6发追踪弹
       for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;const eb=new EnemyBullet(this.x,this.y,a,200,8,this.color);eb.homing=0.6;enemyBullets.push(eb);}
@@ -4058,11 +4538,11 @@ class Boss {
       const beamWidth=50;
       if(d.beamType==='horizontal'){
         // 水平光波：检查玩家是否在光波范围内
-        if(player&&Math.abs(player.y-d.y)<beamWidth)player.takeDamage(dt*3);
+        if(player&&Math.abs(player.y-d.y)<beamWidth)player.takeDamage(dt*5);
         spawnParticles(this.x,d.y,this.color,3);
       }else if(d.beamType==='vertical'){
         // 垂直光波
-        if(player&&Math.abs(player.x-d.x)<beamWidth)player.takeDamage(dt*4);
+        if(player&&Math.abs(player.x-d.x)<beamWidth)player.takeDamage(dt*6);
         spawnParticles(d.x,this.y,this.color,4);
       }else if(d.beamType==='fan'){
         // 扇形光波
@@ -4070,7 +4550,7 @@ class Boss {
           const a=Math.atan2(player.y-d.y,player.x-d.x);
           for(const fa of d.angles){
             if(Math.abs(((a-fa+Math.PI*3)%(Math.PI*2))-Math.PI)<0.15&&dist(d.x,d.y,player.x,player.y)<600){
-              player.takeDamage(dt*3); break;
+              player.takeDamage(dt*5); break;
             }
           }
         }
@@ -4088,14 +4568,14 @@ class Boss {
           player.x+=dx/dist2*pull*dt; player.y+=dy/dist2*pull*dt;
         }
         // 距离很近时造成伤害
-        if(dist2<60)player.takeDamage(dt*5);
+        if(dist2<60)player.takeDamage(dt*8);
       }
       spawnParticles(d.x+rand(-d.radius,d.radius),d.y+rand(-d.radius,d.radius),this.color,2);
       if(d.timer>=d.duration){
         // 最终爆炸
         this._wellActive=false;
         spawnParticles(d.x,d.y,this.color,60);
-        if(player&&dist(d.x,d.y,player.x,player.y)<d.radius)applyDirectDamage(player,3,'💥引力爆炸!',this.color);
+        if(player&&dist(d.x,d.y,player.x,player.y)<d.radius)applyDirectDamage(player,4,'💥引力爆炸!',this.color);
         for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;enemyBullets.push(new EnemyBullet(d.x,d.y,a,150,8,this.color));}
         this._wellData=null;
       }
@@ -4166,6 +4646,8 @@ class Boss {
   }
   applyIceEffect(eff){if(eff.slow){this.slowFactor=Math.min(this.slowFactor,1-eff.slow*0.5);this.slowTimer=eff.slowDur;}}
   takeDamage(dmg,bullet){
+    // 防止Boss死后继续受到伤害（同一帧多颗子弹命中时避免die()被多次调用）
+    if(!this.alive)return;
     // 九尾狐无敌状态：免疫所有伤害
     if(this.invulnerable){
       spawnParticles(this.x,this.y,'#ff69b4',5);
@@ -4194,6 +4676,9 @@ class Boss {
       if(dmg>maxDmg)dmg=maxDmg;
     }
     this.health-=dmg; this.hitFlash=0.08; spawnParticles(this.x+rand(-this.size*0.5,this.size*0.5),this.y+rand(-this.size*0.5,this.size*0.5),this.color,3);
+    // Boss击中音效（节流：Boss 60ms 内最多1次，避免高频射击音效叠加刺耳）
+    const now=performance.now();
+    if(!this._lastHitSnd||now-this._lastHitSnd>60){ playSound('bossHit'); this._lastHitSnd=now; }
     // 元素伤害可视化：Boss也显示彩色伤害浮字
     if(bullet&&bullet.elementEffects){
       if(bullet.elementEffects.ice)pushFloatingText(this.x,this.y-this.size-10,`❄${Math.ceil(dmg)}`,'#79c0ff',0.8);
@@ -4202,9 +4687,42 @@ class Boss {
     }
     if(bullet&&bullet.elementEffects?.ice&&this.applyIceEffect)this.applyIceEffect(bullet.elementEffects.ice);
     if(bullet&&bullet.specialEffects?.fireball){const eff=bullet.specialEffects.fireball; fireEffects.push({x:this.x,y:this.y,radius:eff.radius,damage:eff.burnDmg,life:eff.burnDur,maxLife:eff.burnDur,burnDmg:eff.burnDmg,tick:0,chain:eff.chain||0});}
+    // 天赋：子弹反弹（Boss版 - 弹射到附近敌人,每级+1次,50%伤害）
+    if(player&&player.bulletRicochet>0&&bullet&&!bullet._ricocheted){
+      const remaining=player.bulletRicochet-(bullet._ricochetCount||0);
+      if(remaining>0){
+        let nearest=null,nd=260;
+        for(const e of enemies){if(!e.alive||e===this||bullet.hitEnemies.has(e))continue; const d=dist(this.x,this.y,e.x,e.y); if(d<nd){nd=d;nearest=e;}}
+        if(nearest){
+          bullet._ricochetCount=(bullet._ricochetCount||0)+1;
+          if(bullet._ricochetCount>=player.bulletRicochet)bullet._ricocheted=true;
+          const a=Math.atan2(nearest.y-this.y,nearest.x-this.x);
+          const nb=new Bullet(this.x,this.y,a,{damage:bullet.damage*0.5,size:bullet.size*0.85,speed:bullet.speed,pierce:0});
+          nb._ricochetCount=bullet._ricochetCount; nb._ricocheted=bullet._ricocheted;
+          nb._relicFrost=bullet._relicFrost;
+          bullets.push(nb);
+          spawnParticles(this.x,this.y,'#ffd970',5);
+        }
+      }
+    }
+    // 高级天赋：战斗狂/愤怒 - 击中Boss也叠加层数
+    if(player){
+      if(player.combatFuryMax>0){
+        player.combatFuryStacks=Math.min(player.combatFuryMax,player.combatFuryStacks+1);
+        player.combatFuryTimer=1.5;
+      }
+      if(player.rageFuryMax>0){
+        player.rageFuryStacks=Math.min(player.rageFuryMax,player.rageFuryStacks+1);
+        player.rageFuryTimer=1.5;
+      }
+    }
     updateBossUI(); if(this.health<=0)this.die();
   }
   die(){
+    // 防止die()被重复调用（同一帧多颗子弹命中Boss时，takeDamage可能多次触发die）
+    // 根因：die()被多次调用会导致onBossDefeated多次执行，bossTrialIndex多次递增，
+    //       bossTrialMode被提前重置为false后走非试炼分支调用proceedToNextLevel()跳关
+    if(!this.alive)return;
     this.alive=false; const bonus=this.isSuper?600:200; score+=bonus*this.level;
     // 强化死亡爆炸：大量粒子+屏幕震动+冲击波
     spawnParticles(this.x,this.y,this.color,150);
@@ -4257,11 +4775,17 @@ class Boss {
         if(this.isVariant)artifactChance=0.40;
         if(Math.random()<artifactChance){
           saveData.ownedArtifacts.push(this.bossIndex);
-          // 自动装备第一件魂器
-          if(saveData.equippedArtifact===null)saveData.equippedArtifact=this.bossIndex;
+          // 不自动装备：玩家需在局外魂器菜单手动装备
           saveSave();
-          pushFloatingText(this.x,this.y+60,`✨ 获得魂器: ${artifactDef.name}!`,artifactDef.color,2.5);
-          spawnParticles(this.x,this.y,artifactDef.color,60);
+          // 醒目提示：浮字 + 屏幕公告 + 专属音效 + 大量粒子
+          pushFloatingText(this.x,this.y+60,`✨ 获得魂器: ${artifactDef.name}!`,artifactDef.color,3);
+          pushFloatingText(this.x,this.y-80,`(局外可装备)`,artifactDef.color,2);
+          spawnParticles(this.x,this.y,artifactDef.color,80);
+          spawnParticles(this.x,this.y,'#ffd700',40);
+          screenShake=Math.max(screenShake,0.4);
+          if(typeof playSound==='function')playSound('levelUp');
+          // 屏幕中央公告
+          showWaveAnnounce('✨ 获得魂器！',`${artifactDef.icon} ${artifactDef.name} - 局外可装备`,true);
         }
       }
     }
@@ -4296,8 +4820,8 @@ class Boss {
       setTimeout(()=>{
         if(resumeTrialAfterFinalBoss){
           // 从试炼触发的刑天：继续试炼流程
-          resumeTrialAfterFinalBoss=false;
-          onBossDefeated({isFinalBoss:true,isSuper:true});
+          // 注意：不在此时清除 resumeTrialAfterFinalBoss，由 onBossDefeated 的刑天分支处理
+          onBossDefeated({isFinalBoss:true,isSuper:true,x:this.x,y:this.y});
         }else{
           // 正常关卡触发的刑天：显示胜利结算
           showFinalBossVictory(gotNewWeapon);
@@ -4307,13 +4831,15 @@ class Boss {
     }
     // ===== 超级Boss被击败后50%几率触发刑天 =====
     // 若触发刑天，则不立即调用onBossDefeated；等玩家选择（挑战/放弃）后再调用
+    // 试炼模式中刑天最多出现一次（trialXingtianTriggered 标记）
     let triggeredFinalBoss=false;
     if(this.isSuper&&!this.isFinalBoss&&!endlessMode&&!pendingFinalBoss){
-      if(Math.random()<0.5){
+      const canTriggerXingtian = bossTrialMode ? !trialXingtianTriggered : true;
+      if(canTriggerXingtian && Math.random()<0.5){
         pendingFinalBoss=true;
         triggeredFinalBoss=true;
         // 记录试炼状态，刑天结束后继续试炼流程
-        if(bossTrialMode){resumeTrialAfterFinalBoss=true;}
+        if(bossTrialMode){resumeTrialAfterFinalBoss=true; trialXingtianTriggered=true;}
         showFinalBossPrompt();
       }
     }
@@ -5100,7 +5626,11 @@ function applyDirectDamage(p,dmg,label,color){
   p.hitFlash=0.1;
   if(label)pushFloatingText(p.x,p.y-30,`${label} -${Math.ceil(dmg)}`,color||'#ff4500',1.2);
   spawnParticles(p.x,p.y,color||'#ff4500',15);
-  if(p.health<=0)triggerDeathAnimation();
+  if(p.health<=0){
+    if(!tryRevive(p)){
+      triggerDeathAnimation();
+    }
+  }
   updateUI();
 }
 function updateFireEffects(dt){
@@ -5439,11 +5969,11 @@ function triggerWeaponHitEffects(bullet,target){
     // 爆炸冲击波视觉
     fireEffects.push({x:bullet.x,y:bullet.y,radius:explodeR,damage:0,life:0.8,maxLife:0.8,burnDmg:0,tick:0,chain:0,hammerBlast:true});
   }
-  // 刑天干戚：战魂护盾 — 命中时叠加护盾(每命中3次+1护盾，每发子弹最多触发1次)
+  // 刑天干戚：战魂护盾 — 命中时叠加护盾(每命中5次+1护盾，每发子弹最多触发1次)
   if(bullet.weaponId==='xingtiangeqi'&&player&&!bullet._shieldAdded){
     player._xingtianHits=(player._xingtianHits||0)+1;
-    if(player._xingtianHits>=3){
-      // 每命中3次获得1点护盾（平衡：贴脸有所限制但仍可用）
+    if(player._xingtianHits>=5){
+      // 每命中5次获得1点护盾（平衡：贴脸有所限制但仍可用）
       player._xingtianHits=0;
       player.shield=Math.min(player.shield+1,player.maxShield); // 不超过maxShield
       spawnParticles(player.x,player.y,'#ff4500',6);
@@ -5465,6 +5995,40 @@ function checkCollisions(){
         if(bullet.isCrit)pushFloatingText(enemy.x,enemy.y-15,'暴击!','#ff6b6b',0.6);
         // 吸血
         if(bullet.lifesteal&&Math.random()<bullet.lifesteal&&player){player.heal(1); spawnParticles(enemy.x,enemy.y,'#3fb950',3);}
+        // 爆破子弹：命中时范围爆炸（带强特效）
+        if(bullet.bulletExplode){
+          const explodeR=65;
+          // 视觉特效1：爆炸冲击波环（橙色，0.8秒）
+          fireEffects.push({x:enemy.x,y:enemy.y,radius:explodeR,damage:0,life:0.5,maxLife:0.5,burnDmg:0,tick:0,chain:0,hammerBlast:true});
+          // 视觉特效2：多色粒子（橙红+黄）
+          spawnParticles(enemy.x,enemy.y,'#ff6347',16);
+          spawnParticles(enemy.x,enemy.y,'#ffd700',10);
+          spawnParticles(enemy.x,enemy.y,'#ff8c42',8);
+          // 视觉特效3：屏幕震动（小幅度）
+          screenShake=Math.max(screenShake,0.15);
+          // 音效
+          if(typeof playSound==='function')playSound('explode');
+          // 范围伤害
+          for(const e2 of enemies){if(!e2.alive||e2===enemy||bullet.hitEnemies.has(e2))continue; if(dist(enemy.x,enemy.y,e2.x,e2.y)<explodeR){e2.takeDamage(bullet.damage*0.4,bullet); bullet.hitEnemies.add(e2);}}
+          if(boss&&boss.alive&&boss!==enemy&&dist(enemy.x,enemy.y,boss.x,boss.y)<explodeR){boss.takeDamage(bullet.damage*0.4,bullet);}
+        }
+        // 子弹分裂：命中分裂出2发，伤害减半，最多2代
+        if(bullet.bulletSplit>0&&bullet.splitGen<2){
+          const splitN=2, splitDmg=bullet.damage*0.5;
+          for(let s=0;s<splitN;s++){
+            const sa=bullet.angle+(s===0?0.5:-0.5);
+            const sb=new Bullet(bullet.x,bullet.y,sa,{
+              speed:bullet.speed,damage:splitDmg,pierce:0,homing:0,size:bullet.size*0.8,
+              isCrit:false,elementEffects:{...bullet.elementEffects},finalUpgrades:[...bullet.finalUpgrades],
+              specialEffects:{...bullet.specialEffects},finalSpecials:[...bullet.finalSpecials],
+              lifesteal:0,weaponId:bullet.weaponId,chainCount:0,voidTrail:false,boomerang:false,
+              originX:bullet.x,originY:bullet.y,boomerangMaxDist:300,bulletExplode:0,
+              bulletSplit:bullet.bulletSplit-1,splitGen:bullet.splitGen+1
+            });
+            bullets.push(sb);
+          }
+          spawnParticles(enemy.x,enemy.y,'#bc8cff',4);
+        }
         // 武器差异化机制
         triggerWeaponHitEffects(bullet,enemy);
         if(bullet.pierce>0)bullet.pierce--; else bullet.alive=false;
@@ -5506,7 +6070,7 @@ function checkCollisions(){
   }
   const edmg=Math.max(1,Math.round(getDifficulty().enemyDmgMul));
   for(const enemy of enemies){if(!enemy.alive||!player)continue;if(dist(enemy.x,enemy.y,player.x,player.y)<enemy.size+player.size*0.7){player.takeDamage(edmg); if(player.thorns&&enemy.alive){enemy.takeDamage(player.thorns); spawnParticles(enemy.x,enemy.y,'#c0c0c0',5);}}}
-  if(boss&&boss.alive&&player){if(dist(boss.x,boss.y,player.x,player.y)<boss.size*0.7+player.size*0.7)player.takeDamage(boss.isCharging?edmg+1:edmg);}
+  if(boss&&boss.alive&&player){if(dist(boss.x,boss.y,player.x,player.y)<boss.size*0.7+player.size*0.7)player.takeDamage(boss.isCharging?edmg+3:edmg+2);}
   // 宠物发射的追踪弹：伤害敌人和Boss，不伤害玩家
   for(const eb of enemyBullets){
     if(!eb.alive)continue;
@@ -5531,7 +6095,9 @@ function checkCollisions(){
           // 直接伤害（绕过无敌帧，战魂分身子弹等）
           applyDirectDamage(player,edmg+1,eb.directLabel||'⚔️直接命中!',eb.color);
         }else{
-          player.takeDamage(edmg);
+          // Boss战中子弹伤害更高（edmg是基础值，Boss子弹额外+1）
+          const _bulletDmg = (boss&&boss.alive) ? edmg+1 : edmg;
+          player.takeDamage(_bulletDmg);
         }
         eb.alive=false;spawnParticles(eb.x,eb.y,eb.color,8);
       }
@@ -5577,8 +6143,19 @@ function startWave(){
 function checkWaveComplete(){
   if(gameState!=='fighting')return;
   if(enemiesRemaining<=0&&enemiesToSpawn<=0&&enemies.every(e=>!e.alive)){
-    if(currentWave>=CONFIG.WAVES_PER_LEVEL)startBoss();
-    else showUpgradeScreen();
+    // 经验值模式：不再每波自动触发升级，升级由经验值满触发
+    // 直接进入下一波或Boss
+    if(currentWave>=CONFIG.WAVES_PER_LEVEL){
+      startBoss();
+    }else{
+      // 进入下一波（不触发升级面板）
+      currentWave++;
+      showWaveAnnounce(`第 ${currentWave} 波`,'准备战斗！');
+      enemies=[];enemyBullets=[];bullets=[];minions=[];fireEffects=[];lightningStrikes=[];tornadoes=[];
+      // 注意：不清空 drops，让玩家拾取遗留的经验球
+      gameState='wavePrepare';
+      setTimeout(()=>{if(gameState!=='wavePrepare')return;startWave();},1500);
+    }
   }
 }
 function startBoss(){
@@ -5597,7 +6174,8 @@ function startBoss(){
   bossHealthBar.classList.remove('hidden');
   bossName.style.color=''; // 重置颜色（刑天用红色，需清空）
   bossName.textContent=bossVariant?`变异BOSS - ${boss.name}`:`BOSS - ${boss.name}`;
-  playBossSound(boss.bossIdx); // Boss出场音效
+  playSound('bossSpawn'); // Boss出场号角声
+  playBossSound(boss.bossIdx); // Boss专属音效
   const petDef=getPetDef(boss.bossIndex);
   updateBossUI();
   showWaveAnnounce(bossVariant?'⚠️ 变异Boss!':'BOSS战！',`${boss.name} 出现了！${bossVariant?'\n🔥 变异体：技能混搭，掉落更佳！':''}${petDef?'\n⚡'+petDef.desc:''}`,true);
@@ -5610,6 +6188,10 @@ function applyBossVariant(b){
   b.isVariant=true;
   b.maxHealth=Math.ceil(b.maxHealth*1.5); b.health=b.maxHealth;
   b.speed*=1.3;
+  // 攻速+30%（缩短攻击和技能冷却）
+  b.specialCooldown=Math.max(1, b.specialCooldown*0.7);
+  b.special2Cooldown=Math.max(1, b.special2Cooldown*0.7);
+  if(b.attackTimer)b.attackTimer*=0.7;
   // 借用其他Boss的special技能（混搭）
   const otherBosses=BOSS_TYPES.filter(x=>x.idx!==b.bossIndex&&!x.isSuper);
   if(otherBosses.length>0){
@@ -5657,13 +6239,17 @@ function showFinalBossPrompt(){
       </div>
     </div>
   `;
-  document.getElementById('acceptFinalBoss').addEventListener('click',startFinalBoss);
-  document.getElementById('declineFinalBoss').addEventListener('click',()=>{
+  // 同时绑定 click 和 touchstart（带 preventDefault），避免移动端全局 touchend 监听器
+  // 在 300ms 内连续触摸时 preventDefault 导致 click 不触发
+  const acceptFinalBossBtn=document.getElementById('acceptFinalBoss');
+  const declineFinalBossBtn=document.getElementById('declineFinalBoss');
+  const declineFinalBossAction=()=>{
     pendingFinalBoss=false;
     ov.classList.add('hidden');
     gameState='boss'; // 恢复游戏状态
     // 若从试炼触发，放弃刑天后继续试炼流程
-    if(resumeTrialAfterFinalBoss){
+    if(resumeTrialAfterFinalBoss||bossTrialMode){
+      // 试炼模式：放弃刑天后继续试炼流程（不调用 onBossDefeated，避免误入正常关卡流程）
       resumeTrialAfterFinalBoss=false;
       bossTrialIndex++;
       if(bossTrialIndex<trialBossOrder.length){
@@ -5672,10 +6258,14 @@ function showFinalBossPrompt(){
         bossTrialMode=false; gameOver();
       }
     }else{
-      // 继续正常流程
+      // 冒险模式：继续正常流程
       onBossDefeated({isFinalBoss:false,isSuper:true});
     }
-  });
+  };
+  acceptFinalBossBtn.addEventListener('click',startFinalBoss);
+  acceptFinalBossBtn.addEventListener('touchstart',e=>{e.preventDefault();startFinalBoss();},{passive:false});
+  declineFinalBossBtn.addEventListener('click',declineFinalBossAction);
+  declineFinalBossBtn.addEventListener('touchstart',e=>{e.preventDefault();declineFinalBossAction();},{passive:false});
 }
 function startFinalBoss(){
   pendingFinalBoss=false;
@@ -5727,19 +6317,23 @@ function showFinalBossVictory(gotNewWeapon){
   document.getElementById('victoryReadBook').addEventListener('click',()=>{
     showShanHaiBook(true); // 读完书后回到胜利结算
   });
+  document.getElementById('victoryReadBook').addEventListener('touchstart',e=>{e.preventDefault();e.currentTarget.click();},{passive:false});
   document.getElementById('victoryEndless').addEventListener('click',()=>{
     ov.classList.add('hidden');
     // 进入无尽模式
     endlessMode=true; endlessWave=0;
+    gameState='wavePrepare';
     currentLevel=8; currentWave=1;
     pendingFinalBoss=false; pendingSuperRevenge=false;
     showWaveAnnounce('♾️ 无尽模式','挑战无限波次！',true);
     setTimeout(()=>{if(gameState!=='upgrade'&&gameState!=='wavePrepare')return;enterEndlessWave();},1500);
   });
+  document.getElementById('victoryEndless').addEventListener('touchstart',e=>{e.preventDefault();e.currentTarget.click();},{passive:false});
   document.getElementById('victoryHome').addEventListener('click',()=>{
     ov.classList.add('hidden');
     gameOver();
   });
+  document.getElementById('victoryHome').addEventListener('touchstart',e=>{e.preventDefault();e.currentTarget.click();},{passive:false});
 }
 // ===== 山海故事书阅读 =====
 function showShanHaiBook(fromVictory=false){
@@ -5775,18 +6369,25 @@ function showShanHaiBook(fromVictory=false){
       showMainMenu();
     }
   });
+  document.getElementById('closeBook').addEventListener('touchstart',e=>{e.preventDefault();e.currentTarget.click();},{passive:false});
 }
 // Boss试炼模式：直接挑战Boss
 function startBossTrial(){
+  initAudio(); // 确保音频已初始化
+  startBGM('trial'); // 启动试炼激昂BGM
   gameState='wavePrepare'; score=0; gameTime=0; currentWave=1; currentLevel=1;
   enemiesRemaining=0; enemiesToSpawn=0; spawnTimer=0; boss=null; bossWarnings=[];
   globalSlow=1; globalSlowTimer=0; bossHpMul=1; revivesUsed=0;
   comboCount=0; comboTimer=0; comboMax=0; // 重置连击
   bossTrialMode=true; bossTrialIndex=0; pendingSuperRevenge=false; godslayerBossesLeft=0;
+  _lastRunWasTrial=true; // 标记本局是试炼模式，供 gameOver 结算使用
   // 重置新增系统状态，避免从无尽模式带入遗物等
   endlessMode=false; endlessWave=0; activeRelics=[]; bossTimeChallenge=null; bossVariant=false; pendingEndlessNext=false;
   pendingFinalBoss=false; // 重置刑天触发标记
   resumeTrialAfterFinalBoss=false;
+  trialXingtianTriggered=false; // 重置试炼刑天触发标记（每次试炼最多触发一次刑天）
+  // 重置升级流程标记，防止上一局普通模式遗留的 pendingProceedNext 在试炼升级后错误触发 proceedToNextLevel
+  pendingProceedNext=false; pendingTrialNext=false; prevGameState='boss';
   adventureEnemyTimer=999999; // 试炼模式不生成奇遇小怪
   bullets=[]; enemies=[]; enemyBullets=[]; particles=[]; floatingTexts=[]; drops=[]; minions=[];
   fireEffects=[]; lightningStrikes=[]; tornadoes=[]; pets=[];
@@ -5828,6 +6429,8 @@ function spawnTrialBoss(){
   // 试炼Boss随波次增强攻速
   boss._trialIndex=bossTrialIndex;
   bossHealthBar.classList.remove('hidden'); bossName.style.color=''; bossName.textContent=`试炼 ${bossTrialIndex+1}/${trialBossOrder.length} - ${boss.name}`;
+  playSound('bossSpawn'); // 试炼Boss出场号角声
+  playBossSound(boss.bossIndex); // Boss专属音效
   updateBossUI(); showWaveAnnounce('Boss试炼！',`${boss.name} 出现了！`,true);
   maxLevelTime=CONFIG.BOSS_TIME*1.5; levelTimer=maxLevelTime;
 }
@@ -5835,7 +6438,24 @@ function onBossDefeated(defeatedBoss){
   // 刑天被击败后：若之前从试炼触发，继续试炼流程
   if(defeatedBoss&&defeatedBoss.isFinalBoss&&resumeTrialAfterFinalBoss){
     resumeTrialAfterFinalBoss=false;
-    // 试炼模式：刑天结束后继续下一个试炼Boss
+    // 试炼模式：刑天结束后给经验奖励，然后继续下一个试炼Boss
+    if(player){
+      const trialXp=100; // 刑天给100经验
+      // 经验球掉落
+      for(let i=0;i<6;i++){
+        const dx=(Math.random()-0.5)*60, dy=(Math.random()-0.5)*60;
+        drops.push(new Drop((defeatedBoss.x||CONFIG.WIDTH/2)+dx,(defeatedBoss.y||CONFIG.HEIGHT/2)+dy,'xp'));
+      }
+      const beforeLv=player.xpLevel;
+      player.gainXp(trialXp);
+      // 如果触发了升级，等选完强化后再继续试炼流程
+      if(player.xpLevel>beforeLv){
+        player._lastTrialWasSuperRevenge=false; // 刑天不是超级复仇
+        pendingTrialNext=true;
+        return;
+      }
+    }
+    // 没触发升级：直接继续试炼流程
     bossTrialIndex++;
     if(bossTrialIndex<trialBossOrder.length){
       setTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},2000);
@@ -5864,6 +6484,8 @@ function onBossDefeated(defeatedBoss){
     score+=300;
     pushFloatingText(defeatedBoss.x,defeatedBoss.y-60,'🔥 变异奖励! +300','#ff00ff',2);
   }
+  // 经验值奖励：Boss击杀给大量经验（普通50/超级100/刑天200）
+  const bossXpReward=defeatedBoss?.isFinalBoss?200:(defeatedBoss?.isSuper?100:50);
   // 无尽模式：无尽Boss被击败后直接进入下一波（不走普通关卡流程，不触发超级复仇）
   if(endlessMode&&defeatedBoss&&defeatedBoss._endlessWave){
     // 玩家恢复一些生命与护盾作为奖励
@@ -5873,20 +6495,63 @@ function onBossDefeated(defeatedBoss){
       if(player.shieldRegen)player.shield=Math.min(player.shield+player.shieldRegen,player.maxShield);
       pushFloatingText(player.x,player.y-30,`+${heal} HP`,'#3fb950',1.5);
     }
-    // 标记：选完强化后由 applyUpgrade 直接进入下一波无尽
-    pendingEndlessNext=true;
-    showUpgradeScreen();
+    // 经验值奖励（如果满了会触发升级面板）
+    const beforeLv=player?player.xpLevel:0;
+    if(player)player.gainXp(bossXpReward);
+    // 如果触发了升级，等选完强化再进入下一波无尽
+    if(player&&player.xpLevel>beforeLv){
+      pendingEndlessNext=true;
+      return;
+    }
+    // 安全网：升级面板显示时延迟进入下一波，避免流程冲突
+    if(gameState==='upgrade'){
+      pendingEndlessNext=true;
+      return;
+    }
+    // 没升级，直接进入下一波无尽
+    enterEndlessWave();
     return;
   }
   // Boss试炼模式
   if(bossTrialMode){
+    // 试炼Boss击杀给经验球掉落（让玩家拾取，体验更好）
+    if(defeatedBoss&&player){
+      const trialXp=defeatedBoss.isSuper?100:50;
+      // 经验球掉落（散开多颗，吸引拾取）
+      for(let i=0;i<6;i++){
+        const dx=(Math.random()-0.5)*60, dy=(Math.random()-0.5)*60;
+        drops.push(new Drop(defeatedBoss.x+dx,defeatedBoss.y+dy,'xp'));
+      }
+      // 直接给一部分经验（立即升级反馈）
+      const beforeLv=player.xpLevel;
+      player.gainXp(trialXp);
+      // 如果触发了升级，等选完强化后再继续下一个试炼Boss
+      if(player.xpLevel>beforeLv){
+        // 标记：升级面板关闭后继续试炼流程（由 applyUpgrade 处理）
+        // 记录是否为超级Boss复仇状态，applyUpgrade 据此决定是否递增索引
+        player._lastTrialWasSuperRevenge=!!(defeatedBoss&&defeatedBoss.isSuper&&pendingSuperRevenge);
+        if(player._lastTrialWasSuperRevenge)pendingSuperRevenge=false;
+        pendingTrialNext=true;
+        return;
+      }
+    }
+    // 安全网：如果升级面板正在显示（玩家在试炼Boss战中拾取经验触发了升级，同时Boss被击杀），
+    // 延迟试炼流程到选完强化后，避免setTimeout在upgrade状态时误返回导致卡关
+    if(gameState==='upgrade'){
+      if(player){
+        player._lastTrialWasSuperRevenge=!!(defeatedBoss&&defeatedBoss.isSuper&&pendingSuperRevenge);
+        if(player._lastTrialWasSuperRevenge)pendingSuperRevenge=false;
+      }
+      pendingTrialNext=true;
+      return;
+    }
     // 超级Boss复仇被击败：不增加索引，继续下一个试炼Boss
     if(defeatedBoss&&defeatedBoss.isSuper&&pendingSuperRevenge){
       pendingSuperRevenge=false;
       if(bossTrialIndex<trialBossOrder.length){
         setTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
       }else{
-        bossTrialMode=false;gameOver();
+        bossTrialMode=false; gameOver();
       }
       return;
     }
@@ -5913,15 +6578,28 @@ function onBossDefeated(defeatedBoss){
       return;
     }
   }
-  // 超级Boss复仇：复仇Boss被击败后正常进入升级
+  // 超级Boss复仇：复仇Boss被击败后给经验并进入下一关
   if(defeatedBoss&&defeatedBoss.isSuper&&pendingSuperRevenge){
     pendingSuperRevenge=false;
-    showUpgradeScreen();
+    // 经验值奖励
+    const beforeLv=player?player.xpLevel:0;
+    if(player)player.gainXp(bossXpReward);
+    if(player&&player.xpLevel>beforeLv){
+      pendingProceedNext=true;
+      return;
+    }
+    // 安全网：升级面板显示时延迟进入下一关，避免跳关
+    if(gameState==='upgrade'){
+      pendingProceedNext=true;
+      return;
+    }
+    proceedToNextLevel();
     return;
   }
   // 弑神难度：双Boss，第一个死后立即出现第二个
   if(godslayerBossesLeft>0){
     godslayerBossesLeft--;
+    if(player)player.gainXp(bossXpReward);
     setTimeout(()=>{
       if(gameState!=='boss')return;
       gameState='boss'; enemies=[]; enemyBullets=[];
@@ -5945,8 +6623,58 @@ function onBossDefeated(defeatedBoss){
     },1500);
     return;
   }
-  // 正常进入升级
-  showUpgradeScreen();
+  // 正常流程：给经验值，进入下一关
+  // 安全保护：如果在试炼模式中意外走到这里，不能进入下一关
+  if(bossTrialMode){
+    console.warn('[安全保护] onBossDefeated 正常流程拦截：试炼模式中不应进入下一关');
+    bossTrialIndex++;
+    if(bossTrialIndex<trialBossOrder.length){
+      setTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+    }else{
+      bossTrialMode=false; gameOver();
+    }
+    return;
+  }
+  const beforeLv=player?player.xpLevel:0;
+  if(player)player.gainXp(bossXpReward);
+  // 如果触发了升级，等玩家选完强化再进入下一关
+  if(player&&player.xpLevel>beforeLv){
+    pendingProceedNext=true;
+    return;
+  }
+  // 安全网：如果升级面板正在显示（玩家在Boss战中拾取经验触发了升级，同时Boss被击杀），
+  // 不能直接调用proceedToNextLevel，否则玩家关闭升级面板时防御性保护会再调用一次，导致跳关
+  if(gameState==='upgrade'){
+    pendingProceedNext=true;
+    return;
+  }
+  proceedToNextLevel();
+}
+// 进入下一关/下一波（Boss击败后或升级完成后调用）
+function proceedToNextLevel(){
+  // 安全保护：试炼模式中绝对不能进入下一关
+  if(bossTrialMode){
+    console.warn('[安全保护] proceedToNextLevel 拦截：试炼模式中不应进入下一关');
+    bossTrialIndex++;
+    if(bossTrialIndex<trialBossOrder.length){
+      setTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+    }else{
+      bossTrialMode=false; gameOver();
+    }
+    return;
+  }
+  currentLevel++; currentWave=1;
+  // 无尽模式：通关8关后进入无尽波次
+  if(endlessMode&&currentLevel>8){enterEndlessWave();return;}
+  showWaveAnnounce(`第 ${currentLevel} 关`,'新的挑战开始！',false);
+  const regen=player.regenPerLevel||0; if(regen>0)player.health=Math.min(player.health+regen,player.maxHealth);
+  // 护盾再生：每关恢复护盾
+  if(player.shieldRegen){player.shield=Math.min(player.shield+player.shieldRegen,player.maxShield);}
+  enemies=[];enemyBullets=[];bullets=[];minions=[];fireEffects=[];lightningStrikes=[];tornadoes=[];
+  // 注意：不清空 drops，让玩家拾取遗留的经验球
+  gameState='wavePrepare';
+  setTimeout(()=>{if(gameState!=='wavePrepare')return;startWave();},2000);
+  updateUI();
 }
 function showWaveAnnounce(title,sub,isBoss=false){
   document.getElementById('waveAnnounceTitle').textContent=title;
@@ -5957,8 +6685,19 @@ function showWaveAnnounce(title,sub,isBoss=false){
   setTimeout(()=>wa.classList.remove('show'),1800);
 }
 function showUpgradeScreen(){
+  if(gameState==='upgrade')return;
+  // 记录升级前的游戏状态，选完强化后恢复
+  prevGameState=gameState;
   gameState='upgrade'; enemyBullets=[]; bullets=[];
   const all=getAvailableUpgrades(); const sel=shuffle(all).slice(0,3);
+  if(sel.length===0){
+    // 没有可选升级，直接关闭面板恢复游戏
+    gameState=prevGameState||'fighting';
+    if(prevGameState==='boss' && (!boss || !boss.alive)){
+      proceedToNextLevel();
+    }
+    return;
+  }
   const uc=document.getElementById('upgradeCards'); uc.innerHTML='';
   for(const up of sel){
     const card=document.createElement('div'); card.className=`upgrade-card ${up.rarity} card-enter`;
@@ -5966,41 +6705,78 @@ function showUpgradeScreen(){
     let tt=''; if(up.element){if(up.isFinal)tt='最终升级';else tt=`阶段 ${up.tier}/3`;}
     if(up.special){if(up.isFinalSpecial)tt='最终升级';else tt=`阶段 ${up.tier}/3`;}
     card.innerHTML=`<div class="upgrade-icon">${up.icon}</div><div class="upgrade-name">${up.name}</div><div class="upgrade-desc">${up.desc}</div>${tt?`<div class="upgrade-tier">${tt}</div>`:''}<div class="upgrade-rarity ${up.rarity}">${up.rarity==='common'?'普通':up.rarity==='rare'?'稀有':up.rarity==='epic'?'史诗':'传说'}</div>`;
-    card.addEventListener('click',()=>applyUpgrade(up)); uc.appendChild(card);
+    card.addEventListener('click',()=>applyUpgrade(up));
+    card.addEventListener('touchstart',e=>{e.preventDefault();e.currentTarget.click();},{passive:false}); uc.appendChild(card);
   }
-  document.getElementById('upgradeSubtitle').textContent=currentWave>=CONFIG.WAVES_PER_LEVEL?'Boss已击败！选择强化继续冒险':'你完成了这一波！选择一项强化';
+  document.getElementById('upgradeSubtitle').textContent=`✨ 升级! Lv.${player?player.xpLevel:1} - 选择一项强化`;
   document.getElementById('upgradeOverlay').classList.remove('hidden');
 }
 function applyUpgrade(up){
   if(!player)return;
   up.apply(player); document.getElementById('upgradeOverlay').classList.add('hidden');
-  // 无尽模式Boss击败后选完强化：直接进入下一波无尽（不走普通关卡流程）
+  pushFloatingText(player.x,player.y-30,up.name+'!',up.rarity==='legendary'?'#ffd700':up.rarity==='epic'?'#f0883e':up.rarity==='rare'?'#bc8cff':'#58a6ff',1.5);
+  // ===== 安全保护：试炼模式优先级最高，绝不进入普通关卡流程 =====
+  // 根因：pendingProceedNext 检查在 pendingTrialNext 之前，若两者同时为 true
+  // （如上一局遗留或经验球拾取触发），会错误调用 proceedToNextLevel 导致跳关
+  if(bossTrialMode){
+    pendingProceedNext=false; // 强制清除，防止跳关
+    if(pendingTrialNext){
+      pendingTrialNext=false;
+      gameState='boss';
+      if(player&&player._lastTrialWasSuperRevenge){
+        player._lastTrialWasSuperRevenge=false;
+        if(bossTrialIndex<trialBossOrder.length){
+          setTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+        }else{
+          bossTrialMode=false; gameOver();
+        }
+      }else{
+        bossTrialIndex++;
+        if(bossTrialIndex<trialBossOrder.length){
+          if(Math.random()<0.3){
+            pendingSuperRevenge=true;
+            setTimeout(()=>{if(gameState!=='boss')return;spawnSuperBoss();},1500);
+          }else{
+            setTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+          }
+        }else{
+          bossTrialMode=false; gameOver();
+        }
+      }
+    }else{
+      // 试炼模式中战斗拾取经验触发的升级（非Boss击败）：恢复boss状态继续打
+      gameState='boss';
+    }
+    return;
+  }
+  // ===== 非试炼模式 =====
+  // 1) 无尽Boss击败后触发的升级：进入下一波无尽
   if(endlessMode&&pendingEndlessNext){
     pendingEndlessNext=false;
-    pushFloatingText(player.x,player.y-30,up.name+'!',up.rarity==='legendary'?'#ffd700':up.rarity==='epic'?'#f0883e':up.rarity==='rare'?'#bc8cff':'#58a6ff',1.5);
     enterEndlessWave();
     return;
   }
-  currentWave++;
-  pushFloatingText(player.x,player.y-30,up.name+'!',up.rarity==='legendary'?'#ffd700':up.rarity==='epic'?'#f0883e':up.rarity==='rare'?'#bc8cff':'#58a6ff',1.5);
-  if(currentWave>CONFIG.WAVES_PER_LEVEL){
-    currentLevel++; currentWave=1;
-    // 无尽模式：通关8关后进入无尽波次
-    if(endlessMode&&currentLevel>8){enterEndlessWave();return;}
-    showWaveAnnounce(`第 ${currentLevel} 关`,'新的挑战开始！',false);
-    const regen=player.regenPerLevel||0; if(regen>0)player.health=Math.min(player.health+regen,player.maxHealth);
-    // 护盾再生：每关恢复护盾
-    if(player.shieldRegen){player.shield=Math.min(player.shield+player.shieldRegen,player.maxShield);}
-    enemies=[];enemyBullets=[];bullets=[];drops=[];minions=[];fireEffects=[];lightningStrikes=[];tornadoes=[];
-    setTimeout(()=>{if(gameState!=='upgrade'&&gameState!=='wavePrepare')return;startWave();},2000);
-  }else{
-    showWaveAnnounce(`第 ${currentWave} 波`,'准备战斗！');
-    setTimeout(()=>{if(gameState!=='upgrade'&&gameState!=='wavePrepare')return;startWave();},1500);
+  // 2) 普通Boss击败后触发的升级：进入下一关
+  if(pendingProceedNext){
+    pendingProceedNext=false;
+    proceedToNextLevel();
+    return;
   }
+  // 3) 战斗中经验满触发的升级：恢复原游戏状态
+  // 防御性保护：如果升级前是Boss战状态，但Boss已经死了（boss=null或boss.alive=false），
+  // 说明Boss在升级面板出现前就被击败了，但onBossDefeated的gainXp触发了升级。
+  // 此时不能恢复gameState='boss'（会卡在空Boss战场），必须进入下一关。
+  if(prevGameState==='boss' && (!boss || !boss.alive)){
+    console.warn('[防御保护] 升级前Boss已死，强制进入下一关');
+    proceedToNextLevel();
+    return;
+  }
+  gameState=prevGameState||'fighting';
   updateUI();
 }
 // 进入无尽模式下一波
 function enterEndlessWave(){
+  gameState='wavePrepare';
   endlessWave++;
   currentLevel=8; currentWave=1;
   // 每5波生成强化Boss
@@ -6066,8 +6842,10 @@ function triggerAdventure(){
       pushFloatingText(player.x,player.y-30,ev.desc+'!','#bc8cff',2);
       ov.classList.add('hidden'); gameState='fighting';
     });
+    el.addEventListener('touchstart',e=>{e.preventDefault();e.currentTarget.click();},{passive:false});
   });
   document.getElementById('skipAdventure').addEventListener('click',()=>{ov.classList.add('hidden');gameState='fighting';});
+  document.getElementById('skipAdventure').addEventListener('touchstart',e=>{e.preventDefault();e.currentTarget.click();},{passive:false});
 }
 
 // ==================== Boss捕捉 ====================
@@ -6090,7 +6868,9 @@ function showBossCapture(def){
     ov.classList.add('hidden'); pendingBossCapture=null;
     pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2,'捕捉成功!','#ffd700',2);
   });
+  document.getElementById('captureYes').addEventListener('touchstart',e=>{e.preventDefault();e.currentTarget.click();},{passive:false});
   document.getElementById('captureNo').addEventListener('click',()=>{ov.classList.add('hidden');pendingBossCapture=null;});
+  document.getElementById('captureNo').addEventListener('touchstart',e=>{e.preventDefault();e.currentTarget.click();},{passive:false});
 }
 
 // ==================== UI更新 ====================
@@ -6104,6 +6884,12 @@ function updateUI(){
   document.getElementById('skillBar').style.width=(player.maxSkillCooldown>0?(1-player.skillCooldown/player.maxSkillCooldown)*100:0)+'%';
   document.getElementById('scoreText').textContent=score;
   document.getElementById('gameScore').textContent=score;
+  // 经验值条更新
+  if(player){
+    document.getElementById('xpLevel').textContent=player.xpLevel;
+    document.getElementById('xpText').textContent=`${player.xp}/${player.xpToNext}`;
+    document.getElementById('xpBar').style.width=Math.min(100,player.xp/player.xpToNext*100)+'%';
+  }
   document.getElementById('waveLabel').textContent=endlessMode?`♾️无尽${endlessWave}波 ${gameState==='boss'?'BOSS':'波次'+currentWave}`:`第${currentLevel}关 ${gameState==='boss'?'BOSS':'波次'+currentWave}`;
   const ws=getWeaponStats(saveData.currentWeapon);
   let wt=ws.name; if(ws.stage>0)wt+='+'+'★'.repeat(ws.stage);
@@ -6547,15 +7333,18 @@ function drawWarnings(){
 // ==================== 游戏状态管理 ====================
 function startGame(){
   initAudio(); // 首次开始游戏时初始化音频
+  startBGM('normal'); // 启动普通背景音乐
   gameState='wavePrepare'; score=0; gameTime=0; currentWave=1; currentLevel=1;
   enemiesRemaining=0; enemiesToSpawn=0; spawnTimer=0; boss=null; bossWarnings=[];
   globalSlow=1; globalSlowTimer=0; bossHpMul=1; revivesUsed=0;
   comboCount=0; comboTimer=0; comboMax=0; // 重置连击
   bossTrialMode=false; bossTrialIndex=0; pendingSuperRevenge=false; godslayerBossesLeft=0;
+  _lastRunWasTrial=false; // 普通冒险模式
   adventureEnemyTimer=15;
   endlessMode=false; endlessWave=0; activeRelics=[]; bossTimeChallenge=null; bossVariant=false; pendingEndlessNext=false;
   pendingFinalBoss=false; // 重置刑天触发标记
   resumeTrialAfterFinalBoss=false;
+  pendingProceedNext=false; pendingTrialNext=false; prevGameState='fighting'; // 重置升级流程标记
   bullets=[]; enemies=[]; enemyBullets=[]; particles=[]; floatingTexts=[]; drops=[]; minions=[];
   fireEffects=[]; lightningStrikes=[]; tornadoes=[]; pets=[];
   player=new Player();
@@ -6569,6 +7358,15 @@ function startGame(){
   document.getElementById('upgradeOverlay').classList.add('hidden');
   showWaveAnnounce(`第 ${currentWave} 波`,'准备战斗！');
   setTimeout(()=>{if(gameState!=='upgrade'&&gameState!=='wavePrepare')return;startWave();},1500); updateUI();
+  // 检查神话套装是否激活，显示提示
+  const _mythicCnt=Object.values(saveData.equippedGear).filter(g=>g&&g.rarity==='mythic').length;
+  if(_mythicCnt>=4){
+    setTimeout(()=>{
+      pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2-40,'🔥 神话套装已激活！','#ff4444',3);
+      pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2,'伤害×1.6 移速×1.3 生命×1.3','#ffd970',2.5);
+      pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2+30,'暴击+20% 暴伤+50% 穿透+2 吸血+3%','#ffd970',2.5);
+    },1500);
+  }
 }
 // 无尽模式：通关8关后进入无尽波次
 function startEndlessMode(){
@@ -6614,6 +7412,7 @@ function showRelicSelection(){
         setTimeout(()=>{if(gameState!=='upgrade'&&gameState!=='wavePrepare')return;startWave();},1500);
       }
     });
+    card.addEventListener('touchstart',e=>{e.preventDefault();e.currentTarget.click();},{passive:false});
   });
   document.getElementById('skipRelic').addEventListener('click',()=>{
     score+=200;
@@ -6622,6 +7421,7 @@ function showRelicSelection(){
     showWaveAnnounce('跳过遗物','+200分');
     setTimeout(()=>{if(gameState!=='upgrade'&&gameState!=='wavePrepare')return;startWave();},1500);
   });
+  document.getElementById('skipRelic').addEventListener('touchstart',e=>{e.preventDefault();e.currentTarget.click();},{passive:false});
 }
 // 应用遗物效果（首次获得时立即效果，其他在事件中查询activeRelics）
 function applyRelicEffect(rid,immediate){
@@ -6648,6 +7448,34 @@ function applyRelicEffect(rid,immediate){
 function hasRelic(id){return activeRelics.some(r=>r.id===id);}
 // 死亡动画：玩家炸开效果
 let deathAnimation=null; // {x,y,t,maxT,particles:[]}
+// 尝试复活：成功返回true并恢复半血，失败返回false
+// 同时支持 Player.takeDamage 和 applyDirectDamage 两条伤害路径
+function tryRevive(p){
+  if(!p)return false;
+  // 检查是否还有复活次数（revives）且全局已用次数未超
+  // 注：_reviveUpgradesTaken 记录通过强化获取的次数（整局限2次），其他来源（遗物/奇遇）不计入此限制
+  const totalAllowed=(p.revives||0);
+  if(revivesUsed>=totalAllowed)return false;
+  // 复活：消耗1次，恢复半血，2秒无敌
+  revivesUsed++;
+  p.health=Math.ceil(p.maxHealth*0.5);
+  p.invincible=Math.max(p.invincible||0, 2);
+  p.hitFlash=0;
+  p.alive=true;
+  // 复活特效
+  spawnParticles(p.x,p.y,'#3fb950',40);
+  pushFloatingText(p.x,p.y-30,'💀 复活!','#3fb950',1.8);
+  flashScreen('#3fb950',0.3);
+  playSound('shield'); // 用护盾音效模拟复活
+  // 取消死亡动画（兜底：复活优先于死亡动画）
+  if(deathAnimation){
+    deathAnimation=null;
+    if(deathTimeout){clearTimeout(deathTimeout); deathTimeout=null;}
+  }
+  updateUI();
+  return true;
+}
+let deathTimeout=null; // 死亡动画结束后触发gameOver的定时器
 function triggerDeathAnimation(){
   if(deathAnimation)return; // 防止重复触发
   playSound('death');
@@ -6668,7 +7496,7 @@ function triggerDeathAnimation(){
   // 隐藏玩家
   if(player)player.alive=false;
   // 1.2秒后触发gameOver
-  setTimeout(()=>{deathAnimation=null; gameOver();},1200);
+  deathTimeout=setTimeout(()=>{deathAnimation=null; deathTimeout=null; gameOver();},1200);
 }
 function updateDeathAnimation(dt){
   if(!deathAnimation)return;
@@ -6710,6 +7538,7 @@ function drawDeathAnimation(){
 }
 function gameOver(){
   gameState='gameover';
+  stopBGM(); // 停止背景音乐
   // 隐藏所有可能打开的overlay，防止死亡界面被遮挡
   ['bossHealthBar','upgradeOverlay','adventureOverlay','bossCaptureOverlay','talentOverlay','charOverlay','weaponOverlay','petOverlay','rouletteOverlay','craftOverlay','gearOverlay','bondOverlay','pediaOverlay','relicOverlay','bagOverlay']
     .forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('hidden');});
@@ -6717,11 +7546,13 @@ function gameOver(){
   comboCount=0; comboTimer=0; // 重置连击
   // 重置可能残留的局内状态（避免下次启动时泄漏）
   pendingEndlessNext=false;
+  pendingProceedNext=false;
+  pendingTrialNext=false;
   pendingFinalBoss=false;
   resumeTrialAfterFinalBoss=false;
   if(bossTimeChallenge)bossTimeChallenge.active=false;
-  const ep=scoreToTalentPoints(score);
-  saveData.totalScore+=score; saveData.talentPoints+=ep;
+  // 天赋点系统已改为：每升一级+1点（在Player.gainXp中发放），不再由得分获得
+  saveData.totalScore+=score;
   // 记录无尽模式最佳波次
   if(endlessMode&&endlessWave>(saveData.bestEndlessWave||0)){
     saveData.bestEndlessWave=endlessWave;
@@ -6731,9 +7562,27 @@ function gameOver(){
   const af=saveData.achievementFlags;
   af.totalRuns=(af.totalRuns||0)+1;
   if(score>(af.bestScore||0))af.bestScore=score;
-  const wasTrial=bossTrialMode;
-  // 检查Boss试炼通关（用wasTrial判断，因为bossTrialMode可能已被重置）
-  if(wasTrial&&bossTrialIndex>=trialBossOrder.length)af.trialCleared=true;
+  const wasTrial=_lastRunWasTrial; // 用独立标记，避免 bossTrialMode 被提前重置导致失效
+  // 检查Boss试炼通关
+  if(wasTrial&&bossTrialIndex>=trialBossOrder.length){
+    af.trialCleared=true;
+    // 设置对应难度的试炼通关标志（用于解锁后续难度）
+    const diff=saveData.difficulty;
+    if(!saveData.difficultyCleared)saveData.difficultyCleared={normal:false,hard:false,hell:false,godslayer:false};
+    saveData.difficultyCleared[diff]=true;
+    // 同步到成就标志
+    if(diff==='normal')af.trialNormalCleared=true;
+    else if(diff==='hard')af.trialHardCleared=true;
+    else if(diff==='hell')af.trialHellCleared=true;
+    else if(diff==='godslayer'){
+      af.trialGodslayerCleared=true;
+      // 弑神难度试炼通关：揭示作弊方法（首次揭示）
+      if(!saveData.cheatRevealed){
+        saveData.cheatRevealed=true;
+        _showCheatReveal=true; // 标记，稍后在结算界面显示
+      }
+    }
+  }
   // 检查成就解锁
   const newlyUnlocked=checkAchievements();
   // 牧场生蛋
@@ -6745,10 +7594,59 @@ function gameOver(){
   if(newlyUnlocked.length>0){
     achHtml=`<div style="background:rgba(255,215,0,0.1);border:1px solid #ffd700;border-radius:8px;padding:10px;margin:8px 0"><div style="color:#ffd700;font-size:14px;font-weight:bold">🏆 成就解锁 ${newlyUnlocked.length} 个!</div>${newlyUnlocked.map(a=>`<div style="font-size:12px;color:#c9d1d9">${a.icon} ${a.name} +${a.reward}积分</div>`).join('')}</div>`;
   }
-  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:10px"><h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:28px;margin:4px 0">游戏结束</h1><div class="deco-line" style="margin:4px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>${wasTrial?'<p style="color:#bc8cff;font-size:13px;margin:4px 0">Boss试炼结束</p>':endlessMode?`<p style="color:#daa520;font-size:13px;margin:4px 0">♾️ 无尽模式 - 第 ${endlessWave} 波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' <span style="color:#ffd700">🏆 新纪录!</span>':''}</p>`:`<p style="font-size:13px;margin:4px 0">你到达了第 ${currentLevel} 关 第 ${currentWave} 波</p>`}<div id="finalScore" class="card-enter" style="font-size:48px">${score}</div><p class="subtitle" style="margin:2px 0">本局得分</p>${achHtml}<div style="display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap"><div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div><div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">+${ep}</span><span class="pill-label">天赋点</span></div>${newEggs>0?`<div class="stat-pill" style="animation-delay:1s;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}</div><div style="display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:6px"><button class="action-btn" id="startBtn" style="font-size:16px;padding:10px 28px">⚔️ 再来一局</button><button class="sec-btn" id="backToMenuBtn" style="font-size:13px;padding:8px 20px">🏠 返回主菜单</button></div><div class="subtitle" style="margin-top:6px;font-size:11px">按 R 键快速重新开始</div></div>`;
+  // 根据本局类型决定"再打一次"按钮的行为：试炼→再打一次试炼，其他→再来一局冒险
+  const replayBtnId = wasTrial ? 'replayTrialBtn' : 'startBtn';
+  const replayBtnText = wasTrial ? '🐉 再打一次试炼' : '⚔️ 再来一局';
+  const replayBtnHandler = wasTrial ? 'startBossTrial' : 'startGame';
+  const replayBtnStyle = wasTrial ? 'background:linear-gradient(135deg,#bc8cff,#8b5cf6);font-size:16px;padding:10px 28px' : 'font-size:16px;padding:10px 28px';
+  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:10px"><h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:28px;margin:4px 0">游戏结束</h1><div class="deco-line" style="margin:4px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>${wasTrial?'<p style="color:#bc8cff;font-size:13px;margin:4px 0">Boss试炼结束</p>':endlessMode?`<p style="color:#daa520;font-size:13px;margin:4px 0">♾️ 无尽模式 - 第 ${endlessWave} 波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' <span style="color:#ffd700">🏆 新纪录!</span>':''}</p>`:`<p style="font-size:13px;margin:4px 0">你到达了第 ${currentLevel} 关 第 ${currentWave} 波</p>`}<div id="finalScore" class="card-enter" style="font-size:48px">${score}</div><p class="subtitle" style="margin:2px 0">本局得分</p>${achHtml}<div style="display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap"><div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div><div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>${newEggs>0?`<div class="stat-pill" style="animation-delay:1s;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}</div><div style="display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:6px"><button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle}">${replayBtnText}</button><button class="sec-btn" id="backToMenuBtn" style="font-size:13px;padding:8px 20px">🏠 返回主菜单</button></div><div class="subtitle" style="margin-top:6px;font-size:11px">按 R 键快速重新开始</div></div>`;
   saveSave();
-  document.getElementById('startBtn').addEventListener('click',startGame);
-  document.getElementById('backToMenuBtn').addEventListener('click',showMainMenu);
+  // 同时绑定 click 和 touchstart（带 preventDefault），避免全局 touchend 监听器在 300ms 内连续触摸时
+  // preventDefault 导致 click 事件不触发（移动端按钮点不动问题）
+  const startBtnEl=document.getElementById(replayBtnId);
+  const backToMenuBtnEl=document.getElementById('backToMenuBtn');
+  const replayHandler=wasTrial?startBossTrial:startGame;
+  startBtnEl.addEventListener('click',replayHandler);
+  startBtnEl.addEventListener('touchstart',e=>{e.preventDefault();replayHandler();},{passive:false});
+  backToMenuBtnEl.addEventListener('click',showMainMenu);
+  backToMenuBtnEl.addEventListener('touchstart',e=>{e.preventDefault();showMainMenu();},{passive:false});
+  // 弑神难度试炼首次通关：揭示开发者彩蛋（作弊方法）
+  if(typeof _showCheatReveal!=='undefined' && _showCheatReveal){
+    _showCheatReveal=false;
+    setTimeout(()=>showCheatRevealModal(), 600);
+  }
+}
+
+// 开发者彩蛋揭示弹窗（仅在弑神难度试炼首次通关后显示）
+function showCheatRevealModal(){
+  const html=`<div id="cheatRevealOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)">
+    <div style="background:linear-gradient(180deg,#1a0a2a,#2a1040);border:2px solid #bc8cff;border-radius:14px;max-width:480px;width:100%;padding:24px 22px;box-shadow:0 0 50px rgba(188,140,255,0.5);font-family:STKaiti,KaiTi,serif;text-align:center">
+      <div style="font-size:48px;margin-bottom:8px">⚔️✨</div>
+      <h2 style="color:#bc8cff;letter-spacing:4px;margin:0 0 8px;font-size:22px">弑神封印·开发者彩蛋</h2>
+      <div style="color:#ffd970;font-size:13px;margin-bottom:16px;letter-spacing:1px">恭喜你通过弑神难度Boss试炼！</div>
+      <div style="background:rgba(22,27,34,0.7);border:1px solid rgba(188,140,255,0.4);border-radius:10px;padding:14px;margin:10px 0;text-align:left">
+        <div style="color:#ffd970;font-size:13px;margin-bottom:8px;text-align:center">✦ 开发者彩蛋 · 隐藏功能 ✦</div>
+        <div style="color:#c9d1d9;font-size:13px;line-height:1.8">
+          在主菜单 <b style="color:#bc8cff">连续点击「📖 图鉴」按钮 5 次</b><br>
+          即可获得开发者祝福：<br>
+          <span style="color:#ffd970">✦ +100,000 积分</span><br>
+          <span style="color:#ffd970">✦ +50 天赋点</span>
+        </div>
+        <div style="color:#8b949e;font-size:11px;margin-top:10px;text-align:center">（每次点击间隔需在 7 秒内）</div>
+      </div>
+      <div style="color:#daa520;font-size:12px;margin:10px 0;letter-spacing:1px">这是开发者留给通关勇者的隐藏礼物<br>从此难度选择界面将显示彩蛋标记</div>
+      <button id="cheatRevealCloseBtn" style="margin-top:14px;width:100%;padding:12px;background:linear-gradient(180deg,#bc8cff,#8b5cf6);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:3px;cursor:pointer;font-family:STKaiti,KaiTi,serif">✦ 收下这份战利品 ✦</button>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  const closeBtn=document.getElementById('cheatRevealCloseBtn');
+  const closeFn=(e)=>{
+    if(e)e.preventDefault();
+    const el=document.getElementById('cheatRevealOverlay');
+    if(el)el.remove();
+  };
+  closeBtn.addEventListener('click',closeFn);
+  closeBtn.addEventListener('touchstart',closeFn,{passive:false});
 }
 
 // ==================== 牧场系统 ====================
@@ -7141,12 +8039,16 @@ function renderRanchScene(){
 }
 
 // ==================== 主菜单 ====================
+// 图鉴作弊点击计数器（全局，不随主菜单重渲染而重置）
+let _pediaClickCount=0, _pediaClickTimer=null;
 function showMainMenu(){
   gameState='menu';
+  stopBGM(); // 返回主菜单时停止背景音乐
   const ov=document.getElementById('overlay');
   ov.classList.remove('hidden');
   const diff=getDifficulty();
   const bonusDisabled=saveData.bonusClicks<=0;
+  const playerLvl=getPlayerLevelInfo(); // 局外训练等级（基于累积经验）
   const petCount=saveData.ownedPets.length;
   const gearCount=saveData.gearBag.length+Object.values(saveData.equippedGear).filter(g=>g).length;
   const pediaCount=Object.keys(saveData.bossPedia||{}).length;
@@ -7194,15 +8096,14 @@ function showMainMenu(){
         <div class="sj-boss-label">烛龙 · 镇守</div>
       </div>
 
-      <p class="subtitle" style="font-family:'STKaiti','KaiTi',serif;letter-spacing:2px;margin-top:14px;line-height:1.8">
-        ⚔️ <b style="color:#ffd700">山海经·roug</b> — 一款融合Roguelike与山海神话的动作射击游戏<br>
-        <span style="color:#bc8cff">九尾狐 · 毕方 · 相柳 · 朱厌 · 烛龙 · 饕餮 · 英招 · 计蒙 · 穷奇</span> 九大异兽等你挑战<br>
-        🐉 收集Boss宝宝 · 🔮 魂器系统 · 🎽 神话套装 · ⚔️ 最终Boss<b style="color:#8b0000">刑天</b>降临<br>
-        <span style="color:#f0883e;font-size:12px">4大难度 · 半血特殊机制 · 变异Boss · 无尽模式 · 4角色6皮肤 · 羁绊系统</span>
+      <p class="subtitle" style="font-family:'STKaiti','KaiTi',serif;letter-spacing:2px;margin-top:12px;line-height:1.7;font-size:13px">
+        ⚔️ <b style="color:#ffd700">山海经·roug</b> · 九大异兽 · 最终Boss<b style="color:#8b0000">刑天</b><br>
+        <span style="color:#bc8cff;font-size:11px">九尾狐 · 毕方 · 相柳 · 朱厌 · 烛龙 · 饕餮 · 英招 · 计蒙 · 穷奇</span>
       </p>
 
       <div class="sj-scroll-frame" style="padding:10px 16px">
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0">
+          <div class="stat-pill" style="border-color:#ffd700;box-shadow:0 0 10px rgba(255,215,0,0.4)"><span class="pill-icon">🎖️</span><span class="pill-value" style="color:#ffd700">${playerLvl.level}</span><span class="pill-label">等级</span></div>
           <div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">${saveData.totalScore}</span><span class="pill-label">积分</span></div>
           <div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints}</span><span class="pill-label">天赋点</span></div>
           <div class="stat-pill" style="animation-delay:1s"><span class="pill-icon">🐉</span><span class="pill-value">${petCount}</span><span class="pill-label">宠物</span></div>
@@ -7210,6 +8111,10 @@ function showMainMenu(){
           <div class="stat-pill" style="animation-delay:2s"><span class="pill-icon">📖</span><span class="pill-value">${pediaCount}/${BOSS_TYPES.length}</span><span class="pill-label">图鉴</span></div>
           <div class="stat-pill" style="animation-delay:2.5s"><span class="pill-icon">🔮</span><span class="pill-value">${artCount}/${SOUL_ARTIFACTS.length}</span><span class="pill-label">魂器</span></div>
           <div class="stat-pill" style="animation-delay:3s"><span class="pill-icon">🏆</span><span class="pill-value">${achCount}</span><span class="pill-label">成就</span></div>
+        </div>
+        <div style="max-width:480px;margin:8px auto 2px;padding:0 6px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:#ffd700">🎖️ 训练等级 Lv.${playerLvl.level}</span><span style="color:#8b949e">${playerLvl.inLevel}/${playerLvl.needed} XP → Lv.${playerLvl.level+1}</span></div>
+          <div style="height:6px;background:#1a1f2e;border-radius:3px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.6)"><div style="height:100%;width:${playerLvl.inLevel/playerLvl.needed*100}%;background:linear-gradient(90deg,#ffd700,#ff8c42);transition:width 0.3s;border-radius:3px;box-shadow:0 0 6px rgba(255,215,0,0.5)"></div></div>
         </div>
       </div>
      </div>
@@ -7244,48 +8149,52 @@ function showMainMenu(){
       <div class="menu-section" style="margin-top:8px">
         <div class="menu-section-title" style="font-family:'STKaiti','KaiTi',serif">◈ 难度选择 ◈</div>
         <div class="diff-pills">
-          ${Object.entries(DIFFICULTIES).map(([k,d])=>`<button class="diff-pill ${saveData.difficulty===k?'active':''}" data-diff="${k}" style="${saveData.difficulty===k?`border-color:${d.color};color:${d.color}`:''}">${d.icon} ${d.name}</button>`).join('')}
+          ${Object.entries(DIFFICULTIES).map(([k,d])=>{
+            const unlocked=isDifficultyUnlocked(k);
+            const sel=saveData.difficulty===k;
+            if(unlocked){
+              return `<button class="diff-pill ${sel?'active':''}" data-diff="${k}" style="${sel?`border-color:${d.color};color:${d.color}`:''}">${d.icon} ${d.name}</button>`;
+            }else{
+              return `<button class="diff-pill" data-diff-lock="${k}" style="opacity:0.5;cursor:not-allowed;border-color:#555;color:#888" title="${getDifficultyUnlockHint(k)}">🔒 ${d.name}</button>`;
+            }
+          }).join('')}
         </div>
+        ${(!saveData.difficultyCleared||!saveData.difficultyCleared.godslayer)?`<div style="text-align:center;font-size:11px;color:#bc8cff;margin-top:6px;letter-spacing:1px">⚔️ 通关弑神难度Boss试炼有惊喜！</div>`:''}
+        ${saveData.cheatRevealed?`<div style="text-align:center;font-size:11px;color:#ffd970;margin-top:4px">✦ 开发者彩蛋已解锁 ✦</div>`:''}
       </div>
 
       <div style="margin:6px 0;text-align:center">
-        <button class="sec-btn" id="bonusBtn" style="${bonusDisabled?'opacity:0.4;cursor:not-allowed':'border-color:#ffd700;color:#ffd700;animation:pulseGlow 2s ease-in-out infinite'}">🎁 新手礼包 +800积分 (剩余${saveData.bonusClicks}次)</button>
+        <button class="sec-btn" id="bonusBtn" style="${bonusDisabled?'opacity:0.4;cursor:not-allowed':'border-color:#ffd700;color:#ffd700;animation:pulseGlow 2s ease-in-out infinite'}">🎁 新手礼包 +300积分 +1天赋点 (剩余${saveData.bonusClicks}次)</button>
       </div>
      </div>
 
      <div class="sj-col-bottom" style="text-align:center">
-      <div class="deco-line" style="margin-top:14px"><span>操作指南</span></div>
-      <div class="controls" style="max-width:480px;margin:0 auto">
-        <div class="key">W A S D</div><div class="desc">移动角色</div>
-        <div class="key">鼠标</div><div class="desc">瞄准方向</div>
-        <div class="key">左键/空格</div><div class="desc">射击攻击</div>
-        <div class="key">F</div><div class="desc">角色技能</div>
-        <div class="key">R</div><div class="desc">死亡重开</div>
+      <div class="deco-line" style="margin-top:10px"><span>操作指南</span></div>
+      <div class="controls" style="margin:8px auto 4px">
+        <div class="ctrl-item"><span class="key">WASD</span><span class="desc">移动</span></div>
+        <div class="ctrl-item"><span class="key">鼠标</span><span class="desc">瞄准</span></div>
+        <div class="ctrl-item"><span class="key">左键/空格</span><span class="desc">射击</span></div>
+        <div class="ctrl-item"><span class="key">F</span><span class="desc">技能</span></div>
+        <div class="ctrl-item"><span class="key">R</span><span class="desc">重开</span></div>
+        <div class="ctrl-item"><span class="key">📱摇杆</span><span class="desc">手机端</span></div>
       </div>
-      <div class="subtitle" style="margin-top:10px;font-size:12px">当前难度：${diff.icon} ${diff.name} | 时间到自动进下一关</div>
-      <div class="subtitle" style="color:#bc8cff;font-size:11px">📱 手机端：左下虚拟摇杆，右下射击/技能按钮，自动瞄准</div>
-      <button id="fullscreenBtn">⛶ 全屏播放（无遮挡）</button>
+      <div class="subtitle" style="margin-top:6px;font-size:11px">当前难度：${diff.icon} ${diff.name} | 时间到自动进下一关</div>
+      <button id="fullscreenBtn" style="margin-top:6px">⛶ 全屏播放（无遮挡）</button>
       <div id="homeFullscreenTip"></div>
-      <div style="margin-top:14px;font-family:'STKaiti','KaiTi',serif;font-size:13px;letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
+      <div style="margin-top:10px;font-family:'STKaiti','KaiTi',serif;font-size:12px;letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
 
-      <details style="margin:10px auto 20px;max-width:680px;padding:10px 14px;border:1px solid rgba(212,160,23,0.3);border-radius:10px;background:rgba(22,27,34,0.7);font-size:12px;color:#8b949e;text-align:left;backdrop-filter:blur(8px)">
-        <summary style="cursor:pointer;color:#ffd970;font-size:13px;letter-spacing:1px">📖 新手指南（点击展开）</summary>
-        <div style="margin-top:10px;line-height:1.9">
-          <div style="color:#f0883e">⚡ <b>核心玩法</b>：WASD移动，鼠标瞄准射击，击败小怪和Boss获取积分。每关30秒（Boss关50秒），时间到自动进入下一关。</div>
-          <div style="color:#8b0000">⚔️ <b>最终Boss·刑天</b>：击败超级Boss后有50%几率触发刑天挑战！多阶段机制，掉落山海故事书与专属武器「刑天干戚」。</div>
-          <div style="color:#bc8cff">🌟 <b>天赋系统</b>：每400积分=1天赋点，可重置。升级伤害、射速、生命等基础属性。</div>
-          <div style="color:#ffd970">🎒 <b>背包系统</b>：统一管理角色/武器/宠物/装备/打造/抽奖。武器按强度定价用积分购买，进阶消耗积分。</div>
-          <div style="color:#a855f7">🔮 <b>魂器系统</b>：击败超级Boss有概率掉落对应魂器，装备后释放技能时自动附带魂器技能。穷奇「维度崩塌」、饕餮「万象吞噬」、烛龙「熔岩风暴」三大魂器等你收集！</div>
-          <div style="color:#58a6ff">👤 <b>角色皮肤</b>：默认"神射手"射速快，可解锁"忍者"暴击高。每个角色可佩戴不同皮肤（抽奖获得），仅改变外观。</div>
-          <div style="color:#3fb950">🔫 <b>武器商店</b>：手枪→神臂弓→散弹枪→狙击枪→震天锤→诸葛连弩→雷神炮→虚空之弓，按T1-T5强度定价，3阶段满阶。</div>
-          <div style="color:#ffd700">🐉 <b>宠物系统</b>：抽奖或击败Boss获得Boss宝宝，可进化3阶段，同类宝宝可升阶。9种Boss宝宝各有独特攻击方式。</div>
-          <div style="color:#f85149">🎽 <b>装备系统</b>：5个稀有度（普通→稀有→史诗→传说→神话），3件同品质可合成，4件神话触发套装效果（伤害x2/移速x1.5/吸血+15%）。</div>
-          <div style="color:#daa520">🔗 <b>羁绊系统</b>：收集不同Boss宝宝激活羁绊，获得被动加成。</div>
-          <div style="color:#bc8cff">🎰 <b>灵兽抽奖</b>：800积分/次，可得Boss宝宝/传说装备/角色皮肤。</div>
-          <div style="color:#ff6347">🔥 <b>半血机制</b>：每个Boss半血时触发独有特殊机制！九尾狐魅影闪避、朱厌石头护盾、毕方烈焰爆发等，增加战斗趣味。</div>
-          <div style="color:#ffd700">💥 <b>连击系统</b>：连续击杀怪物获得连击加成！5连击以上每多1连击+5%分数，10连击金色特效，快来挑战极限连击！</div>
-          <div style="color:#bc8cff">📊 <b>难度系统</b>：普通→困难→地狱→弑神。高难度下Boss血量大增、伤害提升、特殊攻击更频繁，但有伤害上限保证Boss至少能撑够时间展示机制。</div>
-          <div style="color:#8b949e">📖 <b>其他</b>：Boss试炼、无尽模式、奇遇事件、装备重铸(300积分/次)、变异Boss(10%概率/掉落更好)</div>
+      <details style="margin:8px auto 14px;max-width:680px;padding:8px 14px;border:1px solid rgba(212,160,23,0.3);border-radius:10px;background:rgba(22,27,34,0.7);font-size:11px;color:#8b949e;text-align:left;backdrop-filter:blur(8px)">
+        <summary style="cursor:pointer;color:#ffd970;font-size:12px;letter-spacing:1px">📖 新手指南（点击展开）</summary>
+        <div style="margin-top:8px;line-height:1.7;font-size:11px">
+          <div style="color:#f0883e">⚡ <b>核心</b>：WASD移动，鼠标瞄准射击。每关30秒（Boss关50秒），时间到自动进下一关。</div>
+          <div style="color:#8b0000">⚔️ <b>最终Boss·刑天</b>：击败超级Boss后50%几率触发，掉落山海故事书与「刑天干戚」。</div>
+          <div style="color:#bc8cff">🌟 <b>天赋</b>：升级获得天赋点，强化伤害/射速/生命等。🎒 <b>背包</b>：管理武器/宠物/装备/打造/抽奖。</div>
+          <div style="color:#a855f7">🔮 <b>魂器</b>：击败超级Boss掉落，释放技能时附带魂器技。👤 <b>角色</b>：神射手/忍者，可佩戴皮肤。</div>
+          <div style="color:#3fb950">🔫 <b>武器</b>：手枪→神臂弓→散弹→狙击→震天锤→连弩→雷神炮→虚空之弓，3阶段满阶。</div>
+          <div style="color:#ffd700">🐉 <b>宠物</b>：抽奖或击败Boss获得，9种Boss宝宝进化3阶段。🎽 <b>装备</b>：5稀有度，3件合成，4神话激活套装。</div>
+          <div style="color:#daa520">🔗 <b>羁绊</b>：收集Boss宝宝激活被动加成。🎰 <b>抽奖</b>：800积分/次，可得宠物/装备/皮肤。</div>
+          <div style="color:#ff6347">🔥 <b>半血机制</b>：Boss半血触发独有特殊机制。💥 <b>连击</b>：5连击+5%分数/击。</div>
+          <div style="color:#bc8cff">📊 <b>4大难度</b>：普通→困难→地狱→弑神，需通关前一难度Boss试炼解锁。📖 <b>其他</b>：试炼/无尽/奇遇/重铸(300分)/变异Boss(10%)</div>
         </div>
       </details>
      </div>
@@ -7298,7 +8207,31 @@ function showMainMenu(){
   document.getElementById('bagBtn').addEventListener('click',showBagMenu);
   document.getElementById('ranchBtn').addEventListener('click',showRanchMenu);
   document.getElementById('bondBtn').addEventListener('click',showBondMenu);
-  document.getElementById('pediaBtn').addEventListener('click',showPediaMenu);
+  // 图鉴按钮：连续点击5次触发内置作弊（10万积分+50天赋点）
+  const _pediaCheat=()=>{
+    _pediaClickCount++;
+    if(_pediaClickTimer)clearTimeout(_pediaClickTimer);
+    _pediaClickTimer=setTimeout(()=>{_pediaClickCount=0;},7000);
+    if(_pediaClickCount>=5){
+      _pediaClickCount=0;
+      saveData.totalScore+=100000;
+      saveData.talentPoints+=50;
+      saveSave();
+      // 弹出居中提示
+      const _toast=document.createElement('div');
+      _toast.textContent='✦ 开发者奖励 +100,000积分 +50天赋点 ✦';
+      _toast.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:20px 40px;background:linear-gradient(135deg,#2a1a0a,#5a3a1a);border:2px solid #ffd700;border-radius:12px;color:#ffd970;font-size:18px;font-weight:bold;letter-spacing:2px;text-shadow:0 0 10px rgba(255,215,0,0.6);z-index:99999;box-shadow:0 0 30px rgba(255,215,0,0.5);font-family:STKaiti,KaiTi,serif';
+      document.body.appendChild(_toast);
+      setTimeout(()=>{_toast.remove();showMainMenu();},1500);
+      return true;
+    }
+    return false;
+  };
+  const _pediaBtnEl=document.getElementById('pediaBtn');
+  _pediaBtnEl.addEventListener('click',()=>{
+    if(_pediaCheat())return;
+    showPediaMenu();
+  });
   const bookBtn=document.getElementById('bookBtn');
   if(bookBtn)bookBtn.addEventListener('click',()=>showShanHaiBook(false));
   // 主菜单内容可能溢出，确保从顶部开始展示
@@ -7309,12 +8242,16 @@ function showMainMenu(){
   ov.querySelectorAll('[data-diff]').forEach(el=>{
     el.addEventListener('click',()=>{saveData.difficulty=el.dataset.diff;saveSave();showMainMenu();});
   });
+  // 锁定难度点击提示
+  ov.querySelectorAll('[data-diff-lock]').forEach(el=>{
+    el.addEventListener('click',()=>{ flashMsg('🔒 '+getDifficultyUnlockHint(el.dataset.diffLock)); });
+  });
   // +800积分按钮
   const bonusBtn=document.getElementById('bonusBtn');
   if(!bonusDisabled){
     bonusBtn.addEventListener('click',()=>{
       if(saveData.bonusClicks<=0)return;
-      saveData.totalScore+=800; saveData.bonusClicks-=1; saveSave();
+      saveData.totalScore+=300; saveData.bonusClicks-=1; saveData.talentPoints=(saveData.talentPoints||0)+1; saveSave();
       showMainMenu();
     });
   }
@@ -7324,20 +8261,52 @@ function showMainMenu(){
 function showTalentMenu(){
   const ov=document.getElementById('talentOverlay');
   ov.classList.remove('hidden');
-  let html=`<h2>🌟 天赋系统</h2><p class="subtitle">当前天赋点: <span style="color:#f0883e;font-size:20px">${saveData.talentPoints}</span> | 每400分=1天赋点</p><div class="talent-grid">`;
+  // 局外经验进度
+  const xpProgress=Math.floor((saveData.totalXp||0)%1000);
+  const xpMilestones=Math.floor((saveData.totalXp||0)/1000);
+  let html=`<h2>🌟 天赋系统</h2><p class="subtitle">当前天赋点: <span style="color:#f0883e;font-size:20px">${saveData.talentPoints}</span> | 每升一级+1天赋点（局内拾取经验球升级）</p>`;
+  html+=`<div style="max-width:600px;margin:0 auto 20px;padding:12px 16px;border:1px solid rgba(188,140,255,0.3);border-radius:10px;background:rgba(22,27,34,0.7)">
+    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span style="color:#bc8cff">🏆 局外经验里程碑</span><span style="color:#8b949e">已达成 ${xpMilestones} 个里程碑 (+${xpMilestones}天赋点)</span></div>
+    <div style="height:10px;background:#1a1f2e;border-radius:5px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.6)"><div style="height:100%;width:${xpProgress/10}%;background:linear-gradient(90deg,#bc8cff,#ffd970);transition:width 0.3s;border-radius:5px;box-shadow:0 0 8px rgba(188,140,255,0.5)"></div></div>
+    <div style="text-align:center;font-size:11px;color:#8b949e;margin-top:4px">${xpProgress}/1000 到下一里程碑（每1000经验+1天赋点）</div>
+  </div>`;
+  html+=`<div class="talent-grid">`;
   for(const t of TALENTS){
     const lv=getTalentLevel(t.id); const maxed=lv>=t.maxLevel; const afford=saveData.talentPoints>=t.costPerLevel;
-    html+=`<div class="talent-node ${maxed?'maxed':''} ${!maxed&&!afford?'unaffordable':''}" data-talent="${t.id}"><div class="talent-icon">${t.icon}</div><div class="talent-name">${t.name}</div><div class="talent-desc">${t.desc}</div><div class="talent-level">Lv.${lv}/${t.maxLevel}</div><div class="talent-cost">${maxed?'已满级':t.costPerLevel+'点'}</div></div>`;
+    // 互斥检查：如果已升级对方天赋,则禁用本天赋
+    let lockedByMutual=false; let lockHint='';
+    if(t.exclusiveWith && getTalentLevel(t.exclusiveWith)>0){
+      lockedByMutual=true;
+      const other=TALENTS.find(x=>x.id===t.exclusiveWith);
+      lockHint=`已选「${other?other.name:t.exclusiveWith}」`;
+    }
+    // 高级天赋标记
+    const advTag=t.advanced?'<span style="position:absolute;top:4px;right:6px;font-size:8px;color:#ff4444;background:rgba(255,68,68,0.15);padding:1px 4px;border-radius:3px">高级</span>':'';
+    const branchTag=t.branch?`<div style="font-size:8px;color:#bc8cff;margin-top:2px;letter-spacing:1px">「${t.branch}」${t.exclusiveWith?'二选一':''}</div>`:'';
+    const stateClass=maxed?'maxed':(!afford||lockedByMutual?'unaffordable':'');
+    const lockDisplay=maxed?'已满级':(lockedByMutual?lockHint:t.costPerLevel+'点');
+    html+=`<div class="talent-node ${stateClass}" data-talent="${t.id}" style="position:relative;${lockedByMutual?'opacity:0.45;cursor:not-allowed':''}">${advTag}<div class="talent-icon">${t.icon}</div><div class="talent-name">${t.name}</div><div class="talent-desc">${t.desc}</div>${branchTag}<div class="talent-level">Lv.${lv}/${t.maxLevel}</div><div class="talent-cost">${lockDisplay}</div></div>`;
   }
-  html+=`</div><div class="panel-actions"><button class="sec-btn" id="resetTalentsBtn">重置天赋</button><button class="sec-btn" id="backFromTalent">返回</button></div>`;
+  html+=`</div><div class="panel-actions"><button class="sec-btn" id="resetTalentsBtn">🔄 重置天赋（全额返还）</button><button class="sec-btn" id="backFromTalent">返回</button></div>`;
   ov.innerHTML=html;
   ov.querySelectorAll('.talent-node').forEach(el=>{
     el.addEventListener('click',()=>{
       const id=el.dataset.talent;
       if(upgradeTalent(id))showTalentMenu();
+      else{
+        // 提示互斥或积分不足
+        const t=TALENTS.find(x=>x.id===id);
+        if(t&&t.exclusiveWith&&getTalentLevel(t.exclusiveWith)>0){
+          const other=TALENTS.find(x=>x.id===t.exclusiveWith);
+          flashMsg(`⚠️ 已选择「${other?other.name:t.exclusiveWith}」,无法同时选择「${t.name}」`);
+        }
+      }
     });
   });
-  document.getElementById('resetTalentsBtn').addEventListener('click',()=>{resetTalents();showTalentMenu();});
+  document.getElementById('resetTalentsBtn').addEventListener('click',()=>{
+    // 二次确认（避免误点）
+    if(confirm('确定要重置所有天赋吗？将全额返还已消耗的天赋点。')){resetTalents();showTalentMenu();}
+  });
   document.getElementById('backFromTalent').addEventListener('click',()=>{ov.classList.add('hidden');showMainMenu();});
 }
 
@@ -7423,7 +8392,7 @@ function showBagMenu(){
   // 套装效果显示（如果有4件神话装备）
   const mythicCount=Object.values(saveData.equippedGear).filter(g=>g&&g.rarity==='mythic').length;
   if(mythicCount>=4){
-    html+='<div style="background:linear-gradient(90deg,#3a1a1a,#5a2a2a,#3a1a1a);border:1px solid #ff4444;border-radius:8px;padding:10px;margin-top:8px;color:#ffd970;font-weight:bold">🔥 神话套装已激活 (${mythicCount}/4)</div>';
+    html+='<div style="background:linear-gradient(90deg,#3a1a1a,#5a2a2a,#3a1a1a);border:1px solid #ff4444;border-radius:8px;padding:10px;margin-top:8px;color:#ffd970;font-weight:bold">🔥 神话套装已激活 (${mythicCount}/4)<br><span style="color:#ffa0a0;font-size:11px;font-weight:normal">伤害×1.6 | 移速×1.3 | 生命×1.3 | 暴击+20% | 暴伤+50% | 穿透+2 | 吸血+3%</span></div>';
   }
   html+='<div class="panel-actions"><button class="sec-btn" id="backFromBag">返回主菜单</button></div>';
   ov.innerHTML=html;
@@ -7688,6 +8657,50 @@ function flashMsg(text){
   el.textContent=text; el.style.opacity='1';
   clearTimeout(el._timer); el._timer=setTimeout(()=>{el.style.opacity='0';},1500);
 }
+// ==================== 通用翻页工具（手机友好） ====================
+// 全局分页状态：每个overlay独立维护页码
+const _pagedState={}; // key -> { page, pageSize, tab }
+function getPagedState(key, init={page:1,pageSize:6,tab:null}){
+  if(!_pagedState[key])_pagedState[key]={...init};
+  return _pagedState[key];
+}
+function resetPagedState(key, init){ _pagedState[key]={...init}; }
+// 生成分页导航HTML：上一页/页码/下一页
+function pagedNavHTML(key, total, pageSize, page){
+  const totalPages=Math.max(1, Math.ceil(total/pageSize));
+  if(totalPages<=1)return '';
+  return `<div class="paged-nav" data-paged-key="${key}">
+    <button class="pg-btn" data-pg-prev="${key}" ${page<=1?'disabled':''}>◀ 上一页</button>
+    <span class="pg-info">第 ${page}/${totalPages} 页</span>
+    <button class="pg-btn" data-pg-next="${key}" ${page>=totalPages?'disabled':''}>下一页 ▶</button>
+  </div>`;
+}
+// 绑定分页按钮（在 overlay 内查找）。rerender: 重新渲染函数
+function bindPagedNav(overlay, rerender){
+  if(!overlay)return;
+  overlay.querySelectorAll('[data-pg-prev]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const k=btn.dataset.pgPrev; const s=_pagedState[k]; if(!s||s.page<=1)return;
+      s.page--; rerender();
+    });
+  });
+  overlay.querySelectorAll('[data-pg-next]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const k=btn.dataset.pgNext; const s=_pagedState[k]; if(!s)return;
+      const totalPages=Math.max(1, Math.ceil(s._total/s.pageSize));
+      if(s.page>=totalPages)return;
+      s.page++; rerender();
+    });
+  });
+}
+// 记录总数用于翻页判断（在render时调用）
+function pagedSetTotal(key, total){
+  if(!_pagedState[key])_pagedState[key]={page:1,pageSize:6,tab:null};
+  _pagedState[key]._total=total;
+  // 若当前页超出总页数，回到第1页
+  const totalPages=Math.max(1, Math.ceil(total/_pagedState[key].pageSize));
+  if(_pagedState[key].page>totalPages)_pagedState[key].page=1;
+}
 
 // ==================== 宠物菜单 ====================
 function showPetMenu(){
@@ -7698,21 +8711,31 @@ function showPetMenu(){
   if(saveData.ownedPets.length===0){
     html+='<p class="info-text">还没有宠物，击败Boss有几率获得！</p>';
   }else{
+    // 翻页：每页6只
+    const pst=getPagedState('pet',{page:1,pageSize:6});
+    pagedSetTotal('pet', saveData.ownedPets.length);
+    const pageSize=pst.pageSize;
+    const totalPages=Math.max(1,Math.ceil(saveData.ownedPets.length/pageSize));
+    if(pst.page>totalPages)pst.page=1;
+    const start=(pst.page-1)*pageSize;
+    const end=Math.min(start+pageSize, saveData.ownedPets.length);
+    html+=pagedNavHTML('pet', saveData.ownedPets.length, pageSize, pst.page);
     html+='<div style="display:flex;flex-wrap:wrap;justify-content:center">';
-    saveData.ownedPets.forEach((p,idx)=>{
-      const def=getPetDef(p.def); if(!def)return;
-      const sel=saveData.selectedPet===idx;
+    for(let i=start;i<end;i++){
+      const p=saveData.ownedPets[i];
+      const def=getPetDef(p.def); if(!def)continue;
+      const sel=saveData.selectedPet===i;
       const evo=def.evoStats[p.stage];
       // 计算同类宝宝数量（不含自身）
-      const sameCount=saveData.ownedPets.filter((pp,i)=>i!==idx&&pp.def===p.def).length;
+      const sameCount=saveData.ownedPets.filter((pp,j)=>j!==i&&pp.def===p.def).length;
       const canEvolve=p.stage<2&&sameCount>0;
       let evoHint='';
       if(p.stage<2){
-        evoHint=canEvolve?`<button class="sec-btn" style="margin-top:6px;font-size:11px;border-color:#ffd700;color:#ffd700" data-evolve="${idx}">升阶 (消耗1只同类)</button>`:'<p style="font-size:10px;color:#8b949e;margin-top:4px">需要1只同类宝宝升阶</p>';
+        evoHint=canEvolve?`<button class="sec-btn" style="margin-top:6px;font-size:11px;border-color:#ffd700;color:#ffd700" data-evolve="${i}">升阶 (消耗1只同类)</button>`:'<p style="font-size:10px;color:#8b949e;margin-top:4px">需要1只同类宝宝升阶</p>';
       }else{
         evoHint='<p style="color:#3fb950;font-size:12px">已满阶</p>';
       }
-      html+=`<div class="pet-card ${sel?'selected':''}" data-pet="${idx}" style="position:relative">
+      html+=`<div class="pet-card ${sel?'selected':''}" data-pet="${i}" style="position:relative">
         <div style="font-size:36px">${def.icon}</div>
         <h3>${def.name}</h3>
         <p style="color:#ffd700">${'★'.repeat(p.stage+1)}</p>
@@ -7720,9 +8743,9 @@ function showPetMenu(){
         <p style="font-size:11px;color:#58a6ff">伤害x${evo.dmgMul}</p>
         ${canEvolve?`<p style="font-size:10px;color:#3fb950">同类x${sameCount}</p>`:''}
         ${evoHint}
-        <button class="sec-btn" style="margin-top:4px;font-size:10px;border-color:#f85149;color:#f85149" data-recycle="${idx}">回收 +500分</button>
+        <button class="sec-btn" style="margin-top:4px;font-size:10px;border-color:#f85149;color:#f85149" data-recycle="${i}">回收 +500分</button>
       </div>`;
-    });
+    }
     html+='</div>';
     if(saveData.selectedPet!==null){
       html+='<button class="sec-btn" id="unselectPet" style="margin-top:10px">取消选择宠物</button>';
@@ -7822,6 +8845,8 @@ function showPetMenu(){
     });
   });
   const us=document.getElementById('unselectPet'); if(us)us.addEventListener('click',()=>{saveData.selectedPet=null;saveSave();showPetMenu();});
+  // 翻页按钮绑定
+  bindPagedNav(ov, showPetMenu);
   document.getElementById('backFromPet').addEventListener('click',()=>{ov.classList.add('hidden');showBagMenu();});
 }
 
@@ -7916,7 +8941,7 @@ function rollRoulette(){
 }
 
 // ==================== 武器打造 ====================
-const MAX_WEAPON_CRAFTS=5; // 每把武器最多5个词条
+const MAX_WEAPON_CRAFTS=4; // 每把武器最多4个词条（削弱：原5个过于强力）
 function renderCraftList(){
   let lh='';
   for(const wid of Object.keys(WEAPONS)){
@@ -7927,7 +8952,7 @@ function renderCraftList(){
 }
 function showCraftMenu(){
   const ov=document.getElementById('craftOverlay'); ov.classList.remove('hidden');
-  let html='<h2>⚒️ 武器打造</h2><p class="subtitle">100分打造一次 | 每把武器最多5个词条 | 满词条时可替换或舍弃</p>';
+  let html='<h2>⚒️ 武器打造</h2><p class="subtitle">300分打造一次 | 每把武器最多5个词条 | 满词条时可替换或舍弃</p>';
   html+=`<p style="font-size:18px;color:#f0883e">当前积分: ${saveData.totalScore}</p>`;
   html+='<div class="section-title">选择武器打造</div>';
   html+='<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px;width:100%;max-width:580px">';
@@ -7937,7 +8962,7 @@ function showCraftMenu(){
     html+=`<button class="sec-btn" data-craft-weapon="${id}">${w.icon} ${w.name} <span style="color:#8b949e;font-size:12px">${cnt}/${MAX_WEAPON_CRAFTS}</span></button>`;
   }
   html+='</div>';
-  html+='<button class="main-btn" id="doCraftBtn" style="margin:6px 0 10px">打造 (100分)</button>';
+  html+='<button class="main-btn" id="doCraftBtn" style="margin:6px 0 10px">打造 (300分)</button>';
   html+='<div id="craftResult" style="min-height:30px;margin:10px 0;width:100%;max-width:580px"></div>';
   html+='<div class="section-title">当前词条</div><div class="craft-list" id="craftListContainer">';
   html+=renderCraftList();
@@ -8019,6 +9044,16 @@ const GEAR_DECOMPOSE_REWARDS={common:30,rare:80,epic:180,legendary:400,mythic:10
 function showGearMenu(){
   const ov=document.getElementById('gearOverlay'); ov.classList.remove('hidden');
   let html=`<h2>🎽 装备背包</h2>`;
+  // 专属词条总览（可折叠）- 让玩家了解传说/神话词条功效
+  html+=`<details style="max-width:680px;margin:0 auto 8px;padding:6px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(212,160,23,0.25);border-radius:6px">
+    <summary style="cursor:pointer;color:#ffd970;font-size:12px;letter-spacing:1px">📜 专属词条功效总览（点击展开）</summary>
+    <div style="margin-top:8px;font-size:11px;line-height:1.7">
+      <div style="color:#ffd970;margin-bottom:4px">✨ 传说词条（金色）：</div>
+      ${GEAR_LEGENDARY_AFFIXES.map(a=>`<div style="color:#c9d1d9;padding:1px 8px">${a.icon} <b style="color:#ffd970">${a.name}</b> - <span style="color:#8b949e">${a.desc}</span></div>`).join('')}
+      <div style="color:#ff4444;margin:8px 0 4px">🔥 神话词条（红色）：</div>
+      ${GEAR_MYTHIC_AFFIXES.map(a=>`<div style="color:#c9d1d9;padding:1px 8px">${a.icon} <b style="color:#ff4444">${a.name}</b> - <span style="color:#8b949e">${a.desc}</span></div>`).join('')}
+    </div>
+  </details>`;
   // ===== 已装备（横排4格） =====
   let mythicEquipped=0, legendaryEquipped=0;
   html+=`<div style="display:flex;gap:6px;justify-content:center;margin:0 auto 6px;max-width:680px">`;
@@ -8037,7 +9072,7 @@ function showGearMenu(){
   }
   html+=`</div>`;
   // 套装提示
-  if(mythicEquipped>=4)html+=`<div style="text-align:center;margin-bottom:4px"><span style="color:#ff4444;font-size:11px;font-weight:bold">🔥 神话套装 ${mythicEquipped}/4 已激活！</span></div>`;
+  if(mythicEquipped>=4)html+=`<div style="text-align:center;margin-bottom:4px;padding:4px;background:linear-gradient(90deg,#3a1a1a,#5a2a2a,#3a1a1a);border:1px solid #ff4444;border-radius:4px"><span style="color:#ff4444;font-size:11px;font-weight:bold">🔥 神话套装 ${mythicEquipped}/4 已激活！</span><br><span style="color:#ffa0a0;font-size:9px">伤害×1.6 移速×1.3 生命×1.3 暴击+20% 暴伤+50% 穿透+2 吸血+3%</span></div>`;
   else if(mythicEquipped>0)html+=`<div style="text-align:center;margin-bottom:4px"><span style="color:#ff4444;font-size:10px">🔥 神话 ${mythicEquipped}/4</span></div>`;
   if(legendaryEquipped>=2){
     const sets=[];if(legendaryEquipped>=2)sets.push('2件伤害+20%');if(legendaryEquipped>=3)sets.push('3件射速+30%');if(legendaryEquipped>=4)sets.push('4件回血');
@@ -8077,29 +9112,42 @@ function showGearMenu(){
     html+=`<button class="sec-btn" data-filter-slot="${t.slot}" style="font-size:11px;padding:4px 12px;${active?'border-color:#58a6ff;color:#58a6ff;background:rgba(88,166,255,0.1)':''}">${t.icon}${t.name}(${cnt})</button>`;
   }
   html+=`</div>`;
-  // ===== 装备网格（横排卡片，固定高度滚动） =====
+  // ===== 装备网格（翻页式，手机友好） =====
   let filteredGears=saveData.gearBag.slice();
   if(gearFilterSlot)filteredGears=filteredGears.filter(g=>g.slot===gearFilterSlot);
   if(gearFilterRarity)filteredGears=filteredGears.filter(g=>g.rarity===gearFilterRarity);
   if(synthFilterRarity)filteredGears=filteredGears.filter(g=>g.rarity===synthFilterRarity);
   // 按品质排序（高到低）
   filteredGears.sort((a,b)=>GEAR_RARITY_ORDER.indexOf(b.rarity)-GEAR_RARITY_ORDER.indexOf(a.rarity));
-  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;max-width:680px;margin:0 auto;max-height:280px;overflow-y:auto;padding:2px">`;
+  // 翻页：每页8件
+  const gst=getPagedState('gear',{page:1,pageSize:8});
+  // 当筛选变化时重置页码（用一个标记检测）
+  const _filterKey=`${gearFilterSlot||''}|${gearFilterRarity||''}|${synthFilterRarity||''}`;
+  if(gst._lastFilter!==_filterKey){gst.page=1; gst._lastFilter=_filterKey;}
+  pagedSetTotal('gear', filteredGears.length);
+  const pageSize=gst.pageSize;
+  const totalPages=Math.max(1,Math.ceil(filteredGears.length/pageSize));
+  if(gst.page>totalPages)gst.page=1;
+  const start=(gst.page-1)*pageSize;
+  const end=Math.min(start+pageSize, filteredGears.length);
+  // 顶部：一键合成（按品质分组）
+  if(!synthFilterRarity&&!gearFilterRarity&&filteredGears.length>0){
+    const rarityGroups={};
+    for(const g of filteredGears){if(!rarityGroups[g.rarity])rarityGroups[g.rarity]=[];rarityGroups[g.rarity].push(g);}
+    for(const rar of GEAR_RARITY_ORDER){
+      const grp=rarityGroups[rar];
+      if(!grp||grp.length<3||rar==='mythic')continue;
+      const rc=GEAR_RARITIES[rar].color;
+      html+=`<div style="text-align:center;margin-bottom:4px"><button class="sec-btn" data-oneslot-synth="${rar}" style="font-size:10px;padding:2px 8px;color:${rc};border-color:${rc}">⚡一键合成${GEAR_RARITIES[rar].name}(${Math.floor(grp.length/3)}组)</button></div>`;
+    }
+  }
+  html+=pagedNavHTML('gear', filteredGears.length, pageSize, gst.page);
+  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;max-width:680px;margin:0 auto 10px">`;
   if(filteredGears.length===0){
     html+=`<div style="grid-column:1/-1;color:#8b949e;text-align:center;padding:20px">${saveData.gearBag.length===0?'背包空空如也，击败Boss获取装备！':'无符合条件的装备'}</div>`;
   }else{
-    // 按品质分组一键合成
-    if(!synthFilterRarity&&!gearFilterRarity){
-      const rarityGroups={};
-      for(const g of filteredGears){if(!rarityGroups[g.rarity])rarityGroups[g.rarity]=[];rarityGroups[g.rarity].push(g);}
-      for(const rar of GEAR_RARITY_ORDER){
-        const grp=rarityGroups[rar];
-        if(!grp||grp.length<3||rar==='mythic')continue;
-        const rc=GEAR_RARITIES[rar].color;
-        html+=`<div style="grid-column:1/-1;text-align:right"><button class="sec-btn" data-oneslot-synth="${rar}" style="font-size:9px;padding:1px 6px;color:${rc};border-color:${rc}">⚡一键合成${GEAR_RARITIES[rar].name}(${Math.floor(grp.length/3)}组)</button></div>`;
-      }
-    }
-    for(const g of filteredGears){
+    for(let i=start;i<end;i++){
+      const g=filteredGears[i];
       const rc=GEAR_RARITIES[g.rarity].color;
       const selected=selectedSynthUids.includes(g.uid);
       const canSynth=g.rarity!=='mythic';
@@ -8294,6 +9342,8 @@ function showGearMenu(){
       showGearMenu();
     });
   });
+  // 翻页按钮绑定
+  bindPagedNav(ov, showGearMenu);
   document.getElementById('backFromGear').addEventListener('click',()=>{selectedSynthUids=[];synthFilterRarity=null;gearFilterSlot=null;gearFilterRarity=null;ov.classList.add('hidden');showBagMenu();});
 }
 // 一键合成：批量合成指定阶级（可指定部位）的所有装备，每组3件
@@ -8384,47 +9434,72 @@ function showBondMenu(){
 // ==================== Boss图鉴与成就菜单 ====================
 function showPediaMenu(){
   const ov=document.getElementById('pediaOverlay'); ov.classList.remove('hidden');
+  const st=getPagedState('pedia',{page:1,pageSize:6,tab:'boss'});
+  pagedSetTotal('pedia', st.tab==='boss'?BOSS_TYPES.length:ACHIEVEMENTS.length);
   let html=`<h2>📖 山海图鉴</h2><p class="subtitle">已发现Boss与成就记录 | 解锁成就自动获得积分奖励</p>`;
-  // 图鉴说明
-  html+=`<div style="max-width:680px;margin:0 auto 12px;padding:8px;border:1px solid #30363d;border-radius:6px;font-size:11px;color:#8b949e;text-align:left">
-    <div style="color:#c9d1d9;margin-bottom:4px">📜 <b>图鉴与成就</b></div>
-    <div>· 击败不同种类的Boss解锁图鉴，记录击败次数</div>
-    <div>· 成就达成条件后自动解锁，积分奖励即时到账</div>
-    <div>· 共${ACHIEVEMENTS.length}个成就，涵盖击杀/分数/收集/难度/挑战/装备6大类</div>
+  // 标签切换
+  html+=`<div class="paged-tabs">
+    <button class="pg-btn" data-pedia-tab="boss" ${st.tab==='boss'?'style="border-color:#58a6ff;color:#58a6ff;background:rgba(88,166,255,0.15)"':''}>🐉 Boss图鉴 (${Object.keys(saveData.bossPedia).length}/${BOSS_TYPES.length})</button>
+    <button class="pg-btn" data-pedia-tab="ach" ${st.tab==='ach'?'style="border-color:#ffd700;color:#ffd700;background:rgba(255,215,0,0.15)"':''}>🏆 成就 (${Object.keys(saveData.achievements).length}/${ACHIEVEMENTS.length})</button>
   </div>`;
-  // Boss图鉴
-  html+=`<div class="section-title">Boss图鉴 (${Object.keys(saveData.bossPedia).length}/${BOSS_TYPES.length})</div>`;
-  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-width:700px;margin:0 auto 16px">`;
-  for(let i=0;i<BOSS_TYPES.length;i++){
-    const b=BOSS_TYPES[i], p=saveData.bossPedia[i];
-    const isSuper=b.isSuper;
-    const petDef=getPetDef(i);
-    const imgPath=BOSS_IMG_PATHS[i];
-    const imgHtml=(p&&imgPath)?`<img src="${imgPath}" style="width:100%;height:100%;object-fit:cover">`:(p?`<div style="font-size:40px;line-height:80px">${b.icon}</div>`:'<div style="font-size:40px;line-height:80px">❓</div>');
-    html+=`<div style="background:#161b22;border:2px solid ${p?b.color:'#30363d'};border-radius:8px;padding:12px;text-align:center;${p?'':'opacity:0.5'}">
-      <div style="width:80px;height:80px;margin:0 auto;border-radius:50%;overflow:hidden;border:2px solid ${p?b.color:'#30363d'};background:#0d1117">${imgHtml}</div>
-      <div style="font-size:13px;font-weight:bold;color:${p?b.color:'#8b949e'};margin-top:6px">${p?b.name:'???'}</div>
-      ${p&&petDef?`<div style="font-size:10px;color:#8b949e;margin-top:3px">${petDef.desc}</div>`:''}
-      <div style="font-size:11px;color:#8b949e;margin-top:4px">${p?`击败${p.killCount}次`:''}</div>
-      ${isSuper?'<div style="font-size:10px;color:#ffd700;margin-top:2px">超级Boss</div>':''}
-    </div>`;
+  if(st.tab==='boss'){
+    // Boss图鉴分页
+    const pageSize=st.pageSize;
+    const totalPages=Math.max(1,Math.ceil(BOSS_TYPES.length/pageSize));
+    if(st.page>totalPages)st.page=1;
+    const start=(st.page-1)*pageSize;
+    const end=Math.min(start+pageSize, BOSS_TYPES.length);
+    html+=pagedNavHTML('pedia', BOSS_TYPES.length, pageSize, st.page);
+    html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-width:700px;margin:0 auto 10px">`;
+    for(let i=start;i<end;i++){
+      const b=BOSS_TYPES[i], p=saveData.bossPedia[i];
+      const isSuper=b.isSuper;
+      const petDef=getPetDef(i);
+      const imgPath=BOSS_IMG_PATHS[i];
+      const imgHtml=(p&&imgPath)?`<img src="${imgPath}" style="width:100%;height:100%;object-fit:cover">`:(p?`<div style="font-size:40px;line-height:80px">${b.icon}</div>`:'<div style="font-size:40px;line-height:80px">❓</div>');
+      html+=`<div style="background:#161b22;border:2px solid ${p?b.color:'#30363d'};border-radius:8px;padding:12px;text-align:center;${p?'':'opacity:0.5'}">
+        <div style="width:80px;height:80px;margin:0 auto;border-radius:50%;overflow:hidden;border:2px solid ${p?b.color:'#30363d'};background:#0d1117">${imgHtml}</div>
+        <div style="font-size:13px;font-weight:bold;color:${p?b.color:'#8b949e'};margin-top:6px">${p?b.name:'???'}</div>
+        ${p&&petDef?`<div style="font-size:10px;color:#8b949e;margin-top:3px">${petDef.desc}</div>`:''}
+        <div style="font-size:11px;color:#8b949e;margin-top:4px">${p?`击败${p.killCount}次`:''}</div>
+        ${isSuper?'<div style="font-size:10px;color:#ffd700;margin-top:2px">超级Boss</div>':''}
+      </div>`;
+    }
+    html+=`</div>`;
+  }else{
+    // 成就分页
+    const pageSize=st.pageSize;
+    const totalPages=Math.max(1,Math.ceil(ACHIEVEMENTS.length/pageSize));
+    if(st.page>totalPages)st.page=1;
+    const start=(st.page-1)*pageSize;
+    const end=Math.min(start+pageSize, ACHIEVEMENTS.length);
+    html+=pagedNavHTML('pedia', ACHIEVEMENTS.length, pageSize, st.page);
+    html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;max-width:700px;margin:0 auto 10px">`;
+    for(let i=start;i<end;i++){
+      const a=ACHIEVEMENTS[i];
+      const u=saveData.achievements[a.id];
+      html+=`<div style="background:#161b22;border:2px solid ${u?'#ffd700':'#30363d'};border-radius:8px;padding:12px;text-align:center;${u?'':'opacity:0.6'}">
+        <div style="font-size:24px">${u?a.icon:'🔒'}</div>
+        <div style="font-size:13px;font-weight:bold;color:${u?'#ffd700':'#c9d1d9'}">${a.name}</div>
+        <div style="font-size:11px;color:#8b949e">${a.desc}</div>
+        <div style="font-size:11px;color:#3fb950;margin-top:4px">+${a.reward}积分</div>
+      </div>`;
+    }
+    html+=`</div>`;
   }
-  html+=`</div>`;
-  // 成就
-  const unlocked=Object.keys(saveData.achievements).length;
-  html+=`<div class="section-title">成就 (${unlocked}/${ACHIEVEMENTS.length})</div>`;
-  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;max-width:700px;margin:0 auto 16px">`;
-  for(const a of ACHIEVEMENTS){
-    const u=saveData.achievements[a.id];
-    html+=`<div style="background:#161b22;border:2px solid ${u?'#ffd700':'#30363d'};border-radius:8px;padding:12px;text-align:center;${u?'':'opacity:0.6'}">
-      <div style="font-size:24px">${u?a.icon:'🔒'}</div>
-      <div style="font-size:13px;font-weight:bold;color:${u?'#ffd700':'#c9d1d9'}">${a.name}</div>
-      <div style="font-size:11px;color:#8b949e">${a.desc}</div>
-      <div style="font-size:11px;color:#3fb950;margin-top:4px">+${a.reward}积分</div>
-    </div>`;
-  }
-  html+=`</div><div class="panel-actions"><button class="sec-btn" id="backFromPedia">返回</button></div>`;
+  html+=`<div class="panel-actions"><button class="sec-btn" id="backFromPedia">返回</button></div>`;
   ov.innerHTML=html;
+  ov.scrollTop=0;
+  // 标签切换
+  ov.querySelectorAll('[data-pedia-tab]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      st.tab=btn.dataset.pediaTab;
+      st.page=1;
+      showPediaMenu();
+    });
+  });
+  // 翻页按钮
+  bindPagedNav(ov, showPediaMenu);
   document.getElementById('backFromPedia').addEventListener('click',()=>{ov.classList.add('hidden');showMainMenu();});
 }
 
@@ -8447,13 +9522,18 @@ function gameLoop(timestamp){
       // 关卡倒计时
       levelTimer-=dt;
       if(levelTimer<=0){
-        // 时间到，自动进入下一波
+        // 时间到，自动进入下一波（经验值模式：不触发升级）
         levelTimer=maxLevelTime;
         if(currentWave>=CONFIG.WAVES_PER_LEVEL){
           startBoss();
         }else{
           // 进入下一波
-          showUpgradeScreen();
+          currentWave++;
+          showWaveAnnounce(`第 ${currentWave} 波`,'准备战斗！');
+          enemies=[];enemyBullets=[];bullets=[];minions=[];fireEffects=[];lightningStrikes=[];tornadoes=[];
+          // 注意：不清空 drops，让玩家拾取遗留的经验球
+          gameState='wavePrepare';
+          setTimeout(()=>{if(gameState!=='wavePrepare')return;startWave();},1500);
         }
       }
       // 敌人生成
@@ -8551,14 +9631,18 @@ function gameLoop(timestamp){
       for(const b of bullets)if(b.alive)b.update(dt);
       for(const eb of enemyBullets)if(eb.alive)eb.update(dt);
       for(const d of drops)if(d.alive)d.update(dt);
-      for(const p of pets)if(p.alive)p.update(dt);
+      // 如果拾取经验触发升级面板（gameState变为'upgrade'），跳过后续Boss更新和碰撞，
+      // 避免同一帧内Boss死亡导致onBossDefeated中的proceedToNextLevel被直接调用，
+      // 之后玩家关闭升级面板时防御性保护又调用一次，造成currentLevel被递增两次（跳关）
+      const _upgradeInterrupted = gameState !== 'boss';
+      for(const p of pets)if(p.alive&&!_upgradeInterrupted)p.update(dt);
       // Boss安全更新
       const bossRef=boss;
-      if(bossRef&&bossRef.alive){bossRef.update(dt);bossRef.updateWrathClones(dt);bossRef.updateOrbitingOrbs(dt);}
-      updateFireEffects(dt); updateLightningStrikes(dt); updateTornadoes(dt);
+      if(bossRef&&bossRef.alive&&!_upgradeInterrupted){bossRef.update(dt);bossRef.updateWrathClones(dt);bossRef.updateOrbitingOrbs(dt);}
+      if(!_upgradeInterrupted){updateFireEffects(dt); updateLightningStrikes(dt); updateTornadoes(dt);}
       updateDeathAnimation(dt);
-      // 碰撞（仅当Boss存活）
-      if(bossRef&&bossRef.alive)checkCollisions();
+      // 碰撞（仅当Boss存活且未触发升级面板）
+      if(bossRef&&bossRef.alive&&!_upgradeInterrupted&&player&&player.alive)checkCollisions();
       // 清理
       bullets=bullets.filter(b=>b.alive);
       enemyBullets=enemyBullets.filter(eb=>eb.alive);
@@ -8629,7 +9713,7 @@ function gameLoop(timestamp){
 window.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   keys[k]=true;
-  if(k==='r'&&gameState==='gameover')startGame();
+  if(k==='r'&&gameState==='gameover'){ if(_lastRunWasTrial)startBossTrial(); else startGame(); }
   if(k===' ')e.preventDefault();
 });
 window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
@@ -8913,9 +9997,11 @@ function togglePause(){
   if(isPaused){
     pauseOverlay.classList.remove('hidden');
     pauseOverlay.style.display = 'flex';
+    if(bgmGain)bgmGain.gain.value=0; // 暂停时静音BGM
   }else{
     pauseOverlay.classList.add('hidden');
     pauseOverlay.style.display = 'none';
+    if(bgmGain)bgmGain.gain.value=bgmMode==='trial'?0.07:0.06; // 恢复BGM（按模式音量）
   }
   vibrate(20);
   updateTouchControlsVisibility();
@@ -8923,6 +10009,7 @@ function togglePause(){
 function resumeFromPause(){
   if(isPaused){
     isPaused = false;
+    if(bgmGain&&bgmGain.gain)bgmGain.gain.value=bgmMode==='trial'?0.07:0.06;
     pauseOverlay.classList.add('hidden');
     pauseOverlay.style.display = 'none';
     updateTouchControlsVisibility();
@@ -9055,6 +10142,7 @@ function vibrate(pattern){
 // ==================== 初始化 ====================
 loadSave();
 showMainMenu();
+showUpdateNotice();
 requestAnimationFrame(gameLoop);
 </script>
 </body>
