@@ -947,29 +947,58 @@ function showUpdateNotice() {
     const lastNotice = localStorage.getItem('pixelShooterNoticeVer') || '';
     if (lastNotice === LATEST_NOTICE_VERSION) return; // 已读最新公告
   } catch(e) { return; }
-  // 构建公告弹窗
+  // 翻页式公告（手机端友好，无需长拖）
+  const PAGE_SIZE = 3; // 每页3条
+  const totalPages = Math.max(1, Math.ceil(NOTICE_CONTENT.length / PAGE_SIZE));
+  let currentPage = 1;
+  const renderPage = () => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = Math.min(start + PAGE_SIZE, NOTICE_CONTENT.length);
+    let list = '';
+    for (let i = start; i < end; i++) {
+      const item = NOTICE_CONTENT[i];
+      list += `<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(22,27,34,0.7);border:1px solid rgba(212,160,23,0.3);border-radius:8px">`;
+      list += `<div style="font-size:22px;flex-shrink:0">${item.icon}</div>`;
+      list += `<div style="flex:1"><div style="color:#ffd970;font-size:14px;font-weight:bold;margin-bottom:4px">${item.title}</div><div style="color:#b0a090;font-size:12px;line-height:1.6">${item.desc}</div></div>`;
+      list += `</div>`;
+    }
+    const contentEl = document.getElementById('noticeContent');
+    if (contentEl) contentEl.innerHTML = list;
+    const infoEl = document.getElementById('noticePageInfo');
+    if (infoEl) infoEl.textContent = `第 ${currentPage}/${totalPages} 页`;
+    const prevBtn = document.getElementById('noticePrevBtn');
+    const nextBtn = document.getElementById('noticeNextBtn');
+    if (prevBtn) prevBtn.disabled = (currentPage <= 1);
+    if (nextBtn) nextBtn.disabled = (currentPage >= totalPages);
+    // 最后一页显示"进入游戏"按钮，其他页显示"下一页"
+    const closeBtn = document.getElementById('noticeCloseBtn');
+    if (closeBtn) closeBtn.style.display = (currentPage >= totalPages) ? 'block' : 'none';
+    if (nextBtn) nextBtn.style.display = (currentPage < totalPages) ? 'block' : 'none';
+  };
   let html = `<div id="noticeOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99998;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)">`;
-  html += `<div style="background:linear-gradient(180deg,#1a1408,#2a1f10);border:2px solid #ffd700;border-radius:14px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;padding:20px 22px;box-shadow:0 0 40px rgba(255,215,0,0.3);font-family:STKaiti,KaiTi,serif">`;
-  html += `<h2 style="color:#ffd700;text-align:center;letter-spacing:3px;margin:0 0 6px">📜 更新公告</h2>`;
-  html += `<div style="text-align:center;color:#bc8cff;font-size:12px;margin-bottom:14px">版本 ${LATEST_NOTICE_VERSION} · 山海经·roug</div>`;
-  html += `<div style="display:flex;flex-direction:column;gap:10px">`;
-  for (const item of NOTICE_CONTENT) {
-    html += `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(212,160,23,0.3);border-radius:8px">`;
-    html += `<div style="font-size:20px;flex-shrink:0">${item.icon}</div>`;
-    html += `<div style="flex:1"><div style="color:#ffd970;font-size:13px;font-weight:bold;margin-bottom:3px">${item.title}</div><div style="color:#b0a090;font-size:11px;line-height:1.5">${item.desc}</div></div>`;
-    html += `</div>`;
-  }
+  html += `<div style="background:linear-gradient(180deg,#1a1408,#2a1f10);border:2px solid #ffd700;border-radius:14px;max-width:520px;width:100%;max-height:90vh;padding:18px 20px;box-shadow:0 0 40px rgba(255,215,0,0.3);font-family:STKaiti,KaiTi,serif;display:flex;flex-direction:column">`;
+  html += `<h2 style="color:#ffd700;text-align:center;letter-spacing:3px;margin:0 0 4px">📜 更新公告</h2>`;
+  html += `<div style="text-align:center;color:#bc8cff;font-size:12px;margin-bottom:12px">版本 ${LATEST_NOTICE_VERSION} · 山海经·roug</div>`;
+  html += `<div id="noticeContent" style="display:flex;flex-direction:column;gap:8px;flex:1;overflow:hidden"></div>`;
+  // 翻页导航
+  html += `<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px">`;
+  html += `<button id="noticePrevBtn" class="pg-btn" style="min-width:80px;padding:8px 14px;font-size:13px;border-radius:8px;background:linear-gradient(180deg,#2a3142,#1a1f2e);border:1px solid rgba(212,160,23,0.5);color:#ffd970;cursor:pointer">◀ 上一页</button>`;
+  html += `<span id="noticePageInfo" style="font-size:12px;color:#ffd970;padding:4px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(212,160,23,0.3);border-radius:6px;min-width:80px;text-align:center"></span>`;
+  html += `<button id="noticeNextBtn" class="pg-btn" style="min-width:80px;padding:8px 14px;font-size:13px;border-radius:8px;background:linear-gradient(180deg,#2a3142,#1a1f2e);border:1px solid rgba(212,160,23,0.5);color:#ffd970;cursor:pointer">下一页 ▶</button>`;
   html += `</div>`;
-  html += `<button id="noticeCloseBtn" style="margin-top:16px;width:100%;padding:10px;background:linear-gradient(180deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:STKaiti,KaiTi,serif">✦ 已阅读，进入游戏 ✦</button>`;
+  html += `<button id="noticeCloseBtn" style="margin-top:10px;width:100%;padding:10px;background:linear-gradient(180deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:STKaiti,KaiTi,serif;display:none">✦ 已阅读，进入游戏 ✦</button>`;
   html += `</div></div>`;
   document.body.insertAdjacentHTML('beforeend', html);
-  const closeBtn = document.getElementById('noticeCloseBtn');
+  renderPage();
+  document.getElementById('noticePrevBtn').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderPage(); } });
+  document.getElementById('noticeNextBtn').addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderPage(); } });
   const closeFn = (e) => {
     if (e) e.preventDefault();
     const el = document.getElementById('noticeOverlay');
     if (el) el.remove();
     try { localStorage.setItem('pixelShooterNoticeVer', LATEST_NOTICE_VERSION); } catch(e) {}
   };
+  const closeBtn = document.getElementById('noticeCloseBtn');
   closeBtn.addEventListener('click', closeFn);
   closeBtn.addEventListener('touchstart', closeFn, { passive: false });
 }
@@ -8096,58 +8125,49 @@ function showMainMenu(){
         <div class="sj-boss-label">烛龙 · 镇守</div>
       </div>
 
-      <p class="subtitle" style="font-family:'STKaiti','KaiTi',serif;letter-spacing:2px;margin-top:12px;line-height:1.7;font-size:13px">
-        ⚔️ <b style="color:#ffd700">山海经·roug</b> · 九大异兽 · 最终Boss<b style="color:#8b0000">刑天</b><br>
-        <span style="color:#bc8cff;font-size:11px">九尾狐 · 毕方 · 相柳 · 朱厌 · 烛龙 · 饕餮 · 英招 · 计蒙 · 穷奇</span>
+      <p class="subtitle" style="font-family:'STKaiti','KaiTi',serif;letter-spacing:2px;margin-top:8px;line-height:1.6;font-size:12px">
+        ⚔️ 九大异兽 · 最终Boss<b style="color:#8b0000">刑天</b>
       </p>
 
-      <div class="sj-scroll-frame" style="padding:10px 16px">
-        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0">
+      <div class="sj-scroll-frame" style="padding:6px 12px">
+        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:4px 0">
           <div class="stat-pill" style="border-color:#ffd700;box-shadow:0 0 10px rgba(255,215,0,0.4)"><span class="pill-icon">🎖️</span><span class="pill-value" style="color:#ffd700">${playerLvl.level}</span><span class="pill-label">等级</span></div>
           <div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">${saveData.totalScore}</span><span class="pill-label">积分</span></div>
-          <div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints}</span><span class="pill-label">天赋点</span></div>
-          <div class="stat-pill" style="animation-delay:1s"><span class="pill-icon">🐉</span><span class="pill-value">${petCount}</span><span class="pill-label">宠物</span></div>
-          <div class="stat-pill" style="animation-delay:1.5s"><span class="pill-icon">🎽</span><span class="pill-value">${gearCount}</span><span class="pill-label">装备</span></div>
-          <div class="stat-pill" style="animation-delay:2s"><span class="pill-icon">📖</span><span class="pill-value">${pediaCount}/${BOSS_TYPES.length}</span><span class="pill-label">图鉴</span></div>
-          <div class="stat-pill" style="animation-delay:2.5s"><span class="pill-icon">🔮</span><span class="pill-value">${artCount}/${SOUL_ARTIFACTS.length}</span><span class="pill-label">魂器</span></div>
-          <div class="stat-pill" style="animation-delay:3s"><span class="pill-icon">🏆</span><span class="pill-value">${achCount}</span><span class="pill-label">成就</span></div>
+          <div class="stat-pill"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints}</span><span class="pill-label">天赋</span></div>
+          <div class="stat-pill"><span class="pill-icon">🐉</span><span class="pill-value">${petCount}</span><span class="pill-label">宠物</span></div>
+          <div class="stat-pill"><span class="pill-icon">🎽</span><span class="pill-value">${gearCount}</span><span class="pill-label">装备</span></div>
+          <div class="stat-pill"><span class="pill-icon">📖</span><span class="pill-value">${pediaCount}/${BOSS_TYPES.length}</span><span class="pill-label">图鉴</span></div>
+          <div class="stat-pill"><span class="pill-icon">🔮</span><span class="pill-value">${artCount}/${SOUL_ARTIFACTS.length}</span><span class="pill-label">魂器</span></div>
+          <div class="stat-pill"><span class="pill-icon">🏆</span><span class="pill-value">${achCount}</span><span class="pill-label">成就</span></div>
         </div>
-        <div style="max-width:480px;margin:8px auto 2px;padding:0 6px">
-          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:#ffd700">🎖️ 训练等级 Lv.${playerLvl.level}</span><span style="color:#8b949e">${playerLvl.inLevel}/${playerLvl.needed} XP → Lv.${playerLvl.level+1}</span></div>
-          <div style="height:6px;background:#1a1f2e;border-radius:3px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.6)"><div style="height:100%;width:${playerLvl.inLevel/playerLvl.needed*100}%;background:linear-gradient(90deg,#ffd700,#ff8c42);transition:width 0.3s;border-radius:3px;box-shadow:0 0 6px rgba(255,215,0,0.5)"></div></div>
+        <div style="max-width:460px;margin:4px auto 2px;padding:0 6px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px"><span style="color:#ffd700">Lv.${playerLvl.level}</span><span style="color:#8b949e">${playerLvl.inLevel}/${playerLvl.needed} XP</span></div>
+          <div style="height:5px;background:#1a1f2e;border-radius:3px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.6)"><div style="height:100%;width:${playerLvl.inLevel/playerLvl.needed*100}%;background:linear-gradient(90deg,#ffd700,#ff8c42);transition:width 0.3s;border-radius:3px;box-shadow:0 0 6px rgba(255,215,0,0.5)"></div></div>
         </div>
       </div>
      </div>
 
      <div class="sj-col-right">
       <div class="menu-section">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
           <button class="action-btn" id="startBtn">⚔️ 开始冒险</button>
           <button class="action-btn trial" id="trialBtn">🐉 Boss试炼</button>
-          <button class="action-btn endless" id="endlessBtn">♾️ 无尽模式 ${saveData.bestEndlessWave>0?`<span style="font-size:13px;opacity:0.9">最佳${saveData.bestEndlessWave}波</span>`:''}</button>
+          <button class="action-btn endless" id="endlessBtn">♾️ 无尽模式 ${saveData.bestEndlessWave>0?`<span style="font-size:12px;opacity:0.9">最佳${saveData.bestEndlessWave}波</span>`:''}</button>
         </div>
       </div>
 
-      <div class="menu-section">
-        <div class="menu-section-title" style="font-family:'STKaiti','KaiTi',serif">◈ 角色养成 ◈</div>
+      <div class="menu-section" style="margin-top:4px">
         <div class="btn-grid">
           <button class="feature-btn fb-gold" id="talentBtn"><div class="fb-icon">🌟</div><div class="fb-name">天赋</div><div class="fb-tag">强化属性</div></button>
-          <button class="feature-btn fb-gold" id="bagBtn"><div class="fb-icon">🎒</div><div class="fb-name">背包</div><div class="fb-tag">装备/武器/宠物/皮肤</div></button>
-        </div>
-      </div>
-
-      <div class="menu-section">
-        <div class="menu-section-title" style="font-family:'STKaiti','KaiTi',serif">◈ 收集图鉴 ◈</div>
-        <div class="btn-grid">
-          <button class="feature-btn fb-green" id="ranchBtn"><div class="fb-icon">🐔</div><div class="fb-name">牧场</div><div class="fb-tag">放养·互动·产蛋</div></button>
+          <button class="feature-btn fb-gold" id="bagBtn"><div class="fb-icon">🎒</div><div class="fb-name">背包</div><div class="fb-tag">装备/武器/宠物</div></button>
+          <button class="feature-btn fb-green" id="ranchBtn"><div class="fb-icon">🐔</div><div class="fb-name">牧场</div><div class="fb-tag">放养·产蛋</div></button>
           <button class="feature-btn fb-purple" id="bondBtn"><div class="fb-icon">🔗</div><div class="fb-name">羁绊</div><div class="fb-tag">被动加成</div></button>
           <button class="feature-btn fb-blue" id="pediaBtn"><div class="fb-icon">📖</div><div class="fb-name">图鉴</div><div class="fb-tag">成就记录</div></button>
           ${saveData.hasShanHaiBook?'<button class="feature-btn" id="bookBtn" style="background:linear-gradient(135deg,#8b0000,#ffd700);border-color:#ffd700"><div class="fb-icon">📖</div><div class="fb-name">山海故事</div><div class="fb-tag">背景故事</div></button>':''}
         </div>
       </div>
 
-      <div class="menu-section" style="margin-top:8px">
-        <div class="menu-section-title" style="font-family:'STKaiti','KaiTi',serif">◈ 难度选择 ◈</div>
+      <div class="menu-section" style="margin-top:6px">
         <div class="diff-pills">
           ${Object.entries(DIFFICULTIES).map(([k,d])=>{
             const unlocked=isDifficultyUnlocked(k);
@@ -8159,18 +8179,17 @@ function showMainMenu(){
             }
           }).join('')}
         </div>
-        ${(!saveData.difficultyCleared||!saveData.difficultyCleared.godslayer)?`<div style="text-align:center;font-size:11px;color:#bc8cff;margin-top:6px;letter-spacing:1px">⚔️ 通关弑神难度Boss试炼有惊喜！</div>`:''}
-        ${saveData.cheatRevealed?`<div style="text-align:center;font-size:11px;color:#ffd970;margin-top:4px">✦ 开发者彩蛋已解锁 ✦</div>`:''}
+        ${(!saveData.difficultyCleared||!saveData.difficultyCleared.godslayer)?`<div style="text-align:center;font-size:10px;color:#bc8cff;margin-top:4px;letter-spacing:1px">⚔️ 通关弑神难度Boss试炼有惊喜！</div>`:''}
+        ${saveData.cheatRevealed?`<div style="text-align:center;font-size:10px;color:#ffd970;margin-top:2px">✦ 开发者彩蛋已解锁 ✦</div>`:''}
       </div>
 
-      <div style="margin:6px 0;text-align:center">
-        <button class="sec-btn" id="bonusBtn" style="${bonusDisabled?'opacity:0.4;cursor:not-allowed':'border-color:#ffd700;color:#ffd700;animation:pulseGlow 2s ease-in-out infinite'}">🎁 新手礼包 +300积分 +1天赋点 (剩余${saveData.bonusClicks}次)</button>
+      <div style="margin:4px 0;text-align:center">
+        <button class="sec-btn" id="bonusBtn" style="${bonusDisabled?'opacity:0.4;cursor:not-allowed':'border-color:#ffd700;color:#ffd700;animation:pulseGlow 2s ease-in-out infinite'}">🎁 新手礼包 +300积分 +1天赋点 (剩${saveData.bonusClicks}次)</button>
       </div>
      </div>
 
      <div class="sj-col-bottom" style="text-align:center">
-      <div class="deco-line" style="margin-top:10px"><span>操作指南</span></div>
-      <div class="controls" style="margin:8px auto 4px">
+      <div class="controls" style="margin:4px auto 2px">
         <div class="ctrl-item"><span class="key">WASD</span><span class="desc">移动</span></div>
         <div class="ctrl-item"><span class="key">鼠标</span><span class="desc">瞄准</span></div>
         <div class="ctrl-item"><span class="key">左键/空格</span><span class="desc">射击</span></div>
@@ -8178,23 +8197,25 @@ function showMainMenu(){
         <div class="ctrl-item"><span class="key">R</span><span class="desc">重开</span></div>
         <div class="ctrl-item"><span class="key">📱摇杆</span><span class="desc">手机端</span></div>
       </div>
-      <div class="subtitle" style="margin-top:6px;font-size:11px">当前难度：${diff.icon} ${diff.name} | 时间到自动进下一关</div>
-      <button id="fullscreenBtn" style="margin-top:6px">⛶ 全屏播放（无遮挡）</button>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0;flex-wrap:wrap">
+        <span class="subtitle" style="font-size:11px;margin:0">难度：${diff.icon} ${diff.name}</span>
+        <button id="fullscreenBtn" style="margin:0;padding:4px 10px;font-size:11px">⛶ 全屏播放</button>
+      </div>
       <div id="homeFullscreenTip"></div>
-      <div style="margin-top:10px;font-family:'STKaiti','KaiTi',serif;font-size:12px;letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
+      <div style="margin:4px 0;font-family:'STKaiti','KaiTi',serif;font-size:11px;letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
 
-      <details style="margin:8px auto 14px;max-width:680px;padding:8px 14px;border:1px solid rgba(212,160,23,0.3);border-radius:10px;background:rgba(22,27,34,0.7);font-size:11px;color:#8b949e;text-align:left;backdrop-filter:blur(8px)">
-        <summary style="cursor:pointer;color:#ffd970;font-size:12px;letter-spacing:1px">📖 新手指南（点击展开）</summary>
-        <div style="margin-top:8px;line-height:1.7;font-size:11px">
+      <details style="margin:4px auto 8px;max-width:680px;padding:6px 12px;border:1px solid rgba(212,160,23,0.3);border-radius:8px;background:rgba(22,27,34,0.7);font-size:10px;color:#8b949e;text-align:left;backdrop-filter:blur(8px)">
+        <summary style="cursor:pointer;color:#ffd970;font-size:11px;letter-spacing:1px">📖 新手指南（点击展开）</summary>
+        <div style="margin-top:6px;line-height:1.6;font-size:10px">
           <div style="color:#f0883e">⚡ <b>核心</b>：WASD移动，鼠标瞄准射击。每关30秒（Boss关50秒），时间到自动进下一关。</div>
           <div style="color:#8b0000">⚔️ <b>最终Boss·刑天</b>：击败超级Boss后50%几率触发，掉落山海故事书与「刑天干戚」。</div>
           <div style="color:#bc8cff">🌟 <b>天赋</b>：升级获得天赋点，强化伤害/射速/生命等。🎒 <b>背包</b>：管理武器/宠物/装备/打造/抽奖。</div>
-          <div style="color:#a855f7">🔮 <b>魂器</b>：击败超级Boss掉落，释放技能时附带魂器技。👤 <b>角色</b>：神射手/忍者，可佩戴皮肤。</div>
+          <div style="color:#a855f7">🔮 <b>魂器</b>：击败超级Boss掉落，释放技能时附带魂器技。</div>
           <div style="color:#3fb950">🔫 <b>武器</b>：手枪→神臂弓→散弹→狙击→震天锤→连弩→雷神炮→虚空之弓，3阶段满阶。</div>
           <div style="color:#ffd700">🐉 <b>宠物</b>：抽奖或击败Boss获得，9种Boss宝宝进化3阶段。🎽 <b>装备</b>：5稀有度，3件合成，4神话激活套装。</div>
-          <div style="color:#daa520">🔗 <b>羁绊</b>：收集Boss宝宝激活被动加成。🎰 <b>抽奖</b>：800积分/次，可得宠物/装备/皮肤。</div>
+          <div style="color:#daa520">🔗 <b>羁绊</b>：收集Boss宝宝激活被动加成。🎰 <b>抽奖</b>：800积分/次。</div>
           <div style="color:#ff6347">🔥 <b>半血机制</b>：Boss半血触发独有特殊机制。💥 <b>连击</b>：5连击+5%分数/击。</div>
-          <div style="color:#bc8cff">📊 <b>4大难度</b>：普通→困难→地狱→弑神，需通关前一难度Boss试炼解锁。📖 <b>其他</b>：试炼/无尽/奇遇/重铸(300分)/变异Boss(10%)</div>
+          <div style="color:#bc8cff">📊 <b>4大难度</b>：普通→困难→地狱→弑神，需通关前一难度Boss试炼解锁。</div>
         </div>
       </details>
      </div>
@@ -8236,6 +8257,31 @@ function showMainMenu(){
   if(bookBtn)bookBtn.addEventListener('click',()=>showShanHaiBook(false));
   // 主菜单内容可能溢出，确保从顶部开始展示
   ov.scrollTop = 0;
+  // 修复手机端滑动导致顶部按钮消失：主菜单状态下锁定overlay滚动，
+  // details/弹窗内部自带滚动不受影响。移除旧监听再绑定，避免重复。
+  if(!ov._menuScrollLock){
+    ov._menuScrollLock=true;
+    ov.addEventListener('touchmove',(e)=>{
+      // 仅当主菜单显示时锁定（其他菜单如背包/图鉴仍可滚动）
+      if(gameState==='menu' && !ov.classList.contains('hidden')){
+        // 若触摸发生在可滚动元素内部(details/弹窗)则放行
+        let node=e.target;
+        while(node && node!==ov){
+          if(node.tagName==='DETAILS'||node.tagName==='SUMMARY'||node.id==='noticeOverlay'){
+            return;
+          }
+          node=node.parentNode;
+        }
+        e.preventDefault();
+      }
+    },{passive:false});
+    // 同时监听scroll事件强制归零（防止地址栏收缩导致的微小滚动）
+    ov.addEventListener('scroll',()=>{
+      if(gameState==='menu' && !ov.classList.contains('hidden') && ov.scrollTop>0){
+        ov.scrollTop=0;
+      }
+    });
+  }
   // 显示手机端全屏/添加到主屏幕提示
   try{ showHomeTipIfMobile(); }catch(e){}
   // 难度选择
