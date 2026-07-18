@@ -701,19 +701,52 @@
   #homeFullscreenTip.show { display: block; }
   #homeFullscreenTip b { color: #ffd970; }
   #fullscreenBtn {
-    display: none;
-    margin: 8px auto 0;
-    padding: 8px 22px;
-    background: rgba(255, 217, 112, 0.15);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, rgba(255,217,112,0.25), rgba(212,160,23,0.15));
     color: #ffd970;
-    border: 1px solid #ffd970;
-    border-radius: 18px;
+    border: 1.5px solid #ffd700;
+    border-radius: 20px;
     font-size: 12px;
+    font-weight: bold;
     letter-spacing: 2px;
     cursor: pointer;
+    box-shadow: 0 0 12px rgba(255,215,0,0.3);
+    animation: pulseGlow 2.5s ease-in-out infinite;
   }
-  #fullscreenBtn.show { display: block; }
-  #fullscreenBtn:active { transform: scale(0.96); }
+  #fullscreenBtn:active { transform: scale(0.95); }
+  /* 手机端首页大号全屏按钮 - fixed定位避免被裁剪 */
+  #homeFullscreenBigBtn {
+    display: none;
+    position: fixed;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #ffd970, #d4a020);
+    color: #1a1f2e;
+    border: 2px solid #ffd700;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    cursor: pointer;
+    box-shadow: 0 0 24px rgba(255,215,0,0.6), 0 4px 12px rgba(0,0,0,0.4);
+    animation: pulseGlow 1.8s ease-in-out infinite;
+    font-family: 'STKaiti', KaiTi, serif;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.4);
+  }
+  #homeFullscreenBigBtn:active { transform: translateX(-50%) scale(0.96); }
+  @media (pointer: coarse) {
+    #homeFullscreenBigBtn { display: block; }
+    /* 手机端横屏视口小,隐藏新手指南details和作者署名避免溢出视口 */
+    .home-guide { display: none !important; }
+    .home-author { display: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -5989,7 +6022,8 @@ function checkCollisions(){
     if(!bullet.alive)continue;
     for(const enemy of enemies){
       if(!enemy.alive||bullet.hitEnemies.has(enemy))continue;
-      if(dist(bullet.x,bullet.y,enemy.x,enemy.y)<bullet.size+enemy.size*0.8){
+      // 受击框放大1.25倍(原0.8→1.0),让子弹更容易命中
+      if(dist(bullet.x,bullet.y,enemy.x,enemy.y)<bullet.size+enemy.size*1.0){
         enemy.takeDamage(bullet.damage,bullet);
         bullet.hitEnemies.add(enemy);
         if(bullet.isCrit)pushFloatingText(enemy.x,enemy.y-15,'暴击!','#ff6b6b',0.6);
@@ -6036,7 +6070,8 @@ function checkCollisions(){
       }
     }
     if(bullet.alive&&boss&&boss.alive&&!bullet.hitEnemies.has(boss)){
-      if(dist(bullet.x,bullet.y,boss.x,boss.y)<bullet.size+boss.size*1.5){
+      // Boss受击框放大(原1.5→1.8),让子弹更容易命中Boss
+      if(dist(bullet.x,bullet.y,boss.x,boss.y)<bullet.size+boss.size*1.8){
         const br=boss; boss.takeDamage(bullet.damage,bullet); bullet.hitEnemies.add(br);
         if(bullet.isCrit&&boss)pushFloatingText(br.x,br.y-30,'暴击!','#ff6b6b',0.6);
         // 吸血
@@ -8169,13 +8204,14 @@ function showMainMenu(){
       </div>
       <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0;flex-wrap:wrap">
         <span class="subtitle" style="font-size:11px;margin:0">难度：${diff.icon} ${diff.name}</span>
-        <button id="fullscreenBtn" style="margin:0;padding:4px 10px;font-size:11px">⛶ 全屏播放</button>
+        <button id="fullscreenBtn">⛶ 点我全屏</button>
         ${saveData.hasShanHaiBook?'<button id="bookBtn" style="margin:0;padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#8b0000,#ffd700);color:#fff;border:1px solid #ffd700;border-radius:6px;cursor:pointer">📖 山海故事</button>':''}
       </div>
+      <button id="homeFullscreenBigBtn">⛶ 点我全屏播放</button>
       <div id="homeFullscreenTip"></div>
-      <div style="margin:4px 0;font-family:'STKaiti','KaiTi',serif;font-size:11px;letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
+      <div class="home-author" style="margin:4px 0;font-family:'STKaiti','KaiTi',serif;font-size:11px;letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
 
-      <details style="margin:4px auto 8px;max-width:680px;padding:6px 12px;border:1px solid rgba(212,160,23,0.3);border-radius:8px;background:rgba(22,27,34,0.7);font-size:10px;color:#8b949e;text-align:left;backdrop-filter:blur(8px)">
+      <details class="home-guide" style="margin:4px auto 8px;max-width:680px;padding:6px 12px;border:1px solid rgba(212,160,23,0.3);border-radius:8px;background:rgba(22,27,34,0.7);font-size:10px;color:#8b949e;text-align:left;backdrop-filter:blur(8px)">
         <summary style="cursor:pointer;color:#ffd970;font-size:11px;letter-spacing:1px">📖 新手指南（点击展开）</summary>
         <div style="margin-top:6px;line-height:1.6;font-size:10px">
           <div style="color:#f0883e">⚡ <b>核心</b>：WASD移动，鼠标瞄准射击。每关30秒（Boss关50秒），时间到自动进下一关。</div>
@@ -9456,13 +9492,30 @@ function showBondMenu(){
 function showPediaMenu(){
   const ov=document.getElementById('pediaOverlay'); ov.classList.remove('hidden');
   const st=getPagedState('pedia',{page:1,pageSize:6,tab:'boss'});
-  pagedSetTotal('pedia', st.tab==='boss'?BOSS_TYPES.length:ACHIEVEMENTS.length);
+  pagedSetTotal('pedia', st.tab==='boss'?BOSS_TYPES.length:(st.tab==='ach'?ACHIEVEMENTS.length:1));
   let html=`<h2>📖 山海图鉴</h2><p class="subtitle">已发现Boss与成就记录 | 解锁成就自动获得积分奖励</p>`;
   // 标签切换
   html+=`<div class="paged-tabs">
     <button class="pg-btn" data-pedia-tab="boss" ${st.tab==='boss'?'style="border-color:#58a6ff;color:#58a6ff;background:rgba(88,166,255,0.15)"':''}>🐉 Boss图鉴 (${Object.keys(saveData.bossPedia).length}/${BOSS_TYPES.length})</button>
     <button class="pg-btn" data-pedia-tab="ach" ${st.tab==='ach'?'style="border-color:#ffd700;color:#ffd700;background:rgba(255,215,0,0.15)"':''}>🏆 成就 (${Object.keys(saveData.achievements).length}/${ACHIEVEMENTS.length})</button>
+    <button class="pg-btn" data-pedia-tab="guide" ${st.tab==='guide'?'style="border-color:#3fb950;color:#3fb950;background:rgba(63,185,80,0.15)"':''}>📖 新手指南</button>
   </div>`;
+  if(st.tab==='guide'){
+    html+=`<div style="max-width:680px;margin:0 auto;padding:12px 16px;background:rgba(22,27,34,0.7);border:1px solid rgba(212,160,23,0.3);border-radius:10px;font-size:12px;color:#b0a090;line-height:1.8;text-align:left">
+      <div style="color:#f0883e;margin-bottom:6px">⚡ <b>核心</b>：WASD移动，鼠标瞄准射击。每关30秒（Boss关50秒），时间到自动进下一关。</div>
+      <div style="color:#8b0000;margin-bottom:6px">⚔️ <b>最终Boss·刑天</b>：击败超级Boss后50%几率触发，掉落山海故事书与「刑天干戚」。</div>
+      <div style="color:#bc8cff;margin-bottom:6px">🌟 <b>天赋</b>：升级获得天赋点，强化伤害/射速/生命等。</div>
+      <div style="color:#bc8cff;margin-bottom:6px">🎒 <b>背包</b>：管理武器/宠物/装备/打造/抽奖。</div>
+      <div style="color:#a855f7;margin-bottom:6px">🔮 <b>魂器</b>：击败超级Boss掉落，释放技能时附带魂器技。</div>
+      <div style="color:#3fb950;margin-bottom:6px">🔫 <b>武器</b>：手枪→神臂弓→散弹→狙击→震天锤→连弩→雷神炮→虚空之弓，3阶段满阶。</div>
+      <div style="color:#ffd700;margin-bottom:6px">🐉 <b>宠物</b>：抽奖或击败Boss获得，9种Boss宝宝进化3阶段。</div>
+      <div style="color:#ffd700;margin-bottom:6px">🎽 <b>装备</b>：5稀有度，3件合成，4神话激活套装。</div>
+      <div style="color:#daa520;margin-bottom:6px">🔗 <b>羁绊</b>：收集Boss宝宝激活被动加成。🎰 <b>抽奖</b>：800积分/次。</div>
+      <div style="color:#ff6347;margin-bottom:6px">🔥 <b>半血机制</b>：Boss半血触发独有特殊机制。💥 <b>连击</b>：5连击+5%分数/击。</div>
+      <div style="color:#bc8cff;margin-bottom:6px">📊 <b>4大难度</b>：普通→困难→地狱→弑神，需通关前一难度Boss试炼解锁。</div>
+      <div style="color:#8b949e;margin-top:8px;text-align:center;font-size:11px;letter-spacing:3px">✦ Edeka 制作 ✦</div>
+    </div>`;
+  }
   if(st.tab==='boss'){
     // Boss图鉴分页
     const pageSize=st.pageSize;
@@ -9794,6 +9847,18 @@ document.addEventListener('webkitfullscreenchange', () => { lastTime = 0; });
 function showHomeTipIfMobile(){
   const tip = document.getElementById('homeFullscreenTip');
   if(!tip) return;
+  // 始终绑定全屏按钮点击事件（电脑端+手机端都可用）
+  const fsBtn = document.getElementById('fullscreenBtn');
+  if(fsBtn && !fsBtn._bound){
+    fsBtn._bound = true;
+    fsBtn.addEventListener('click', toggleFullscreen);
+  }
+  const bigBtn = document.getElementById('homeFullscreenBigBtn');
+  if(bigBtn && !bigBtn._bound){
+    bigBtn._bound = true;
+    bigBtn.addEventListener('click', toggleFullscreen);
+    bigBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); toggleFullscreen(); }, {passive:false});
+  }
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
   let html = '';
@@ -9815,12 +9880,7 @@ function showHomeTipIfMobile(){
     // 已经是主屏幕模式，不用提示
     return;
   }else if(isTouchDevice){
-    // 非微信手机浏览器：显示全屏按钮
-    const btn = document.getElementById('fullscreenBtn');
-    if(btn){
-      btn.classList.add('show');
-      btn.addEventListener('click', toggleFullscreen);
-    }
+    // 非微信手机浏览器：按钮已在上方统一绑定,这里只显示提示文字
     if(isIOS){
       html += ' IOS 最佳体验：<br>点底部 <b>分享 ↗</b> → <b>添加到主屏幕</b><br>像 App 一样全屏玩，无地址栏';
     }else{
