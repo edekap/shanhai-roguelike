@@ -613,6 +613,9 @@ function startGame(){
   if(typeof _pushGameState==='function')_pushGameState(); // Android 后退键保护
   initAudio(); // 首次开始游戏时初始化音频
   startBGM('normal'); // 启动普通背景音乐
+  // 预加载所有Boss图片：避免Boss战开始时图片未加载完显示fallback圆形
+  // _bossImgLoadedSet 会去重，重复调用安全
+  if(typeof loadAllBossImages==='function')loadAllBossImages();
   // 清理可能残留的死亡动画定时器（防御性：正常流程下gameOver已执行，此处兜底）
   if(deathTimeout){clearTimeout(deathTimeout); deathTimeout=null;}
   deathAnimation=null;
@@ -1489,6 +1492,9 @@ function showMainMenu(){
   if(typeof resetTouchState==='function')resetTouchState();
   gameState='menu';
   stopBGM(); // 返回主菜单时停止背景音乐
+  // 后台预加载所有Boss图片：用户在主菜单操作时图片就在加载，
+  // 进入游戏时大概率已加载完，避免手机端网络慢导致Boss显示fallback圆形
+  if(typeof loadAllBossImages==='function')loadAllBossImages();
   const ov=document.getElementById('overlay');
   ov.classList.remove('hidden');
   const diff=getDifficulty();

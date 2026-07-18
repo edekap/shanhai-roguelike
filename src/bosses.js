@@ -306,6 +306,8 @@ function startBossTrial(){
   if(typeof _pushGameState==='function')_pushGameState(); // Android 后退键保护
   initAudio(); // 确保音频已初始化
   startBGM('trial'); // 启动试炼激昂BGM
+  // 预加载所有Boss图片：避免试炼Boss战开始时图片未加载完显示fallback圆形
+  if(typeof loadAllBossImages==='function')loadAllBossImages();
   // 清理可能残留的死亡动画定时器（防御性）
   if(typeof deathTimeout!=='undefined'&&deathTimeout){clearTimeout(deathTimeout); deathTimeout=null;}
   if(typeof deathAnimation!=='undefined')deathAnimation=null;
