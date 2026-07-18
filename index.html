@@ -807,10 +807,10 @@
   #homeFullscreenBigBtn:active { transform: translateX(-50%) scale(0.96); }
   @media (pointer: coarse) {
     #homeFullscreenBigBtn { display: block; }
-    /* 手机端横屏视口小,隐藏details折叠区避免溢出,显示精简版新手指南按钮 */
-    .home-guide { display: none !important; }
-    .home-author { display: none !important; }
-    .home-guide-mobile { display: block !important; }
+    /* 手机端显示完整新手指南（details默认折叠）和开发者署名，隐藏精简版按钮避免重复 */
+    .home-guide { display: block !important; }
+    .home-author { display: block !important; }
+    .home-guide-mobile { display: none !important; }
   }
   .home-guide-mobile { display: none; }
   /* 手机端按钮触摸目标统一规范：主按钮 min-height:48px，次按钮 min-height:44px（iOS HIG/Material Design 标准） */

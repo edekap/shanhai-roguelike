@@ -12,6 +12,24 @@ function _bindTap(el, handler){
 function _bindTapAll(selector, handler){
   document.querySelectorAll(selector).forEach(el=>_bindTap(el, handler));
 }
+// 装备菜单专用模态弹窗：z-index 100 高于 gearOverlay(30)/adventureOverlay(35)/bossCaptureOverlay(40)，
+// 避免 #gearOverlay 内的二次确认弹窗被自身遮挡（旧代码用 #overlay z-index:20 会被 gearOverlay 盖住）
+function _showGearModal(html){
+  let modal=document.getElementById('gearModal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='gearModal';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow-y:auto;-webkit-overflow-scrolling:touch';
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML=html;
+  modal.style.display='flex';
+  return modal;
+}
+function _hideGearModal(){
+  const modal=document.getElementById('gearModal');
+  if(modal)modal.style.display='none';
+}
 // 性能优化：缓存所有DOM引用，避免每帧调用getElementById
 const _ui = {
   healthText:null, healthBar:null, shieldBarWrap:null, shieldBar:null,
@@ -1020,7 +1038,7 @@ function gameOver(){
   const replayBtnHandler = wasTrial ? 'startBossTrial' : 'startGame';
   const replayBtnStyle = wasTrial ? 'background:linear-gradient(135deg,#bc8cff,#8b5cf6);font-size:16px;padding:14px 28px;min-height:48px' : 'font-size:16px;padding:14px 28px;min-height:48px';
   const tipHtml=generateDeathTip();
-  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:10px;padding-top:24px"><h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:28px;margin:4px 0">游戏结束</h1><div class="deco-line" style="margin:4px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>${wasTrial?'<p style="color:#bc8cff;font-size:13px;margin:4px 0">Boss试炼结束</p>':endlessMode?`<p style="color:#daa520;font-size:13px;margin:4px 0">♾️ 无尽模式 - 第 ${endlessWave} 波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' <span style="color:#ffd700">🏆 新纪录!</span>':''}</p>`:`<p style="font-size:13px;margin:4px 0">你到达了第 ${currentLevel} 关 第 ${currentWave} 波</p>`}<div id="finalScore" class="card-enter" style="font-size:48px">${score}</div><p class="subtitle" style="margin:2px 0">本局得分</p>${achHtml}${tipHtml}${recapHtml}<div style="display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap"><div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div><div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>${newEggs>0?`<div class="stat-pill" style="animation-delay:1s;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}</div><div style="display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:6px;padding-bottom:20px"><button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle}">${replayBtnText}</button><button class="sec-btn" id="backToMenuBtn" style="font-size:14px;padding:12px 24px;min-height:44px">🏠 返回主菜单</button></div><div class="subtitle" style="margin-top:6px;font-size:11px">按 R 键快速重新开始</div></div>`;
+  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:10px;padding-top:24px"><h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:28px;margin:4px 0">游戏结束</h1><div class="deco-line" style="margin:4px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>${wasTrial?'<p style="color:#bc8cff;font-size:13px;margin:4px 0">Boss试炼结束</p>':endlessMode?`<p style="color:#daa520;font-size:13px;margin:4px 0">♾️ 无尽模式 - 第 ${endlessWave} 波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' <span style="color:#ffd700">🏆 新纪录!</span>':''}</p>`:`<p style="font-size:13px;margin:4px 0">你到达了第 ${currentLevel} 关 第 ${currentWave} 波</p>`}<div id="finalScore" class="card-enter" style="font-size:48px">${score}</div><p class="subtitle" style="margin:2px 0">本局得分</p>${achHtml}${tipHtml}${recapHtml}<div style="display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap"><div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div><div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>${newEggs>0?`<div class="stat-pill" style="animation-delay:1s;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}</div><div style="display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:6px;padding:12px 10px calc(12px + env(safe-area-inset-bottom, 0px));position:sticky;bottom:0;background:linear-gradient(180deg,transparent 0%,rgba(13,10,5,0.92) 25%);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:5"><button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle}">${replayBtnText}</button><button class="sec-btn" id="backToMenuBtn" style="font-size:14px;padding:12px 24px;min-height:44px">🏠 返回主菜单</button><div class="subtitle" style="margin-top:2px;font-size:11px">按 R 键快速重新开始</div></div></div>`;
   saveSave();
   // 死亡界面按钮统一用 _bindTap（带 _isSynthesizedClick 守卫，防止触屏笔记本双触发）
   const startBtnEl=document.getElementById(replayBtnId);
@@ -2928,20 +2946,19 @@ function showGearMenu(){
       }
       rh+=`</div>`;
       rh+=`<div style="text-align:center;margin-top:8px"><button class="sec-btn" id="cancelDirectReforge">取消</button></div>`;
-      const ov2=document.getElementById('overlay');
-      ov2.classList.remove('hidden');
-      ov2.innerHTML=`<div style="max-width:500px;margin:auto;padding:16px;background:#161b22;border:1px solid #ffd700;border-radius:8px">${rh}</div>`;
-      ov2.querySelectorAll('[data-pick-affix]').forEach(b=>{
+      // 使用专用模态弹窗（z-index:100），避免被 #gearOverlay(z-index:30) 遮挡
+      const modal=_showGearModal(`<div style="max-width:500px;width:100%;margin:auto;padding:16px;background:#161b22;border:1px solid #ffd700;border-radius:8px">${rh}</div>`);
+      modal.querySelectorAll('[data-pick-affix]').forEach(b=>{
         _bindTap(b,()=>{
           const targetId=b.dataset.pickAffix;
           const result=directReforge(uid, targetId);
-          ov2.classList.add('hidden');
+          _hideGearModal();
           showGearMenu();
           setTimeout(()=>showSynthResult(result),50);
         });
       });
       _bindTap(document.getElementById('cancelDirectReforge'),()=>{
-        ov2.classList.add('hidden');
+        _hideGearModal();
       });
     });
   });
@@ -2954,12 +2971,10 @@ function showGearMenu(){
       if(!g)return;
       const cost=GEAR_ASCEND_COST[g.rarity];
       if(!cost)return;
-      // 二次确认（消耗较大）
-      const ov2=document.getElementById('overlay');
-      ov2.classList.remove('hidden');
+      // 二次确认（消耗较大）：使用专用模态弹窗（z-index:100），避免被 #gearOverlay(z-index:30) 遮挡
       const newRarity=GEAR_RARITY_ORDER[GEAR_RARITY_ORDER.indexOf(g.rarity)+1];
       const newRarityDef=GEAR_RARITIES[newRarity];
-      ov2.innerHTML=`<div style="max-width:440px;margin:auto;padding:16px;background:#161b22;border:1px solid #bc8cff;border-radius:8px;text-align:center">
+      const modal=_showGearModal(`<div style="max-width:440px;width:100%;padding:16px;background:#161b22;border:1px solid #bc8cff;border-radius:8px;text-align:center">
         <div style="color:#bc8cff;font-size:14px;font-weight:bold;margin-bottom:8px">⬆ 装备升阶确认</div>
         <div style="color:#c9d1d9;font-size:12px;margin-bottom:8px">${GEAR_SLOT_ICONS[g.slot]} ${g.name} (${GEAR_RARITIES[g.rarity].name})</div>
         <div style="color:#8b949e;font-size:11px;margin-bottom:6px">→ 升阶为 <span style="color:${newRarityDef.color};font-weight:bold">${newRarityDef.name}</span> 品质</div>
@@ -2969,14 +2984,14 @@ function showGearMenu(){
           <button class="main-btn" id="confirmAscend" style="background:linear-gradient(135deg,#bc8cff,#58a6ff);font-size:13px;padding:8px 18px">确认升阶</button>
           <button class="sec-btn" id="cancelAscend" style="font-size:13px;padding:8px 18px">取消</button>
         </div>
-      </div>`;
+      </div>`);
       _bindTap(document.getElementById('confirmAscend'),()=>{
         const result=ascendGear(uid);
-        ov2.classList.add('hidden');
+        _hideGearModal();
         showGearMenu();
         setTimeout(()=>showSynthResult(result),50);
       });
-      _bindTap(document.getElementById('cancelAscend'),()=>{ov2.classList.add('hidden');});
+      _bindTap(document.getElementById('cancelAscend'),()=>{_hideGearModal();});
     });
   });
   // 装备图鉴：部位筛选
