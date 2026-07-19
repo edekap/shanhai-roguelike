@@ -1035,11 +1035,16 @@ showMainMenu();
 // 因此在触摸设备 + 非全屏 + 非standalone + 非微信 环境下，先显示全屏引导遮罩，
 // 用户点击"全屏开始"后进入全屏，再继续显示故事/公告/教程。
 const _showWelcomeFlow = () => {
+  // 首次玩家：故事 + 新手教程（跳过更新公告，避免三连弹窗劝退）
+  // 老玩家：更新公告（如有新版本）
   if(!saveData.storyViewed){
     showOpeningStory();
+    // 故事关闭后会自动触发 showUpdateNotice，但首次玩家不需要看公告
+    // 故在 showOpeningStory 的 closeFn 中已调用 showUpdateNotice，这里跳过
   }else{
     showUpdateNotice();
   }
+  // 新手教程仅首次显示（saveData.tutorialShown=false 时）
   if(!saveData.tutorialShown && typeof showTutorial === 'function'){
     showTutorial();
   }

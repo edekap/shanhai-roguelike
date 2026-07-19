@@ -428,7 +428,10 @@ function showOpeningStory(){
     saveData.storyViewed = true;
     saveSave();
     // 故事关闭后显示更新公告(如果有)
-    showUpdateNotice();
+    // 但首次玩家（tutorialShown=false）跳过公告，直接看新手教程，避免三连弹窗劝退
+    if(saveData.tutorialShown){
+      showUpdateNotice();
+    }
   };
   _bindTap(document.getElementById('storyStartBtn'), closeFn);
   _bindTap(document.getElementById('storySkipBtn'), closeFn);

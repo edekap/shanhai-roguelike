@@ -1015,13 +1015,15 @@ function startGame(){
     },1500);
   }
   // 手机端首次进入游戏：提示摇杆自动锁定机制（仅本次会话首次显示，不污染存档）
-  if(isTouchDevice && touchConfirmed && !sessionStorage.getItem('_aimTipShown')){
+  // 移除 touchConfirmed 依赖：首次玩家还没触摸过屏幕，touchConfirmed=false 会导致提示被跳过
+  // 教程已包含此提示，但战斗中再次浮出强化记忆
+  if(isTouchDevice && !sessionStorage.getItem('_aimTipShown')){
     sessionStorage.setItem('_aimTipShown', '1');
     gameTimeout(()=>{
       pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2-60,'🎯 右摇杆不动=自动锁定最近敌人','#ffd970',4);
       pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2-30,'推动右摇杆=手动瞄准射击','#bc8cff',4);
       pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2,'金色准星+虚线=当前瞄准方向','#58a6ff',4);
-    },2000);
+    },2500);
   }
 }
 // 无尽模式：通关8关后进入无尽波次
@@ -2727,6 +2729,10 @@ function showTutorial(force){
           <div>左侧摇杆：<span style="color:#ffd970">移动</span></div>
           <div>右侧摇杆：<span style="color:#ffd970">射击方向</span>（自动开火）</div>
           <div>双手可同时操控，互不干扰</div>
+          <div style="margin-top:10px;padding:8px 10px;background:rgba(255,215,0,0.1);border-left:3px solid #ffd970;border-radius:4px">
+            <div style="color:#ffd970;font-weight:bold">🎯 右摇杆不动 = 自动锁定最近敌人</div>
+            <div style="color:#b0a090;font-size:11px;margin-top:2px">推动右摇杆 = 手动瞄准射击</div>
+          </div>
           <div style="color:#79c0ff;font-size:14px;font-weight:bold;margin:14px 0 8px">💻 电脑端</div>
           <div>WASD / 方向键：移动</div>
           <div>鼠标移动：瞄准 · 自动开火</div>
