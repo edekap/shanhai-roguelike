@@ -1834,7 +1834,7 @@ class Drop {
     this.size= this.type==='xp'?10:(this.type==='gear'?14:12); this.alive=true;this.lifetime=10;
     this.wobble=rand(0,Math.PI*2);this.bobOffset=0;
     // 经验球被吸引但不会被立即拾取，给玩家主动拾取的体验
-    this.xpPullRange=80; // 经验球吸引范围（小于磁铁范围，避免全屏吸）
+    this.xpPullRange=160; // 经验球吸引范围（小于磁铁范围，避免全屏吸）
   }
   update(dt){
     this.lifetime-=dt;this.wobble+=dt*3;this.bobOffset=Math.sin(this.wobble)*3;
@@ -1852,7 +1852,7 @@ class Drop {
       if(d<player.size+this.size){ this.pickup(); }
     }else{
       // 其他掉落物：磁铁范围内立即拾取
-      const range=(player?.magnetRange||60);
+      const range=(player?.magnetRange||120);
       if(d<range)this.pickup();
     }
   }

@@ -308,7 +308,7 @@ function drawBossDeathFx(){
     }
   }
 }
-function getWaveEnemyCount(wave){return Math.ceil((5+wave*3+Math.floor(wave/2)*2)*getDifficulty().enemyCountMul);}
+function getWaveEnemyCount(wave){return Math.ceil((8+wave*4+Math.floor(wave/2)*3)*getDifficulty().enemyCountMul);}
 function getWaveEnemyTypes(wave){
   const t=['grunt']; if(wave>=2)t.push('runner'); if(wave>=3)t.push('tank','spiky'); if(wave>=4)t.push('shooter','invincible'); if(wave>=5)t.push('giant','bomber');
   if(wave>=7)t.push('taunt');

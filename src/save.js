@@ -725,7 +725,7 @@ const BASE_UPGRADES = [
   {id:'speed',name:'轻灵',icon:'👟',desc:'移动速度+12%',rarity:'common',apply:p=>p.speed*=1.12},
   {id:'health',name:'强韧',icon:'❤️',desc:'最大生命+2并回满',rarity:'common',apply:p=>{p.maxHealth+=2;p.health=p.maxHealth;}},
   {id:'bulletspeed',name:'风之祝福',icon:'💨',desc:'子弹速度+30%',rarity:'common',apply:p=>p.bulletSpeed*=1.30},
-  {id:'magnet',name:'聚灵',icon:'🌀',desc:'拾取范围+100',rarity:'common',apply:p=>p.magnetRange=(p.magnetRange||60)+100},
+  {id:'magnet',name:'聚灵',icon:'🌀',desc:'拾取范围+100',rarity:'common',apply:p=>p.magnetRange=(p.magnetRange||120)+100},
 
   // === 稀有（机制增强）===
   {id:'multishot',name:'多重射击',icon:'🎯',desc:'额外+1发子弹',rarity:'rare',apply:p=>{p.bulletCount+=1;p.bulletSpread+=0.12;}},
@@ -1044,7 +1044,7 @@ const GEAR_LEGENDARY_AFFIXES = [
   { id:'thorns', name:'荆棘反伤', icon:'🌵', desc:'受击反弹伤害', apply:(p)=>p.thornsDmg=(p.thornsDmg||0)+1 },
   { id:'shieldregen', name:'护盾再生', icon:'🔄', desc:'每关恢复护盾', apply:(p)=>p.shieldRegen=(p.shieldRegen||0)+1 },
   { id:'pierce_all', name:'穿透强化', icon:'🏹', desc:'子弹额外穿透', apply:(p)=>p.bulletPierce+=2 },
-  { id:'magnet', name:'磁力范围', icon:'🧲', desc:'拾取范围大幅增加', apply:(p)=>p.magnetRange=(p.magnetRange||60)+120 },
+  { id:'magnet', name:'磁力范围', icon:'🧲', desc:'拾取范围大幅增加', apply:(p)=>p.magnetRange=(p.magnetRange||120)+120 },
   { id:'dodge',  name:'闪避', icon:'💨', desc:'15%几率闪避伤害', apply:(p)=>p.dodgeChance=(p.dodgeChance||0)+0.15 }
 ];
 // 神话(红)专属词条池 - 更强大的独特效果

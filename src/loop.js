@@ -1035,18 +1035,38 @@ showMainMenu();
 // 因此在触摸设备 + 非全屏 + 非standalone + 非微信 环境下，先显示全屏引导遮罩，
 // 用户点击"全屏开始"后进入全屏，再继续显示故事/公告/教程。
 const _showWelcomeFlow = () => {
-  // 首次玩家：故事 + 新手教程（跳过更新公告，避免三连弹窗劝退）
-  // 老玩家：更新公告（如有新版本）
+  // 首次玩家：故事 → 故事关闭后看教程（跳过更新公告，避免三连弹窗劝退）
+  // 老玩家：更新公告（如有新版本）→ 公告关闭后看教程（如未看过）
   if(!saveData.storyViewed){
+    // 首次玩家：showOpeningStory 是同步模态弹窗，教程必须在故事关闭后才显示
+    // 通过 hack：在 showOpeningStory 后监听 storyOverlay 的 remove 事件
     showOpeningStory();
-    // 故事关闭后会自动触发 showUpdateNotice，但首次玩家不需要看公告
-    // 故在 showOpeningStory 的 closeFn 中已调用 showUpdateNotice，这里跳过
+    // 等待故事关闭后再显示教程（轮询检测 storyOverlay 是否被移除）
+    if(!saveData.tutorialShown && typeof showTutorial === 'function'){
+      const _waitStoryClose = setInterval(()=>{
+        const el = document.getElementById('storyOverlay');
+        if(!el){
+          clearInterval(_waitStoryClose);
+          if(!saveData.tutorialShown){
+            showTutorial();
+          }
+        }
+      }, 200);
+    }
   }else{
     showUpdateNotice();
-  }
-  // 新手教程仅首次显示（saveData.tutorialShown=false 时）
-  if(!saveData.tutorialShown && typeof showTutorial === 'function'){
-    showTutorial();
+    // 老玩家：等待公告关闭后再显示教程（如未看过）
+    if(!saveData.tutorialShown && typeof showTutorial === 'function'){
+      const _waitNoticeClose = setInterval(()=>{
+        const el = document.getElementById('noticeOverlay');
+        if(!el){
+          clearInterval(_waitNoticeClose);
+          if(!saveData.tutorialShown){
+            showTutorial();
+          }
+        }
+      }, 200);
+    }
   }
 };
 const _isStandaloneMode = () => {
