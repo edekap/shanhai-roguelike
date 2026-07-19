@@ -241,22 +241,23 @@ function updateUI(){
   // 生命值（仅变化时写DOM）
   const hpTxt=`${Math.ceil(player.health)}/${player.maxHealth}`;
   if(hpTxt!==_ui._lastHealth){_ui.healthText.textContent=hpTxt;_ui._lastHealth=hpTxt;}
-  const hpPct=Math.max(0,player.health/player.maxHealth*100)+'%';
-  _ui.healthBar.style.width=hpPct;
-  // 玩家低血裂纹：血量<30%时血条变暗+震动+脉冲红光（强化"濒死"危机感）
+  // 性能优化：血条宽度仅在变化>1%时才写DOM，避免每帧触发 style 重算
   const hpRatio=player.health/player.maxHealth;
-  if(hpRatio<=0.30 && hpRatio>0){
-    _ui.healthBar.classList.add('lowhp-crack');
-  }else{
-    _ui.healthBar.classList.remove('lowhp-crack');
-  }
+  const hpPct=Math.max(0,hpRatio*100);
+  if(Math.abs(hpPct-_ui._lastHpPct)>0.5){_ui.healthBar.style.width=hpPct+'%';_ui._lastHpPct=hpPct;}
+  // 玩家低血裂纹：血量<30%时血条变暗+震动+脉冲红光（强化"濒死"危机感）
+  const lowHpFlag=hpRatio<=0.30 && hpRatio>0;
+  if(lowHpFlag!==_ui._lastLowHp){_ui.healthBar.classList.toggle('lowhp-crack',lowHpFlag);_ui._lastLowHp=lowHpFlag;}
   // 护盾
   const shTxt=player.shield>0?'block':'none';
   if(_ui._lastShield!==shTxt){
     _ui.shieldBarWrap.style.display=shTxt;
     _ui._lastShield=shTxt;
   }
-  if(player.shield>0)_ui.shieldBar.style.width=(player.maxShield>0?player.shield/player.maxShield*100:0)+'%';
+  if(player.shield>0){
+    const shPct=player.maxShield>0?player.shield/player.maxShield*100:0;
+    if(Math.abs(shPct-_ui._lastShieldPct)>1){_ui.shieldBar.style.width=shPct+'%';_ui._lastShieldPct=shPct;}
+  }
   // 技能CD
   const skPct=(player.maxSkillCooldown>0?(1-player.skillCooldown/player.maxSkillCooldown)*100:0);
   if(Math.abs(skPct-_ui._lastSkill)>1){_ui.skillBar.style.width=skPct+'%';_ui._lastSkill=skPct;}
@@ -273,7 +274,9 @@ function updateUI(){
     _ui.xpText.textContent=xpTxt;
     _ui._lastXp=xpTxt;
   }
-  _ui.xpBar.style.width=Math.min(100,player.xp/player.xpToNext*100)+'%';
+  // 性能优化：经验条宽度仅在变化>1%时才写DOM
+  const xpPct=Math.min(100,player.xp/player.xpToNext*100);
+  if(Math.abs(xpPct-_ui._lastXpPct)>1){_ui.xpBar.style.width=xpPct+'%';_ui._lastXpPct=xpPct;}
   // 波次（冒险模式显示 第X/5关，强调5关制）
   const wTxt=endlessMode?`♾️无尽${endlessWave}波 ${gameState==='boss'?'BOSS':'波次'+currentWave}`:`第${currentLevel}/5关 ${gameState==='boss'?'BOSS':'波次'+currentWave}`;
   if(wTxt!==_ui._lastWave){_ui.waveLabel.textContent=wTxt;_ui._lastWave=wTxt;}
@@ -321,29 +324,46 @@ function updateBossUI(){
   }
   _ui._lastBossSeg=seg;
   // Boss低血金震：血量<25%时血条整体金色脉动，强化"即将击杀"的紧张感
+  // 性能优化：仅在状态切换时改 classList，避免每帧 add/remove 触发样式重算
   if(_ui.bossBarFill){
-    if(pct<=25 && pct>0)_ui.bossBarFill.classList.add('boss-lowhp-shake');
-    else _ui.bossBarFill.classList.remove('boss-lowhp-shake');
+    const lowFlag=pct<=25 && pct>0;
+    if(lowFlag!==_ui._lastBossLowHp){
+      _ui.bossBarFill.classList.toggle('boss-lowhp-shake',lowFlag);
+      _ui._lastBossLowHp=lowFlag;
+    }
   }
 }
 function updateTimerUI(){
   if(!_ui._initDone)_initUICache();
   const tb=_ui.timerBar||document.getElementById('timerBar');
   const pct=Math.max(0,levelTimer/maxLevelTime*100);
-  tb.style.width=pct+'%';
+  // 性能优化：宽度仅在变化>1%时才写DOM
+  if(Math.abs(pct-_ui._lastTimerPct)>1){tb.style.width=pct+'%';_ui._lastTimerPct=pct;}
   let txt=Math.ceil(levelTimer)+'s';
   // 时间挑战显示
   if(bossTimeChallenge&&bossTimeChallenge.active&&gameState==='boss'){
     const t=Math.ceil(bossTimeChallenge.time);
     txt+=` | ⚡${t}s`;
-    if(t<=10){tb.style.background='linear-gradient(90deg,#ff6347,#f85149)';tb.style.boxShadow='0 0 14px rgba(255,99,71,0.8)';}
-    else if(t<=20){tb.style.background='linear-gradient(90deg,#ffd700,#f0883e)';tb.style.boxShadow='0 0 12px rgba(255,215,0,0.6)';}
-    else{tb.style.background='linear-gradient(90deg,#3fb950,#58a6ff)';tb.style.boxShadow='0 0 10px rgba(63,185,80,0.5)';}
+    // 性能优化：仅在档位变化时才写 style（10/20秒阈值切换）
+    const tier=t<=10?'red':t<=20?'yellow':'green';
+    if(tier!==_ui._lastTimerTier){
+      if(tier==='red'){tb.style.background='linear-gradient(90deg,#ff6347,#f85149)';tb.style.boxShadow='0 0 14px rgba(255,99,71,0.8)';}
+      else if(tier==='yellow'){tb.style.background='linear-gradient(90deg,#ffd700,#f0883e)';tb.style.boxShadow='0 0 12px rgba(255,215,0,0.6)';}
+      else{tb.style.background='linear-gradient(90deg,#3fb950,#58a6ff)';tb.style.boxShadow='0 0 10px rgba(63,185,80,0.5)';}
+      _ui._lastTimerTier=tier;
+    }
   }else{
-    tb.style.background=''; tb.style.boxShadow='';
+    // 性能优化：仅在 tier 变化时清空 style
+    if(_ui._lastTimerTier!=='normal'){
+      tb.style.background=''; tb.style.boxShadow='';
+      _ui._lastTimerTier='normal';
+    }
   }
-  if(_ui.timerText)_ui.timerText.textContent=txt;
-  else{const el=document.getElementById('timerText');if(el)_ui.timerText=el; if(_ui.timerText)_ui.timerText.textContent=txt;}
+  if(_ui._lastTimerTxt!==txt){
+    if(_ui.timerText)_ui.timerText.textContent=txt;
+    else{const el=document.getElementById('timerText');if(el)_ui.timerText=el; if(_ui.timerText)_ui.timerText.textContent=txt;}
+    _ui._lastTimerTxt=txt;
+  }
 }
 
 // ==================== 背景绘制 ====================
@@ -958,8 +978,10 @@ function showRelicSelection(){
   const sel=shuffle(available).slice(0,Math.min(3,available.length));
   const ov=document.getElementById('relicOverlay');
   let html='<h2 style="color:#bc8cff">✨ 遗物选择</h2><div class="deco-line"><span>本局有效 · 与永久装备区分</span></div><div class="upgrade-cards">';
-  for(const r of sel){
-    html+=`<div class="relic-card ${r.rarity} card-enter" data-relic="${r.id}" style="animation-delay:${sel.indexOf(r)*0.1}s"><div class="relic-icon">${r.icon}</div><div class="upgrade-name" style="color:${r.rarity==='epic'?'#f0883e':'#bc8cff'}">${r.name}</div><div class="upgrade-desc">${r.desc}</div><div class="upgrade-rarity ${r.rarity}">${r.rarity==='rare'?'稀有':'史诗'}</div></div>`;
+  // 性能优化：用索引替代 indexOf，避免 O(n²) 复杂度
+  for(let _ri=0;_ri<sel.length;_ri++){
+    const r=sel[_ri];
+    html+=`<div class="relic-card ${r.rarity} card-enter" data-relic="${r.id}" style="animation-delay:${_ri*0.1}s"><div class="relic-icon">${r.icon}</div><div class="upgrade-name" style="color:${r.rarity==='epic'?'#f0883e':'#bc8cff'}">${r.name}</div><div class="upgrade-desc">${r.desc}</div><div class="upgrade-rarity ${r.rarity}">${r.rarity==='rare'?'稀有':'史诗'}</div></div>`;
   }
   html+='</div><button class="sec-btn" id="skipRelic" style="margin-top:16px">💰 跳过 (+200分)</button>';
   ov.innerHTML=html; ov.classList.remove('hidden');

@@ -325,7 +325,12 @@ function updateRotateHint(){
   }
 }
 window.addEventListener('orientationchange', updateRotateHint);
-window.addEventListener('resize', updateRotateHint);
+// 性能优化：resize 事件防抖，避免手机浏览器地址栏显隐时频繁触发
+let _resizeTimer = null;
+window.addEventListener('resize', ()=>{
+  if(_resizeTimer) clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(updateRotateHint, 150);
+});
 window.addEventListener('load', updateRotateHint);
 setTimeout(updateRotateHint, 300); // 初始延迟检测，避免某些机型取值不准
 

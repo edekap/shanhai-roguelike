@@ -486,10 +486,7 @@
   .diff-pill.active { border-width: 2px; background: rgba(40,30,15,0.85); box-shadow: 0 0 16px currentColor; animation: pulseGlow 2.5s ease-in-out infinite; }
 
   /* 装备卡片增强 */
-  .gear-card { background: linear-gradient(180deg, rgba(26,31,46,0.95) 0%, rgba(13,17,23,0.95) 100%); border: 2px solid #30363d; border-radius: 12px; padding: 12px; margin: 6px 0; transition: all 0.25s; position: relative; overflow: hidden; }
-  .gear-card.common { border-color: #4a5568; } .gear-card.rare { border-color: #58a6ff; box-shadow: 0 0 12px rgba(88,166,255,0.15); }
-  .gear-card.epic { border-color: #bc8cff; box-shadow: 0 0 14px rgba(188,140,255,0.2); } .gear-card.legendary { border-color: #ffd970; box-shadow: 0 0 18px rgba(255,215,0,0.3); animation: legendaryPulse 2.5s ease-in-out infinite; }
-  .gear-card.mythic { border-color: #ff6347; box-shadow: 0 0 22px rgba(255,99,71,0.4); animation: legendaryPulse 2s ease-in-out infinite; }
+  /* .gear-card 已废弃：装备项使用内联 style 渲染（见 src/ui.js），CSS 规则保留 legendaryPulse keyframes 供 .upgrade-card.legendary 使用 */
 
   /* 浮动徽章 */
   .float-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; animation: badgeBounce 2s ease-in-out infinite; }
@@ -688,10 +685,10 @@
     /* 副标题在横屏隐藏省空间 */
     .sj-col-left > .subtitle { display: none; }
     /* overlay padding 收紧 + 禁止外层滚动（避免页面整体往下滑） */
+    /* 注：justify-content 不支持 stretch 值，依靠 sj-main height:100% + sj-col-left/right overflow-y:auto 实现内部滚动 */
     #overlay {
       padding: 4px !important;
       overflow: hidden !important;
-      justify-content: stretch !important;
     }
     /* bigBtn 横屏时变小，仍 fixed 在底部中央 */
     #homeFullscreenBigBtn { padding: 5px 14px !important; font-size: 10px !important; min-height: 30px !important; bottom: 2px !important; left: 50% !important; transform: translateX(-50%) !important; }
@@ -1091,7 +1088,6 @@
     #overlay {
       overflow: hidden !important;
       padding: 4px !important;
-      justify-content: stretch !important;
     }
     /* sj-col-left/right 占满整个视口高度，内部允许滚动 */
     .sj-main {
@@ -1238,7 +1234,7 @@
     .talent-icon { font-size: 20px !important; }
     .talent-node h3, .talent-node .talent-name { font-size: 11px !important; margin: 1px 0 !important; }
     .talent-node p, .talent-node .talent-desc { font-size: 9px !important; line-height: 1.3 !important; margin: 1px 0 !important; }
-    /* 6. 装备卡片压缩 */
+    /* 6. 装备卡片压缩（注：装备项使用内联 style，此规则保留以备未来重构为 class 时使用） */
     .gear-card { padding: 6px 8px !important; margin: 3px 0 !important; border-radius: 8px !important; border-width: 1px !important; }
     .gear-card h3, .gear-card h4 { font-size: 11px !important; margin: 1px 0 !important; }
     .gear-card p, .gear-card div { font-size: 10px !important; line-height: 1.4 !important; }
