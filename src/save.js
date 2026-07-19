@@ -48,6 +48,7 @@ let saveData = {
   lastCheckInDate: '',   // 上次签到日期 YYYY-MM-DD
   checkInStreak: 0,      // 连续签到天数
   tutorialShown: false,  // 是否已展示过新手教程
+  aimTipShown: false,    // 是否已展示过自瞄提示（首次玩家专属）
   hasShanHaiBook: false, // 是否拥有山海故事书
   storyViewed: false,    // 是否已看过开场故事
   shanhaiPages: [],      // 已收集的山海残页（bossIdx列表，0-9）
@@ -113,6 +114,7 @@ const SAVE_MIGRATIONS = {
     if(d.lastCheckInDate === undefined) d.lastCheckInDate = '';
     if(d.checkInStreak === undefined) d.checkInStreak = 0;
     if(d.tutorialShown === undefined) d.tutorialShown = false;
+    if(d.aimTipShown === undefined) d.aimTipShown = false;
   },
   // v6->v7: 简化装备系统 — 把装备精魄按 1精魄=20分 折算合并到积分
   6: (d) => {
@@ -721,14 +723,31 @@ const ELEMENT_UPGRADES = {
 const BASE_UPGRADES = [
   // === 普通（基础数值）===
   {id:'damage',name:'利刃',icon:'⚔️',desc:'子弹伤害+1',rarity:'common',apply:p=>p.bulletDamage+=1},
-  {id:'firerate',name:'疾射',icon:'⚡',desc:'射击冷却-12%',rarity:'common',apply:p=>p.fireCooldown*=0.88},
+  {id:'firerate',name:'疾射',icon:'⚡',desc:'射击冷却-12%(递减)',rarity:'common',apply:p=>{
+    // 射速叠加递减：第1次-12%，第2次-10%，第3次-8%，第4次-6%，第5次+4%
+    // 防止后期无限叠加后射速过快导致手感无变化
+    const cnt=(p._firerateCount||0);
+    const reduction=0.12-cnt*0.02;
+    if(reduction>0.04){
+      p.fireCooldown*=(1-reduction);
+      p._firerateCount=cnt+1;
+    }
+  }},
   {id:'speed',name:'轻灵',icon:'👟',desc:'移动速度+12%',rarity:'common',apply:p=>p.speed*=1.12},
   {id:'health',name:'强韧',icon:'❤️',desc:'最大生命+2并回满',rarity:'common',apply:p=>{p.maxHealth+=2;p.health=p.maxHealth;}},
   {id:'bulletspeed',name:'风之祝福',icon:'💨',desc:'子弹速度+30%',rarity:'common',apply:p=>p.bulletSpeed*=1.30},
   {id:'magnet',name:'聚灵',icon:'🌀',desc:'拾取范围+100',rarity:'common',apply:p=>p.magnetRange=(p.magnetRange||120)+100},
 
   // === 稀有（机制增强）===
-  {id:'multishot',name:'多重射击',icon:'🎯',desc:'额外+1发子弹',rarity:'rare',apply:p=>{p.bulletCount+=1;p.bulletSpread+=0.12;}},
+  {id:'multishot',name:'多重射击',icon:'🎯',desc:'额外+1发子弹(上限3次)',rarity:'rare',apply:p=>{
+    // 多重射击上限3次：第4次开始无效果，避免子弹数超标
+    const cnt=(p._multishotCount||0);
+    if(cnt<3){
+      p.bulletCount+=1;
+      p.bulletSpread+=0.12;
+      p._multishotCount=cnt+1;
+    }
+  }},
   {id:'pierce',name:'穿透',icon:'🏹',desc:'穿透+1敌人',rarity:'rare',apply:p=>p.bulletPierce+=1},
   {id:'homing',name:'追踪',icon:'🧲',desc:'子弹轻微追踪',rarity:'rare',apply:p=>p.bulletHoming+=0.8},
   {id:'bigbullet',name:'巨型子弹',icon:'🔵',desc:'子弹更大+伤害1',rarity:'rare',apply:p=>{p.bulletSize+=4;p.bulletDamage+=1;}},
@@ -757,6 +776,16 @@ function getAvailableUpgrades(){
     if(u.id==='revive'){
       const revivesOwned=player._reviveUpgradesTaken||0;
       if(revivesOwned>=2)return false;
+    }
+    // 多重射击：上限3次，达上限后不再出现
+    if(u.id==='multishot'){
+      const ms=(player._multishotCount||0);
+      if(ms>=3)return false;
+    }
+    // 疾射：射速递减到4%以下后不再出现（已叠加5次）
+    if(u.id==='firerate'){
+      const fr=(player._firerateCount||0);
+      if(fr>=5)return false;
     }
     return true;
   });

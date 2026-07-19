@@ -1014,16 +1014,38 @@ function startGame(){
       pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2+30,'暴击+20% 暴伤+50% 穿透+2 吸血+3%','#ffd970',2.5);
     },1500);
   }
-  // 手机端首次进入游戏：提示摇杆自动锁定机制（仅本次会话首次显示，不污染存档）
-  // 移除 touchConfirmed 依赖：首次玩家还没触摸过屏幕，touchConfirmed=false 会导致提示被跳过
-  // 教程已包含此提示，但战斗中再次浮出强化记忆
-  if(isTouchDevice && !sessionStorage.getItem('_aimTipShown')){
-    sessionStorage.setItem('_aimTipShown', '1');
+  // 手机端首次进入游戏：提示摇杆自动锁定机制（持久化记录，仅首次玩家显示）
+  // 使用 saveData.aimTipShown 持久化，避免每次开浏览器都弹
+  // 改用中央卡片提示（比浮字更明显），玩家点击关闭
+  if(isTouchDevice && !saveData.aimTipShown){
+    saveData.aimTipShown = true;
+    saveSave();
     gameTimeout(()=>{
-      pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2-60,'🎯 右摇杆不动=自动锁定最近敌人','#ffd970',4);
-      pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2-30,'推动右摇杆=手动瞄准射击','#bc8cff',4);
-      pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2,'金色准星+虚线=当前瞄准方向','#58a6ff',4);
-    },2500);
+      _showAimTipModal();
+    }, 3000);
+  }
+}
+// 自瞄提示模态弹窗（首次玩家专属，必须点击关闭，不会错过）
+function _showAimTipModal(){
+  const html = `<div style="max-width:340px;text-align:center;padding:20px 18px;font-family:'STKaiti',KaiTi,serif">
+    <div style="font-size:48px;margin-bottom:10px">🎯</div>
+    <h3 style="color:#ffd970;letter-spacing:2px;margin:0 0 12px;font-size:18px">自动锁定机制</h3>
+    <div style="color:#e0d8c8;font-size:13px;line-height:1.9;margin-bottom:16px">
+      <div style="background:rgba(255,215,0,0.1);border-left:3px solid #ffd970;padding:8px 10px;margin:6px 0;border-radius:4px;text-align:left">
+        <div style="color:#ffd970;font-weight:bold">📲 右摇杆不动</div>
+        <div style="color:#d4c5a0;font-size:12px;margin-top:2px">自动锁定射程内最近敌人</div>
+      </div>
+      <div style="background:rgba(188,140,255,0.1);border-left:3px solid #bc8cff;padding:8px 10px;margin:6px 0;border-radius:4px;text-align:left">
+        <div style="color:#bc8cff;font-weight:bold">👆 推动右摇杆</div>
+        <div style="color:#d4c5a0;font-size:12px;margin-top:2px">手动瞄准射击方向</div>
+      </div>
+    </div>
+    <button id="aimTipCloseBtn" style="width:100%;padding:12px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">✦ 知道了，开始战斗 ✦</button>
+  </div>`;
+  const modal = _showGearModal(html);
+  const closeBtn = document.getElementById('aimTipCloseBtn');
+  if(closeBtn){
+    _bindTap(closeBtn, ()=>{ _hideGearModal(modal); });
   }
 }
 // 无尽模式：通关8关后进入无尽波次
