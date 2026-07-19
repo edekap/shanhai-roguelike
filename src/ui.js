@@ -938,6 +938,7 @@ function gameOver(){
   pendingTrialNext=false;
   pendingFinalBoss=false;
   resumeTrialAfterFinalBoss=false;
+  pendingSuperRevenge=false; // 第五轮新增：避免跨局泄漏污染下一只Boss
   if(bossTimeChallenge)bossTimeChallenge.active=false;
   // 天赋点系统已改为：每升一级+1点（在Player.gainXp中发放），不再由得分获得
   saveData.totalScore+=score;

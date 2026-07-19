@@ -3222,19 +3222,17 @@ class Boss {
       pushFloatingText(this.x,this.y-this.size-5,'免疫','#ff69b4',0.6);
       return;
     }
-    // 朱厌石头护盾：吸收伤害（溢出伤害传递到Boss血量，避免高伤单发被全吞）
+    // 朱厌石头护盾：吸收伤害（溢出伤害传递到主逻辑处理，应用护甲/上限，避免双伤）
     if(this.stoneShield&&this.stoneShieldHp>0){
       if(dmg>=this.stoneShieldHp){
-        const excess=dmg-this.stoneShieldHp; // 溢出伤害传递到Boss血量
+        // 护盾破碎：将溢出部分作为新 dmg 走主逻辑（应用护甲/上限），避免重复扣血
+        dmg=dmg-this.stoneShieldHp;
         this.stoneShieldHp=0; this.stoneShield=false;
         spawnParticles(this.x,this.y,'#8b6c5c',40);
         pushFloatingText(this.x,this.y-this.size-10,'护盾破碎!','#daa520',1.5);
         showWaveAnnounce('破盾！','朱厌的石头护盾被击碎',true);
-        if(excess>0){
-          this.health-=excess;
-          pushFloatingText(this.x,this.y-this.size-20,`-${Math.ceil(excess)}`,'#ff6347',1.0);
-          if(this.health<=0){this.die();return;}
-        }
+        if(dmg<=0)return; // 无溢出伤害，不再继续
+        // 有溢出伤害时，让 dmg 走下方主逻辑（护甲/上限/扣血）
       }else{
         this.stoneShieldHp-=dmg;
         spawnParticles(this.x+rand(-this.size*0.5,this.size*0.5),this.y+rand(-this.size*0.5,this.size*0.5),'#8b6c5c',4);

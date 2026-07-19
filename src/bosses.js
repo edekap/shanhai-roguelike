@@ -406,7 +406,9 @@ function onBossDefeated(defeatedBoss){
       player.gainXp(trialXp-6*xpPerOrb); // 直接给剩余经验
       // 如果触发了升级，等选完强化后再继续试炼流程
       if(player.xpLevel>beforeLv){
-        player._lastTrialWasSuperRevenge=false; // 刑天不是超级复仇
+        // 刑天是额外的Boss（由超级复仇触发），不应再递增 bossTrialIndex
+        // 用 _lastTrialWasSuperRevenge=true 让 applyUpgrade 走非递增分支
+        player._lastTrialWasSuperRevenge=true;
         pendingTrialNext=true;
         return;
       }
@@ -581,7 +583,9 @@ function onBossDefeated(defeatedBoss){
   if(defeatedBoss&&!defeatedBoss.isSuper&&Math.random()<0.3){
     pendingSuperRevenge=true;
     gameTimeout(()=>{
-      if(gameState!=='boss')return;
+      // 允许 boss 和 upgrade 状态触发 — 玩家可能在1.5秒内拾取经验触发升级面板
+      // applyUpgrade 会拦截 pendingSuperRevenge 防止跳关，但不会主动 spawn（避免双superBoss）
+      if(gameState!=='boss'&&gameState!=='upgrade')return;
       spawnSuperBoss();
     },1500);
     return;
@@ -748,12 +752,12 @@ function applyUpgrade(up){
     return;
   }
   // 1.5) 超级复仇挂起：普通Boss击败后30%触发超级复仇，1.5秒延迟内若玩家拾取经验触发升级，
-  // 必须优先处理超级复仇，否则会被下面的"防御性跳关"跳过，导致超级Boss复仇被吞掉
-  // 且 pendingSuperRevenge 残留为 true 污染下一只Boss
+  // 必须拦截"防御性跳关"，否则超级Boss复仇会被吞掉且 pendingSuperRevenge 残留污染下一只Boss
+  // 注意：只清除标记 + 暂停跳关，不主动调用 spawnSuperBoss — 因为 onBossDefeated 已安排了
+  // gameTimeout(()=>spawnSuperBoss(),1500)，主动调用会导致两只超级Boss 同时生成（覆盖引用+伤害丢失）
   if(pendingSuperRevenge){
     pendingSuperRevenge=false;
-    gameState='boss';
-    gameTimeout(()=>{if(gameState!=='boss')return;spawnSuperBoss();},100);
+    gameState='boss'; // 保持 Boss 状态等待 onBossDefeated 的 gameTimeout 触发 spawnSuperBoss
     return;
   }
   // 2) 普通Boss击败后触发的升级：进入下一关
