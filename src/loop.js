@@ -628,9 +628,10 @@ function updateTouchControlsVisibility(){
   }
 }
 
-// 虚拟摇杆
+// 虚拟摇杆（浮动摇杆：左半屏任意位置按下即出现，松手消失）
 const joystickZone = document.getElementById('joystickZone');
 const joystickThumb = document.getElementById('joystickThumb');
+const joystickBase = document.getElementById('joystickBase');
 let joystickActive = false;
 let joystickStartX = 0, joystickStartY = 0;
 let joystickTouchId = null; // 跟踪触摸点 identifier，防止两摇杆互相抢
@@ -644,9 +645,17 @@ function handleJoystickStart(e){
   if(joystickActive || joystickTouchId !== null) return;
   const touch = e.changedTouches ? e.changedTouches[0] : e;
   joystickTouchId = touch.identifier;
-  const rect = joystickZone.getBoundingClientRect();
-  joystickStartX = rect.left + rect.width / 2;
-  joystickStartY = rect.top + rect.height / 2;
+  // 浮动摇杆：起始点为手指按下位置（相对 touchControls 容器）
+  const tcRect = joystickZone.parentElement.getBoundingClientRect();
+  joystickStartX = touch.clientX;
+  joystickStartY = touch.clientY;
+  // 把 base/thumb 中心移到手指位置（用 left/top + transform:translate(-50%,-50%)）
+  joystickBase.style.left = (touch.clientX - tcRect.left) + 'px';
+  joystickBase.style.top = (touch.clientY - tcRect.top) + 'px';
+  joystickThumb.style.left = (touch.clientX - tcRect.left) + 'px';
+  joystickThumb.style.top = (touch.clientY - tcRect.top) + 'px';
+  joystickBase.style.opacity = '1';
+  joystickThumb.style.opacity = '1';
   joystickActive = true;
   handleJoystickMove(e);
 }
@@ -670,7 +679,8 @@ function handleJoystickMove(e){
   }
   touchMoveX = dx / joystickRadius;
   touchMoveY = dy / joystickRadius;
-  joystickThumb.style.transform = `translate(${dx}px, ${dy}px)`;
+  // thumb 中心已对齐 start 点，再叠加方向偏移（注意保留 translate(-50%,-50%) 居中）
+  joystickThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
 }
 function handleJoystickEnd(e){
   e.preventDefault();
@@ -687,16 +697,20 @@ function handleJoystickEnd(e){
   touchMoveX = 0;
   touchMoveY = 0;
   touchMoveVec.active = false;
-  joystickThumb.style.transform = 'translate(0, 0)';
+  // 隐藏摇杆
+  joystickBase.style.opacity = '0';
+  joystickThumb.style.opacity = '0';
+  joystickThumb.style.transform = 'translate(-50%, -50%)';
 }
 joystickZone.addEventListener('touchstart', handleJoystickStart, {passive:false});
 joystickZone.addEventListener('touchmove', handleJoystickMove, {passive:false});
 joystickZone.addEventListener('touchend', handleJoystickEnd, {passive:false});
 joystickZone.addEventListener('touchcancel', handleJoystickEnd, {passive:false});
 
-// 右摇杆：控制射击方向+自动射击
+// 右摇杆：控制射击方向+自动射击（浮动摇杆：右半屏任意位置按下即出现，松手消失）
 const aimJoystickZone = document.getElementById('aimJoystickZone');
 const aimJoystickThumb = document.getElementById('aimJoystickThumb');
+const aimJoystickBase = document.getElementById('aimJoystickBase');
 let aimJoystickActive = false;
 let aimJoystickStartX = 0, aimJoystickStartY = 0;
 let aimJoystickX = 0, aimJoystickY = 0; // 射击方向 (-1 to 1)
@@ -710,9 +724,16 @@ function handleAimJoystickStart(e){
   if(aimJoystickActive || aimJoystickTouchId !== null) return;
   const touch = e.changedTouches ? e.changedTouches[0] : e;
   aimJoystickTouchId = touch.identifier;
-  const rect = aimJoystickZone.getBoundingClientRect();
-  aimJoystickStartX = rect.left + rect.width / 2;
-  aimJoystickStartY = rect.top + rect.height / 2;
+  // 浮动摇杆：起始点为手指按下位置
+  const tcRect = aimJoystickZone.parentElement.getBoundingClientRect();
+  aimJoystickStartX = touch.clientX;
+  aimJoystickStartY = touch.clientY;
+  aimJoystickBase.style.left = (touch.clientX - tcRect.left) + 'px';
+  aimJoystickBase.style.top = (touch.clientY - tcRect.top) + 'px';
+  aimJoystickThumb.style.left = (touch.clientX - tcRect.left) + 'px';
+  aimJoystickThumb.style.top = (touch.clientY - tcRect.top) + 'px';
+  aimJoystickBase.style.opacity = '1';
+  aimJoystickThumb.style.opacity = '1';
   aimJoystickActive = true;
   mouse.down = true; // 激活即开始射击
   handleAimJoystickMove(e);
@@ -737,7 +758,7 @@ function handleAimJoystickMove(e){
   }
   aimJoystickX = dx / aimJoystickRadius;
   aimJoystickY = dy / aimJoystickRadius;
-  aimJoystickThumb.style.transform = `translate(${dx}px, ${dy}px)`;
+  aimJoystickThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
 }
 function handleAimJoystickEnd(e){
   e.preventDefault();
@@ -754,7 +775,10 @@ function handleAimJoystickEnd(e){
   aimJoystickX = 0;
   aimJoystickY = 0;
   mouse.down = false; // 松开停止射击
-  aimJoystickThumb.style.transform = 'translate(0, 0)';
+  // 隐藏摇杆
+  aimJoystickBase.style.opacity = '0';
+  aimJoystickThumb.style.opacity = '0';
+  aimJoystickThumb.style.transform = 'translate(-50%, -50%)';
 }
 aimJoystickZone.addEventListener('touchstart', handleAimJoystickStart, {passive:false});
 aimJoystickZone.addEventListener('touchmove', handleAimJoystickMove, {passive:false});
@@ -946,11 +970,20 @@ function resetTouchState(){
   // 清空摇杆状态，防止 iOS 不触发 touchend 导致玩家持续移动
   if(typeof joystickActive!=='undefined'){
     joystickActive=false; joystickTouchId=null;
-    if(typeof joystickThumb!=='undefined'&&joystickThumb)joystickThumb.style.transform='translate(0,0)';
+    // 浮动摇杆：重置时隐藏并归位
+    if(typeof joystickBase!=='undefined'&&joystickBase)joystickBase.style.opacity='0';
+    if(typeof joystickThumb!=='undefined'&&joystickThumb){
+      joystickThumb.style.opacity='0';
+      joystickThumb.style.transform='translate(-50%, -50%)';
+    }
   }
   if(typeof aimJoystickActive!=='undefined'){
     aimJoystickActive=false; aimJoystickTouchId=null;
-    if(typeof aimJoystickThumb!=='undefined'&&aimJoystickThumb)aimJoystickThumb.style.transform='translate(0,0)';
+    if(typeof aimJoystickBase!=='undefined'&&aimJoystickBase)aimJoystickBase.style.opacity='0';
+    if(typeof aimJoystickThumb!=='undefined'&&aimJoystickThumb){
+      aimJoystickThumb.style.opacity='0';
+      aimJoystickThumb.style.transform='translate(-50%, -50%)';
+    }
   }
   if(typeof touchMoveX!=='undefined'){touchMoveX=0; touchMoveY=0;}
   if(typeof touchMoveVec!=='undefined')touchMoveVec.active=false;

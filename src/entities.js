@@ -1211,8 +1211,24 @@ class Player {
     }
     if(this.shield>0){
       // 护盾免疫：消耗一次免疫层
-      if(this.shieldImmune&&this.shieldImmune>0){this.shieldImmune--; this.invincible=0.8; pushFloatingText(this.x,this.y-30,'护盾免疫!','#58a6ff',1); spawnParticles(this.x,this.y,'#58a6ff',20); updateUI(); return;}
-      this.shield--; this.invincible=0.5; spawnParticles(this.x,this.y,'#58a6ff',12); updateUI(); return;
+      if(this.shieldImmune&&this.shieldImmune>0){this.shieldImmune--; this.invincible=0.8; pushFloatingText(this.x,this.y-30,'护盾免疫!','#58a6ff',1); spawnParticles(this.x,this.y,'#58a6ff',20); if(typeof playSound==='function')playSound('shieldHit'); updateUI(); return;}
+      // 护盾破碎瞬间检测：从 1→0 时给予强反馈（音效+震屏+蓝闪+爆裂粒子+浮字）
+      const _willBreak = this.shield <= 1;
+      this.shield--; this.invincible=0.5;
+      if(_willBreak){
+        // 护盾破碎：玻璃碎裂音 + 红色"护盾破碎"浮字 + 蓝色屏幕闪烁 + 中等震屏 + 爆裂粒子
+        if(typeof playSound==='function')playSound('shieldBreak');
+        pushFloatingText(this.x,this.y-40,'🛡️ 护盾破碎!','#ff6b6b',1.4);
+        spawnParticles(this.x,this.y,'#58a6ff',18);
+        spawnParticles(this.x,this.y,'#ffffff',10);
+        if(typeof flashScreen==='function')flashScreen('#58a6ff', 0.25);
+        if(typeof screenShake!=='undefined')screenShake = Math.max(screenShake, 0.5);
+      }else{
+        // 普通护盾消耗（仍有剩余）：轻巧"叮"声 + 蓝色粒子
+        if(typeof playSound==='function')playSound('shieldHit');
+        spawnParticles(this.x,this.y,'#58a6ff',12);
+      }
+      updateUI(); return;
     }
     // Boss装备词条：雨帘护体(计蒙) - 受到伤害-15%
     if(this.dmgReduction){dmg=Math.max(1,Math.ceil(dmg*(1-this.dmgReduction)));}

@@ -1032,12 +1032,16 @@ function _showAimTipModal(){
     <h3 style="color:#ffd970;letter-spacing:2px;margin:0 0 12px;font-size:18px">自动锁定机制</h3>
     <div style="color:#e0d8c8;font-size:13px;line-height:1.9;margin-bottom:16px">
       <div style="background:rgba(255,215,0,0.1);border-left:3px solid #ffd970;padding:8px 10px;margin:6px 0;border-radius:4px;text-align:left">
-        <div style="color:#ffd970;font-weight:bold">📲 右摇杆不动</div>
+        <div style="color:#ffd970;font-weight:bold">📲 右半屏按下不动</div>
         <div style="color:#d4c5a0;font-size:12px;margin-top:2px">自动锁定射程内最近敌人</div>
       </div>
       <div style="background:rgba(188,140,255,0.1);border-left:3px solid #bc8cff;padding:8px 10px;margin:6px 0;border-radius:4px;text-align:left">
-        <div style="color:#bc8cff;font-weight:bold">👆 推动右摇杆</div>
+        <div style="color:#bc8cff;font-weight:bold">👆 滑动手指</div>
         <div style="color:#d4c5a0;font-size:12px;margin-top:2px">手动瞄准射击方向</div>
+      </div>
+      <div style="background:rgba(88,166,255,0.08);border-left:3px solid #58a6ff;padding:8px 10px;margin:6px 0;border-radius:4px;text-align:left">
+        <div style="color:#58a6ff;font-weight:bold">✨ 浮动摇杆</div>
+        <div style="color:#d4c5a0;font-size:12px;margin-top:2px">左/右半屏任意位置按下即出现摇杆，松手消失，不挡视野</div>
       </div>
     </div>
     <button id="aimTipCloseBtn" style="width:100%;padding:12px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">✦ 知道了，开始战斗 ✦</button>
@@ -2716,12 +2720,13 @@ function showTutorial(force){
       content: `
         <div style="color:#e0d8c8;font-size:13px;line-height:2;text-align:left;font-family:'STKaiti',KaiTi,serif">
           <div style="color:#79c0ff;font-size:14px;font-weight:bold;margin-bottom:8px">📱 手机端</div>
-          <div>左侧摇杆：<span style="color:#ffd970">移动</span></div>
-          <div>右侧摇杆：<span style="color:#ffd970">射击方向</span>（自动开火）</div>
+          <div>左半屏按下：<span style="color:#ffd970">移动</span></div>
+          <div>右半屏按下：<span style="color:#ffd970">射击方向</span>（自动开火）</div>
+          <div style="color:#58a6ff;font-size:11px;margin-top:2px">✨ 浮动摇杆：手指戳哪摇杆出现在哪，松手消失</div>
           <div>双手可同时操控，互不干扰</div>
           <div style="margin-top:10px;padding:8px 10px;background:rgba(255,215,0,0.1);border-left:3px solid #ffd970;border-radius:4px">
-            <div style="color:#ffd970;font-weight:bold">🎯 右摇杆不动 = 自动锁定最近敌人</div>
-            <div style="color:#b0a090;font-size:11px;margin-top:2px">推动右摇杆 = 手动瞄准射击</div>
+            <div style="color:#ffd970;font-weight:bold">🎯 右半屏按下不动 = 自动锁定最近敌人</div>
+            <div style="color:#b0a090;font-size:11px;margin-top:2px">滑动手指 = 手动瞄准射击</div>
           </div>
           <div style="color:#79c0ff;font-size:14px;font-weight:bold;margin:14px 0 8px">💻 电脑端</div>
           <div>WASD / 方向键：移动</div>

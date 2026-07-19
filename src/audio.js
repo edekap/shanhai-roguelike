@@ -288,6 +288,35 @@ function playSound(type){
       o2.connect(g2); g2.connect(master); o2.start(t); o2.stop(t+0.12);
       break;
     }
+    case 'shieldBreak': { // 护盾破碎：玻璃碎裂感的高频噪音 + 低频能量破裂闷响
+      // 高频玻璃碎裂：噪音 + 高通滤波（衰减式）
+      const noise=audioCtx.createBufferSource();
+      const buf=audioCtx.createBuffer(1,4410,44100);
+      const data=buf.getChannelData(0);
+      for(let i=0;i<4410;i++)data[i]=(Math.random()*2-1)*(1-i/4410);
+      noise.buffer=buf; const ng=audioCtx.createGain(); const nf=audioCtx.createBiquadFilter();
+      nf.type='highpass'; nf.frequency.setValueAtTime(3000,t); nf.frequency.exponentialRampToValueAtTime(800,t+0.25);
+      ng.gain.setValueAtTime(0.5,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+      noise.connect(nf); nf.connect(ng); ng.connect(master); noise.start(t);
+      // 低频能量破裂"嘭"
+      const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(180,t); o.frequency.exponentialRampToValueAtTime(60,t+0.25);
+      g.gain.setValueAtTime(0.55,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t+0.3);
+      // 中频"哧"声：能量消散
+      const o2=audioCtx.createOscillator(); const g2=audioCtx.createGain();
+      o2.type='sawtooth'; o2.frequency.setValueAtTime(900,t); o2.frequency.exponentialRampToValueAtTime(300,t+0.15);
+      g2.gain.setValueAtTime(0.18,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+      o2.connect(g2); g2.connect(master); o2.start(t); o2.stop(t+0.2);
+      break;
+    }
+    case 'shieldHit': { // 护盾消耗（仍有剩余）：轻巧的"叮"声
+      const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+      o.type='triangle'; o.frequency.setValueAtTime(1200,t); o.frequency.exponentialRampToValueAtTime(800,t+0.1);
+      g.gain.setValueAtTime(0.28,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t+0.12);
+      break;
+    }
   }
 }
 
