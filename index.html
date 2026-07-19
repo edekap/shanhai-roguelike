@@ -175,13 +175,20 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 14px rgba(0,0,0,0.4);
   }
   .upgrade-card:hover { border-color: #ffd970; transform: translateY(-8px); box-shadow: 0 14px 36px rgba(212,160,23,0.3), inset 0 1px 0 rgba(255,255,255,0.1); }
-  .upgrade-card.common { border-color: #4a5568; } .upgrade-card.rare { border-color: #58a6ff; box-shadow: 0 0 18px rgba(88,166,255,0.18), inset 0 1px 0 rgba(255,255,255,0.06); } .upgrade-card.epic { border-color: #bc8cff; box-shadow: 0 0 18px rgba(188,140,255,0.22), inset 0 1px 0 rgba(255,255,255,0.06); } .upgrade-card.legendary { border-color: #ffd970; box-shadow: 0 0 22px rgba(255,215,0,0.35), inset 0 1px 0 rgba(255,255,255,0.1); animation: legendaryPulse 2s ease-in-out infinite; }
+  .upgrade-card.common { border-color: #4a5568; } .upgrade-card.rare { border-color: #58a6ff; border-width: 3px; box-shadow: 0 0 22px rgba(88,166,255,0.25), inset 0 1px 0 rgba(255,255,255,0.06); } .upgrade-card.epic { border-color: #bc8cff; border-width: 3px; box-shadow: 0 0 22px rgba(188,140,255,0.32), inset 0 1px 0 rgba(255,255,255,0.06); } .upgrade-card.legendary { border-color: #ffd970; border-width: 3px; box-shadow: 0 0 26px rgba(255,215,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1); animation: legendaryPulse 2s ease-in-out infinite; }
+  /* 稀有度顶部彩条（一眼可辨）*/
+  .upgrade-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 14px 14px 0 0; background: #4a5568; }
+  .upgrade-card { position: relative; padding-top: 22px; }
+  .upgrade-card.common::before { background: linear-gradient(90deg, #4a5568, #6b7280); }
+  .upgrade-card.rare::before { background: linear-gradient(90deg, #58a6ff, #79c0ff); box-shadow: 0 0 8px rgba(88,166,255,0.6); }
+  .upgrade-card.epic::before { background: linear-gradient(90deg, #bc8cff, #d8b4fe); box-shadow: 0 0 8px rgba(188,140,255,0.7); }
+  .upgrade-card.legendary::before { background: linear-gradient(90deg, #ffd700, #ff8c42); box-shadow: 0 0 10px rgba(255,215,0,0.8); }
   .upgrade-icon { width: 58px; height: 58px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #2a3142, #0d1117); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 8px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 0 2px rgba(212,160,23,0.2); }
   .upgrade-name { font-size: 15px; font-weight: bold; margin-bottom: 4px; color: #ffd970; }
   .upgrade-desc { font-size: 12px; color: #b0a090; line-height: 1.5; text-align: center; }
   .upgrade-tier { font-size: 11px; color: #f0a838; margin-top: 4px; font-weight: 600; }
-  .upgrade-rarity { font-size: 10px; margin-top: 6px; padding: 2px 9px; border-radius: 8px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-  .upgrade-rarity.common { background: rgba(74,85,104,0.4); color: #b0a090; } .upgrade-rarity.rare { background: rgba(88,166,255,0.22); color: #58a6ff; } .upgrade-rarity.epic { background: rgba(188,140,255,0.22); color: #bc8cff; } .upgrade-rarity.legendary { background: rgba(255,215,0,0.25); color: #ffd970; }
+  .upgrade-rarity { font-size: 11px; margin-top: 8px; padding: 3px 12px; border-radius: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); }
+  .upgrade-rarity.common { background: rgba(74,85,104,0.5); color: #b0a090; border-color: rgba(74,85,104,0.6); } .upgrade-rarity.rare { background: rgba(88,166,255,0.3); color: #79c0ff; border-color: rgba(88,166,255,0.6); } .upgrade-rarity.epic { background: rgba(188,140,255,0.3); color: #d8b4fe; border-color: rgba(188,140,255,0.6); } .upgrade-rarity.legendary { background: rgba(255,215,0,0.32); color: #ffd700; border-color: rgba(255,215,0,0.7); text-shadow: 0 0 6px rgba(255,215,0,0.6); }
   #bossHealthBar { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 10; display: none; text-align: center; }
   #bossName { font-size: 17px; color: #ff6b6b; margin-bottom: 5px; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 12px rgba(248,81,73,0.6); }
   #bossBarBg { width: 320px; height: 14px; background: #1a1f2e; border-radius: 7px; overflow: hidden; border: 1px solid rgba(165,40,56,0.5); box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 12px rgba(165,40,56,0.3); }

@@ -193,6 +193,7 @@ let pendingSuperRevenge=false; // 普通Boss死后是否触发超级Boss复仇
 let pendingFinalBoss=false;   // 超级Boss死后是否触发刑天最终Boss
 let resumeTrialAfterFinalBoss=false; // 刑天结束后是否继续试炼流程
 let trialXingtianTriggered=false; // 本次试炼中刑天是否已触发过（限制最多一次）
+let _level5FinalBossDone=false; // 冒险模式第5关后强制刑天已触发（防止decline后死循环）
 let godslayerBossesLeft=0;     // 弑神难度剩余Boss数量
 
 const keys={};
@@ -478,8 +479,9 @@ class Player {
       this.xpLevel++;
       this.xpToNext=this.computeXpToNext(this.xpLevel);
       leveledUp=true;
-      // 每升一级获得1天赋点（局外天赋系统，不再由得分获得）
-      saveData.talentPoints=(saveData.talentPoints||0)+1;
+      // 每升一级获得2天赋点（局外天赋系统，不再由得分获得）
+      // 改为2点：让玩家升级后能明显感到变强，5%暴击/+1伤害等单点加成太微小
+      saveData.talentPoints=(saveData.talentPoints||0)+2;
     }
     // 局外经验里程碑奖励：每1000经验额外+1天赋点
     const milestoneXp=Math.floor((saveData.totalXp||0)/1000)*1000;
@@ -1444,9 +1446,10 @@ class EnemyBullet {
 
 // ==================== 掉落物 ====================
 class Drop {
-  constructor(x,y,type,amount){
+  constructor(x,y,type,amount,gearData){
     this.x=x;this.y=y;this.type=type;this.amount=amount||0;
-    this.size= this.type==='xp'?10:12; this.alive=true;this.lifetime=10;
+    this.gear=gearData||null; // 装备掉落（小怪1%概率）
+    this.size= this.type==='xp'?10:(this.type==='gear'?14:12); this.alive=true;this.lifetime=10;
     this.wobble=rand(0,Math.PI*2);this.bobOffset=0;
     // 经验球被吸引但不会被立即拾取，给玩家主动拾取的体验
     this.xpPullRange=80; // 经验球吸引范围（小于磁铁范围，避免全屏吸）
@@ -1477,9 +1480,24 @@ class Drop {
     else if(this.type==='shield'){player.addShield(2);pushFloatingText(this.x,this.y-10,'+2 护盾','#58a6ff',1);}
     else if(this.type==='coin'){score+=18;pushFloatingText(this.x,this.y-10,'+18','#f0883e',1);updateUI();}
     else if(this.type==='xp'){player.gainXp(this.amount);}
+    else if(this.type==='gear'&&this.gear){
+      // 装备掉落：直接放入背包
+      saveData.gearBag.push(this.gear);
+      const rar=(typeof GEAR_RARITIES!=='undefined'&&GEAR_RARITIES[this.gear.rarity])||{color:'#f0883e',name:'装备'};
+      pushFloatingText(this.x,this.y-10,`+${rar.name||'装备'}`,rar.color||'#f0883e',1.4);
+      spawnParticles(this.x,this.y,rar.color||'#f0883e',18);
+      if(typeof runStats!=='undefined')runStats.gearsDropped=(runStats.gearsDropped||0)+1;
+      saveSave();
+    }
     spawnParticles(this.x,this.y,this.getColor(),10);
   }
-  getColor(){return this.type==='health'?'#3fb950':this.type==='shield'?'#58a6ff':this.type==='xp'?'#bc8cff':'#f0883e';}
+  getColor(){
+    if(this.type==='gear'&&this.gear){
+      const rar=(typeof GEAR_RARITIES!=='undefined'&&GEAR_RARITIES[this.gear.rarity])||{color:'#f0883e'};
+      return rar.color||'#f0883e';
+    }
+    return this.type==='health'?'#3fb950':this.type==='shield'?'#58a6ff':this.type==='xp'?'#bc8cff':'#f0883e';
+  }
   draw(){
     ctx.save();ctx.translate(this.x,this.y+this.bobOffset);
     const c=this.getColor(),a=this.lifetime<3?(Math.sin(this.lifetime*8)*0.3+0.7):1;
@@ -1494,6 +1512,19 @@ class Drop {
       ctx.fillStyle='rgba(255,255,255,0.6)';ctx.beginPath();ctx.arc(-this.size*0.25,-this.size*0.25,this.size*0.25,0,Math.PI*2);ctx.fill();
       // 中心星形（小）
       ctx.fillStyle='#ffd970';ctx.beginPath();ctx.arc(0,0,this.size*0.2,0,Math.PI*2);ctx.fill();
+    }else if(this.type==='gear'){
+      // 装备掉落：旋转菱形+内部图标
+      const rot=_NOW/600;
+      ctx.rotate(rot);
+      ctx.fillStyle=c;
+      ctx.beginPath();ctx.moveTo(0,-this.size);ctx.lineTo(this.size,0);ctx.lineTo(0,this.size);ctx.lineTo(-this.size,0);ctx.closePath();ctx.fill();
+      // 内部白色高光
+      ctx.fillStyle='rgba(255,255,255,0.85)';ctx.beginPath();ctx.arc(0,0,this.size*0.35,0,Math.PI*2);ctx.fill();
+      ctx.rotate(-rot);
+      // 装备图标（部件名首字）
+      const slotIcon={helmet:'🪖',armor:'🛡️',boots:'👟',ring:'💍'}[this.gear?.slot]||'⚔️';
+      ctx.font=`${this.size}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(slotIcon,0,1);
     }else{ctx.fillStyle=c;ctx.beginPath();ctx.arc(0,0,this.size*0.7,0,Math.PI*2);ctx.fill();}
     ctx.restore();
   }
@@ -1790,6 +1821,17 @@ class Enemy {
     let dropChance=0.15;
     if(hasRelic('treasure'))dropChance+=0.10;
     if(Math.random()<dropChance){const types=['health','shield','coin'];const w=[4,3,5];let tw=w.reduce((a,b)=>a+b,0);let r=Math.random()*tw;let sel='coin';for(let i=0;i<3;i++){r-=w[i];if(r<=0){sel=types[i];break;}}drops.push(new Drop(this.x,this.y,sel));}
+    // 小怪1%概率掉普通/稀有装备（增加Build多样性，不与Boss掉落冲突）
+    if(Math.random()<0.01 && typeof GEAR_SLOTS!=='undefined' && typeof generateGear==='function'){
+      // 品质分布：70%普通、25%稀有、5%史诗
+      const rr=Math.random();
+      const rarity=rr<0.70?'common':rr<0.95?'rare':'epic';
+      const slot=GEAR_SLOTS[randInt(0,GEAR_SLOTS.length-1)];
+      try{
+        const g=generateGear(slot,rarity);
+        drops.push(new Drop(this.x,this.y,'gear',0,g));
+      }catch(e){ /* generateGear 失败时静默，不影响掉落 */ }
+    }
     // 成就追踪：击杀数
     saveData.achievementFlags.totalKills=(saveData.achievementFlags.totalKills||0)+1;
     // 奇遇小怪
@@ -3370,14 +3412,18 @@ class Boss {
       saveData.gearBag.push(gear); saveSave();
       pushFloatingText(this.x,this.y+30,`获得装备: ${gear.name}!`,GEAR_RARITIES[gear.rarity].color,2);
     }
-    // 超级Boss掉落魂器（20%概率，变异Boss40%）
+    // 超级Boss掉落魂器（20%概率，变异Boss40%；5次未掉则第6次必掉）
     if(this.isSuper){
       const artifactDef=getArtifactDef(this.bossIndex);
       if(artifactDef&&!saveData.ownedArtifacts.includes(this.bossIndex)){
         let artifactChance=0.20;
         if(this.isVariant)artifactChance=0.40;
-        if(Math.random()<artifactChance){
+        // 保底机制：连续5次未掉魂器，第6次必掉
+        saveData.artifactPityCounter=(saveData.artifactPityCounter||0)+1;
+        const pityDrop = saveData.artifactPityCounter>=6;
+        if(pityDrop || Math.random()<artifactChance){
           saveData.ownedArtifacts.push(this.bossIndex);
+          saveData.artifactPityCounter=0; // 重置保底计数
           // 不自动装备：玩家需在局外魂器菜单手动装备
           saveSave();
           // 醒目提示：浮字 + 屏幕公告 + 专属音效 + 大量粒子
@@ -3388,8 +3434,11 @@ class Boss {
           screenShake=Math.max(screenShake,0.4);
           if(typeof playSound==='function')playSound('levelUp');
           // 屏幕中央公告
-          showWaveAnnounce('✨ 获得魂器！',`${artifactDef.icon} ${artifactDef.name} - 局外可装备`,true);
+          showWaveAnnounce(pityDrop?'✨ 保底魂器！':'✨ 获得魂器！',`${artifactDef.icon} ${artifactDef.name} - 局外可装备`,true);
         }
+      }else if(artifactDef&&saveData.ownedArtifacts.includes(this.bossIndex)){
+        // 已拥有该魂器：不计数（避免已收集齐全后保底永远不重置）
+        saveData.artifactPityCounter=0;
       }
     }
     // 更新Boss图鉴与成就追踪

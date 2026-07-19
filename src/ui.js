@@ -98,8 +98,8 @@ function updateUI(){
     _ui._lastXp=xpTxt;
   }
   _ui.xpBar.style.width=Math.min(100,player.xp/player.xpToNext*100)+'%';
-  // 波次
-  const wTxt=endlessMode?`♾️无尽${endlessWave}波 ${gameState==='boss'?'BOSS':'波次'+currentWave}`:`第${currentLevel}关 ${gameState==='boss'?'BOSS':'波次'+currentWave}`;
+  // 波次（冒险模式显示 第X/5关，强调5关制）
+  const wTxt=endlessMode?`♾️无尽${endlessWave}波 ${gameState==='boss'?'BOSS':'波次'+currentWave}`:`第${currentLevel}/5关 ${gameState==='boss'?'BOSS':'波次'+currentWave}`;
   if(wTxt!==_ui._lastWave){_ui.waveLabel.textContent=wTxt;_ui._lastWave=wTxt;}
   // 武器
   const ws=getWeaponStats(saveData.currentWeapon);
@@ -645,6 +645,7 @@ function startGame(){
   if(typeof pendingBossCapture!=='undefined')pendingBossCapture=false;
   if(typeof adventureEnemies!=='undefined')adventureEnemies=[];
   trialXingtianTriggered=false; // 兜底重置
+  if(typeof _level5FinalBossDone!=='undefined')_level5FinalBossDone=false; // 兜底重置
   // 死亡复盘：重置本局统计
   resetRunStats();
   player=new Player();
@@ -939,6 +940,7 @@ function gameOver(){
   pendingFinalBoss=false;
   resumeTrialAfterFinalBoss=false;
   pendingSuperRevenge=false; // 第五轮新增：避免跨局泄漏污染下一只Boss
+  if(typeof _level5FinalBossDone!=='undefined')_level5FinalBossDone=false; // 重置5关强制刑天标记
   if(bossTimeChallenge)bossTimeChallenge.active=false;
   // 天赋点系统已改为：每升一级+1点（在Player.gainXp中发放），不再由得分获得
   saveData.totalScore+=score;
@@ -951,6 +953,31 @@ function gameOver(){
   const af=saveData.achievementFlags;
   af.totalRuns=(af.totalRuns||0)+1;
   if(score>(af.bestScore||0))af.bestScore=score;
+  // 首局保底奖励：第1局死亡/通关后额外送5天赋点+1件史诗装备
+  // 解决新手第1局必死且只拿几十积分、缺乏"再来一局"动力的问题
+  let firstRunBonus=null;
+  if(af.totalRuns===1 && !af.firstRunBonusClaimed){
+    af.firstRunBonusClaimed=true;
+    saveData.talentPoints=(saveData.talentPoints||0)+5;
+    // 生成1件史诗装备放进背包
+    let bonusGear=null;
+    try{
+      if(typeof generateRandomGear==='function'){
+        bonusGear=generateRandomGear('epic');
+      }else if(typeof generateGear==='function'){
+        bonusGear=generateGear({rarity:'epic'});
+      }
+    }catch(e){ bonusGear=null; }
+    if(bonusGear){
+      saveData.gearBag.push(bonusGear);
+      firstRunBonus={talents:5, gear:bonusGear};
+    }else{
+      // 装备生成失败兜底：多送5天赋点
+      saveData.talentPoints=(saveData.talentPoints||0)+5;
+      firstRunBonus={talents:10, gear:null};
+    }
+    saveSave();
+  }
   const wasTrial=_lastRunWasTrial; // 用独立标记，避免 bossTrialMode 被提前重置导致失效
   // 死亡复盘：补全局时长统计
   if(typeof runStats!=='undefined' && runStats){
@@ -1045,7 +1072,17 @@ function gameOver(){
   const replayBtnHandler = wasTrial ? 'startBossTrial' : 'startGame';
   const replayBtnStyle = wasTrial ? 'background:linear-gradient(135deg,#bc8cff,#8b5cf6);font-size:16px;padding:14px 28px;min-height:48px' : 'font-size:16px;padding:14px 28px;min-height:48px';
   const tipHtml=generateDeathTip();
-  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:10px;padding-top:24px"><h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:28px;margin:4px 0">游戏结束</h1><div class="deco-line" style="margin:4px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>${wasTrial?'<p style="color:#bc8cff;font-size:13px;margin:4px 0">Boss试炼结束</p>':endlessMode?`<p style="color:#daa520;font-size:13px;margin:4px 0">♾️ 无尽模式 - 第 ${endlessWave} 波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' <span style="color:#ffd700">🏆 新纪录!</span>':''}</p>`:`<p style="font-size:13px;margin:4px 0">你到达了第 ${currentLevel} 关 第 ${currentWave} 波</p>`}<div id="finalScore" class="card-enter" style="font-size:48px">${score}</div><p class="subtitle" style="margin:2px 0">本局得分</p>${achHtml}${tipHtml}${recapHtml}<div style="display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap"><div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div><div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>${newEggs>0?`<div class="stat-pill" style="animation-delay:1s;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}</div><div style="display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:6px;padding:12px 10px calc(12px + env(safe-area-inset-bottom, 0px));position:sticky;bottom:0;background:linear-gradient(180deg,transparent 0%,rgba(13,10,5,0.92) 25%);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:5"><button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle}">${replayBtnText}</button><button class="sec-btn" id="backToMenuBtn" style="font-size:14px;padding:12px 24px;min-height:44px">🏠 返回主菜单</button><div class="subtitle" style="margin-top:2px;font-size:11px">按 R 键快速重新开始</div></div></div>`;
+  // 首局保底奖励提示
+  const firstBonusHtml = firstRunBonus ? `
+    <div style="background:linear-gradient(135deg,rgba(212,160,23,0.2),rgba(165,40,56,0.15));border:2px solid #ffd700;border-radius:12px;padding:14px 18px;margin:8px auto;max-width:420px;box-shadow:0 0 20px rgba(255,215,0,0.3);animation:cardEnter 0.5s">
+      <div style="color:#ffd700;font-size:15px;font-weight:bold;letter-spacing:2px;text-align:center;margin-bottom:6px">🎁 新手首局礼包</div>
+      <div style="color:#c9d1d9;font-size:13px;line-height:1.8;text-align:center">
+        ✦ <b style="color:#ffd970">+${firstRunBonus.talents} 天赋点</b>（已可用于升级天赋）<br>
+        ${firstRunBonus.gear?`✦ <b style="color:#a855f7">+1件史诗装备</b>（${firstRunBonus.gear.name||'神秘装备'}）已放入背包`:''}
+      </div>
+      <div style="color:#8b949e;font-size:11px;text-align:center;margin-top:6px">下次开局前记得装备上！</div>
+    </div>` : '';
+  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:10px;padding-top:24px"><h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:28px;margin:4px 0">游戏结束</h1><div class="deco-line" style="margin:4px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>${wasTrial?'<p style="color:#bc8cff;font-size:13px;margin:4px 0">Boss试炼结束</p>':endlessMode?`<p style="color:#daa520;font-size:13px;margin:4px 0">♾️ 无尽模式 - 第 ${endlessWave} 波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' <span style="color:#ffd700">🏆 新纪录!</span>':''}</p>`:`<p style="font-size:13px;margin:4px 0">你到达了第 ${currentLevel} 关 第 ${currentWave} 波</p>`}<div id="finalScore" class="card-enter" style="font-size:48px">${score}</div><p class="subtitle" style="margin:2px 0">本局得分</p>${achHtml}${firstBonusHtml}${tipHtml}${recapHtml}<div style="display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap"><div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div><div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>${newEggs>0?`<div class="stat-pill" style="animation-delay:1s;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}</div><div style="background:rgba(22,27,34,0.7);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:8px 12px;margin:4px auto;max-width:340px;text-align:center;font-size:12px"><span style="color:#ffd700">🎖️ 训练等级 Lv.${(saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1}</span><br><span style="color:#8b949e">距下个天赋点：还差 <b style="color:#ffd970">${1000-((saveData.totalXp||0)%1000)} XP</b></span></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:6px;padding:12px 10px calc(12px + env(safe-area-inset-bottom, 0px));position:sticky;bottom:0;background:linear-gradient(180deg,transparent 0%,rgba(13,10,5,0.92) 25%);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:5"><button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle}">${replayBtnText}</button><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="sec-btn" id="backToMenuBtn" style="font-size:14px;padding:12px 24px;min-height:44px">🏠 返回主菜单</button><button class="sec-btn" id="shareScoreBtn" style="font-size:14px;padding:12px 24px;min-height:44px;border-color:#bc8cff;color:#bc8cff">📤 分享战绩</button></div><div class="subtitle" style="margin-top:2px;font-size:11px">按 R 键快速重新开始</div></div></div>`;
   saveSave();
   // 死亡界面按钮统一用 _bindTap（带 _isSynthesizedClick 守卫，防止触屏笔记本双触发）
   const startBtnEl=document.getElementById(replayBtnId);
@@ -1053,6 +1090,8 @@ function gameOver(){
   const replayHandler=wasTrial?startBossTrial:startGame;
   _bindTap(startBtnEl, replayHandler);
   _bindTap(backToMenuBtnEl, showMainMenu);
+  const shareBtnEl=document.getElementById('shareScoreBtn');
+  if(shareBtnEl)_bindTap(shareBtnEl, ()=>shareRunResult(score, wasTrial, recapHtml));
   // 弑神难度试炼首次通关：揭示开发者彩蛋（作弊方法）
   if(typeof _showCheatReveal!=='undefined' && _showCheatReveal){
     _showCheatReveal=false;
@@ -1060,6 +1099,104 @@ function gameOver(){
   }
 }
 
+// 战绩分享卡片：生成图片可保存到相册或分享
+function shareRunResult(finalScore, wasTrial, recapHtml){
+  // 提取关键数据
+  const mode = wasTrial ? 'Boss试炼' : (endlessMode ? `无尽·${endlessWave}波` : `冒险·第${currentLevel}关`);
+  const kills = (typeof runStats!=='undefined' && runStats) ? (runStats.kills||0) : 0;
+  const maxCombo = (typeof runStats!=='undefined' && runStats) ? (runStats.maxCombo||0) : 0;
+  const xpEarned = (typeof runStats!=='undefined' && runStats) ? (runStats.xpEarned||0) : 0;
+  // 生成分享卡片
+  const canvas=document.createElement('canvas');
+  canvas.width=720; canvas.height=1280;
+  const ctx=canvas.getContext('2d');
+  // 背景：深色渐变
+  const grad=ctx.createLinearGradient(0,0,0,1280);
+  grad.addColorStop(0,'#1a0a05'); grad.addColorStop(0.5,'#0d0a08'); grad.addColorStop(1,'#000');
+  ctx.fillStyle=grad; ctx.fillRect(0,0,720,1280);
+  // 顶部金色装饰条
+  ctx.fillStyle='#d4a017'; ctx.fillRect(0,0,720,4);
+  // 标题
+  ctx.textAlign='center';
+  ctx.fillStyle='#f85149';
+  ctx.font='bold 60px STKaiti,KaiTi,serif';
+  ctx.shadowColor='rgba(248,81,73,0.6)'; ctx.shadowBlur=20;
+  ctx.fillText('游戏结束',360,140);
+  ctx.shadowBlur=0;
+  // 副标题
+  ctx.fillStyle='#8b949e';
+  ctx.font='28px STKaiti,KaiTi,serif';
+  ctx.fillText(mode,360,200);
+  // 分数
+  ctx.fillStyle='#ffd970';
+  ctx.font='bold 160px STKaiti,KaiTi,serif';
+  ctx.shadowColor='rgba(255,217,112,0.5)'; ctx.shadowBlur=30;
+  ctx.fillText(finalScore,360,400);
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#8b949e';
+  ctx.font='24px STKaiti,KaiTi,serif';
+  ctx.fillText('本局得分',360,450);
+  // 分隔线
+  ctx.strokeStyle='rgba(212,160,23,0.4)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(80,500); ctx.lineTo(640,500); ctx.stroke();
+  // 数据网格
+  ctx.font='22px STKaiti,KaiTi,serif';
+  const stats=[
+    {label:'⚔️ 击杀数', value: kills, color:'#3fb950'},
+    {label:'🔥 最高连击', value: maxCombo, color:'#ffd970'},
+    {label:'⭐ 经验获得', value: xpEarned+' XP', color:'#bc8cff'},
+    {label:'🎖️ 训练等级', value: 'Lv.'+(((saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1)), color:'#ffd700'}
+  ];
+  stats.forEach((s,i)=>{
+    const y=560+i*80;
+    ctx.fillStyle='#8b949e'; ctx.textAlign='left';
+    ctx.fillText(s.label,120,y);
+    ctx.fillStyle=s.color; ctx.textAlign='right'; ctx.font='bold 28px STKaiti,KaiTi,serif';
+    ctx.fillText(s.value,600,y);
+    ctx.font='22px STKaiti,KaiTi,serif';
+  });
+  // 底部品牌
+  ctx.textAlign='center';
+  ctx.fillStyle='#d4a017'; ctx.font='28px STKaiti,KaiTi,serif';
+  ctx.fillText('山海经·揍异兽',360,1080);
+  ctx.fillStyle='#8b949e'; ctx.font='18px STKaiti,KaiTi,serif';
+  ctx.fillText('九大异兽·刑天战神·肉鸽冒险',360,1115);
+  // 底部装饰
+  ctx.fillStyle='#d4a017'; ctx.fillRect(0,1276,720,4);
+  // 转为图片
+  try{
+    const dataUrl=canvas.toDataURL('image/png');
+    // 优先使用 Web Share API（手机端原生分享）
+    if(navigator.share || navigator.canShare){
+      canvas.toBlob(async (blob)=>{
+        try{
+          const file=new File([blob],'战绩.png',{type:'image/png'});
+          if(navigator.canShare && navigator.canShare({files:[file]})){
+            await navigator.share({files:[file], title:'我在山海经揍异兽', text:`${mode} 得分 ${finalScore}!`});
+          }else{
+            await navigator.share({title:'我在山海经揍异兽', text:`${mode} 得分 ${finalScore}! 击杀${kills} 最高连击${maxCombo}`});
+          }
+        }catch(err){
+          // 用户取消分享，不报错
+          if(err.name!=='AbortError') showToast('已生成战绩图','📄',2000);
+        }
+      },'image/png');
+    }else{
+      // 桌面端：在新标签页打开图片，让用户右键保存
+      const win=window.open();
+      if(win){
+        win.document.write(`<title>战绩分享</title><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="${dataUrl}" style="max-width:100%;max-height:100vh"></body>`);
+      }else{
+        // 弹窗被拦截，下载图片
+        const a=document.createElement('a');
+        a.href=dataUrl; a.download=`战绩_${finalScore}分.png`; a.click();
+      }
+      showToast('战绩图已生成','📄',2000);
+    }
+  }catch(err){
+    showToast('生成失败：'+err.message,'⚠️',2000);
+  }
+}
 // 开发者彩蛋揭示弹窗（仅在弑神难度试炼首次通关后显示）
 function showCheatRevealModal(){
   const html=`<div id="cheatRevealOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)">
@@ -1485,6 +1622,222 @@ function renderRanchScene(){
 // ==================== 主菜单 ====================
 // 图鉴作弊点击计数器（全局，不随主菜单重渲染而重置）
 let _pediaClickCount=0, _pediaClickTimer=null;
+
+// 每日签到系统
+function _getTodayStr(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function _getYesterdayStr(){
+  const d=new Date(); d.setDate(d.getDate()-1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function _isCheckInAvailable(){
+  return saveData.lastCheckInDate !== _getTodayStr();
+}
+function _renderDailyCheckIn(){
+  const today=_getTodayStr();
+  const available = saveData.lastCheckInDate !== today;
+  const streak = saveData.checkInStreak || 0;
+  if(available){
+    // 今日可签到
+    const yesterday = _getYesterdayStr();
+    const willContinue = saveData.lastCheckInDate === yesterday;
+    const newStreak = willContinue ? streak+1 : 1;
+    // 奖励预览：基础200分+连续签到加成
+    const scoreReward = 200 + Math.min(newStreak-1, 7) * 50; // 第1天200，每连续+50，最多第8天550
+    return `<button id="dailyCheckInBtn" style="display:block;width:100%;max-width:460px;margin:0 auto 8px;padding:8px 14px;background:linear-gradient(135deg,#3a2a1a,#5a3a1a);border:2px solid #ffd700;border-radius:10px;color:#ffd970;font-size:13px;font-weight:bold;cursor:pointer;box-shadow:0 0 16px rgba(255,215,0,0.3);animation:pulse 2s infinite">
+      🎁 每日签到 (第${newStreak}天) · 领取 ${scoreReward} 积分 + 随机装备
+    </button>`;
+  }else{
+    // 今日已签到
+    return `<div style="text-align:center;font-size:11px;color:#8b949e;margin:0 auto 6px;padding:4px 10px;background:rgba(22,27,34,0.6);border:1px solid #30363d;border-radius:6px;max-width:460px">
+      ✓ 今日已签到 · 连续 ${streak} 天 · 明日再来
+    </div>`;
+  }
+}
+function claimDailyCheckIn(){
+  if(!_isCheckInAvailable())return;
+  const today=_getTodayStr();
+  const yesterday=_getYesterdayStr();
+  const willContinue = saveData.lastCheckInDate === yesterday;
+  saveData.checkInStreak = willContinue ? (saveData.checkInStreak||0)+1 : 1;
+  saveData.lastCheckInDate = today;
+  const streak = saveData.checkInStreak;
+  const scoreReward = 200 + Math.min(streak-1, 7) * 50;
+  saveData.totalScore = (saveData.totalScore||0) + scoreReward;
+  // 随机装备奖励（稀有度随连续天数递增）
+  let rarity = 'common';
+  if(streak>=7) rarity='epic';
+  else if(streak>=4) rarity='rare';
+  else if(streak>=2) rarity='rare';
+  let bonusGear = null;
+  try{
+    if(typeof generateGear==='function'){
+      const slot = (typeof GEAR_SLOTS!=='undefined') ? GEAR_SLOTS[Math.floor(Math.random()*GEAR_SLOTS.length)] : 'ring';
+      bonusGear = generateGear(slot, rarity);
+    }
+  }catch(e){ bonusGear=null; }
+  if(bonusGear){
+    saveData.gearBag.push(bonusGear);
+  }
+  saveSave();
+  // 弹窗提示
+  const ov=document.getElementById('overlay');
+  const wasHidden = ov.classList.contains('hidden');
+  ov.classList.remove('hidden');
+  const rarName = (typeof GEAR_RARITIES!=='undefined'&&GEAR_RARITIES[rarity]) ? GEAR_RARITIES[rarity].name : rarity;
+  const rarColor = (typeof GEAR_RARITIES!=='undefined'&&GEAR_RARITIES[rarity]) ? GEAR_RARITIES[rarity].color : '#f0883e';
+  ov.innerHTML=`
+    <div style="text-align:center;max-width:480px;margin:auto">
+      <h2 style="color:#ffd700;font-size:26px;text-shadow:0 0 18px rgba(255,215,0,0.6);margin-bottom:8px">🎁 每日签到</h2>
+      <p style="color:#ffd970;font-size:15px;margin:6px 0">连续签到 第 ${streak} 天</p>
+      <div style="background:rgba(13,10,5,0.85);border:1px solid rgba(255,215,0,0.3);border-radius:12px;padding:18px;margin:14px 0;line-height:1.9">
+        <div style="color:#ffd970">✦ +${scoreReward} 积分</div>
+        ${bonusGear?`<div style="color:${rarColor};margin-top:6px">✦ +1件 ${rarName}装备：${bonusGear.name||'神秘装备'}</div>`:''}
+      </div>
+      <p style="color:#8b949e;font-size:11px;margin:8px 0">连续签到7天可得史诗装备</p>
+      <button class="main-btn" id="closeCheckInBtn" style="background:linear-gradient(135deg,#daa520,#ff8c00);font-size:14px;padding:8px 28px;margin-top:6px">✓ 收下</button>
+    </div>
+  `;
+  _bindTap(document.getElementById('closeCheckInBtn'),()=>{
+    ov.classList.add('hidden');
+    showMainMenu();
+  });
+}
+// ==================== 新手引导 ====================
+// 首次进入游戏后展示4步基础引导：操作 / 5关制 / 装备天赋入口 / 每日签到
+// 完成后设置 saveData.tutorialShown=true，不再弹窗
+function showTutorial(force){
+  if(!force && saveData.tutorialShown) return;
+  // 等待其他欢迎覆盖层（开场故事/更新公告）关闭后再弹出，避免同时出现
+  if(document.getElementById('storyOverlay') || document.getElementById('noticeOverlay')){
+    setTimeout(()=>showTutorial(force), 300);
+    return;
+  }
+  // 已存在引导覆盖层时不重复创建
+  if(document.getElementById('tutorialOverlay')) return;
+  const steps = [
+    {
+      icon: '🎮',
+      title: '第一步 · 基础操作',
+      bg: 'linear-gradient(180deg,#0a1a2a,#1a3a5a)',
+      content: `
+        <div style="color:#e0d8c8;font-size:13px;line-height:2;text-align:left;font-family:'STKaiti',KaiTi,serif">
+          <div style="color:#79c0ff;font-size:14px;font-weight:bold;margin-bottom:8px">📱 手机端</div>
+          <div>左侧摇杆：<span style="color:#ffd970">移动</span></div>
+          <div>右侧摇杆：<span style="color:#ffd970">射击方向</span>（自动开火）</div>
+          <div>双手可同时操控，互不干扰</div>
+          <div style="color:#79c0ff;font-size:14px;font-weight:bold;margin:14px 0 8px">💻 电脑端</div>
+          <div>WASD / 方向键：移动</div>
+          <div>鼠标移动：瞄准 · 自动开火</div>
+          <div>ESC：暂停</div>
+          <div style="color:#8b949e;font-size:11px;margin-top:10px">建议横屏游玩，体验更佳</div>
+        </div>
+      `
+    },
+    {
+      icon: '🗺️',
+      title: '第二步 · 关卡流程',
+      bg: 'linear-gradient(180deg,#1a3a5a,#2a4a3a)',
+      content: `
+        <div style="color:#e0d8c8;font-size:13px;line-height:2;text-align:left;font-family:'STKaiti',KaiTi,serif">
+          <div>每一关有 <span style="color:#ffd970">3 波小怪 + 1 个 Boss</span></div>
+          <div>冒险模式共 <span style="color:#ffd970">5 关</span>，难度递增</div>
+          <div>击败小怪掉落 <span style="color:#bc8cff">紫色经验球</span>，靠近自动拾取</div>
+          <div>升级后获得 <span style="color:#ffd970">天赋点</span>，可在3选1强化中选技能</div>
+          <div style="margin-top:10px;color:#ff6347;font-weight:bold">⚔️ 第5关后：最终Boss 刑天</div>
+          <div style="color:#8b949e;font-size:11px">击败刑天后可进入 ♾️ 无尽模式</div>
+          <div style="color:#8b949e;font-size:11px">也可跳过刑天直接挑战无尽</div>
+        </div>
+      `
+    },
+    {
+      icon: '🎽',
+      title: '第三步 · 装备与天赋',
+      bg: 'linear-gradient(180deg,#2a4a3a,#3a2a4a)',
+      content: `
+        <div style="color:#e0d8c8;font-size:13px;line-height:2;text-align:left;font-family:'STKaiti',KaiTi,serif">
+          <div style="color:#ffd970;font-weight:bold;margin-bottom:6px">🎒 背包</div>
+          <div>查看/装备/合成装备</div>
+          <div>3件同品质 → <span style="color:#58a6ff">50%</span> 合成更高一阶</div>
+          <div style="color:#ffd970;font-weight:bold;margin:10px 0 6px">🧬 天赋</div>
+          <div>消耗天赋点升级被动属性</div>
+          <div>每升一级获得 <span style="color:#ffd970">2 天赋点</span></div>
+          <div style="color:#ffd970;font-weight:bold;margin:10px 0 6px">🔮 魂器</div>
+          <div>击败超级Boss掉落，局外装备</div>
+          <div style="color:#8b949e;font-size:11px;margin-top:8px">5次未掉魂器后第6次必掉</div>
+        </div>
+      `
+    },
+    {
+      icon: '🎁',
+      title: '第四步 · 日常福利',
+      bg: 'linear-gradient(180deg,#3a2a4a,#2a1a3a)',
+      content: `
+        <div style="color:#e0d8c8;font-size:13px;line-height:2;text-align:left;font-family:'STKaiti',KaiTi,serif">
+          <div style="color:#ffd970;font-weight:bold;margin-bottom:6px">📅 每日签到</div>
+          <div>每天可签到1次，连续签到奖励递增</div>
+          <div>第7天起掉落 <span style="color:#bc8cff">史诗装备</span></div>
+          <div style="color:#ffd970;font-weight:bold;margin:10px 0 6px">⭐ 训练等级</div>
+          <div>累积经验升级局外等级</div>
+          <div>每 <span style="color:#ffd970">1000 XP</span> 额外奖励 1 天赋点</div>
+          <div style="color:#ffd970;font-weight:bold;margin:10px 0 6px">🏆 难度解锁</div>
+          <div>通关当前难度试炼 → 解锁下一难度</div>
+          <div style="color:#8b949e;font-size:11px;margin-top:10px">普通 → 困难 → 地狱 → 弑神</div>
+        </div>
+      `
+    }
+  ];
+  let currentPage = 0;
+  const totalPages = steps.length;
+  const renderPage = () => {
+    const s = steps[currentPage];
+    const el = document.getElementById('tutorialOverlay');
+    if(!el) return;
+    el.style.background = s.bg;
+    const contentEl = document.getElementById('tutorialContent');
+    if(contentEl){
+      contentEl.innerHTML = `
+        <div style="font-size:48px;margin-bottom:12px;text-shadow:0 0 20px rgba(255,215,0,0.5)">${s.icon}</div>
+        <h2 style="color:#ffd700;letter-spacing:3px;margin:0 0 18px;font-size:18px;font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 10px rgba(255,215,0,0.4)">${s.title}</h2>
+        <div style="background:rgba(0,0,0,0.4);border:1px solid rgba(212,160,23,0.3);border-radius:10px;padding:18px 20px">${s.content}</div>
+      `;
+    }
+    const infoEl = document.getElementById('tutorialPageInfo');
+    if(infoEl) infoEl.textContent = `${currentPage+1} / ${totalPages}`;
+    const prevBtn = document.getElementById('tutorialPrevBtn');
+    const nextBtn = document.getElementById('tutorialNextBtn');
+    const doneBtn = document.getElementById('tutorialDoneBtn');
+    if(prevBtn) prevBtn.style.display = (currentPage > 0) ? 'inline-block' : 'none';
+    if(nextBtn) nextBtn.style.display = (currentPage < totalPages - 1) ? 'inline-block' : 'none';
+    if(doneBtn) doneBtn.style.display = (currentPage === totalPages - 1) ? 'block' : 'none';
+  };
+  let html = `<div id="tutorialOverlay" style="position:fixed;inset:0;z-index:99997;display:flex;align-items:center;justify-content:center;padding:16px;transition:background 0.6s">`;
+  html += `<div style="max-width:480px;width:100%;text-align:center;padding:24px 20px">`;
+  html += `<div style="color:#ffd700;font-size:14px;letter-spacing:6px;margin-bottom:18px;font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ 新手引导 ✦</div>`;
+  html += `<div id="tutorialContent" style="min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start"></div>`;
+  html += `<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:24px">`;
+  html += `<button id="tutorialPrevBtn" style="padding:8px 18px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:13px;font-family:'STKaiti',KaiTi,serif">◀ 上一步</button>`;
+  html += `<span id="tutorialPageInfo" style="color:#ffd970;font-size:12px;min-width:50px"></span>`;
+  html += `<button id="tutorialNextBtn" style="padding:8px 18px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:13px;font-family:'STKaiti',KaiTi,serif">下一步 ▶</button>`;
+  html += `</div>`;
+  html += `<button id="tutorialDoneBtn" style="display:none;margin-top:14px;width:100%;padding:14px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:10px;font-size:16px;font-weight:bold;letter-spacing:3px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;box-shadow:0 0 20px rgba(255,215,0,0.5)">⚔️ 开始游戏</button>`;
+  html += `<button id="tutorialSkipBtn" style="margin-top:10px;padding:6px 16px;background:transparent;color:#8b949e;border:none;font-size:11px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">跳过 ⏭</button>`;
+  html += `</div></div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  renderPage();
+  _bindTap(document.getElementById('tutorialPrevBtn'), () => { if(currentPage > 0){ currentPage--; renderPage(); } });
+  _bindTap(document.getElementById('tutorialNextBtn'), () => { if(currentPage < totalPages - 1){ currentPage++; renderPage(); } });
+  const closeFn = () => {
+    const el = document.getElementById('tutorialOverlay');
+    if(el) el.remove();
+    saveData.tutorialShown = true;
+    saveSave();
+  };
+  _bindTap(document.getElementById('tutorialDoneBtn'), closeFn);
+  _bindTap(document.getElementById('tutorialSkipBtn'), closeFn);
+}
 function showMainMenu(){
   if(typeof _clearGameState==='function')_clearGameState(); // 清理 Android 后退键历史记录
   _runToken++; // 丢弃本局残留的 gameTimeout 回调，防止覆盖主菜单
@@ -1566,14 +1919,21 @@ function showMainMenu(){
           <div class="stat-pill"><span class="pill-icon">🏆</span><span class="pill-value">${achCount}</span><span class="pill-label">成就</span></div>
         </div>
         <div style="max-width:460px;margin:4px auto 2px;padding:0 6px">
-          <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px"><span style="color:#ffd700">Lv.${playerLvl.level}</span><span style="color:#8b949e">${playerLvl.inLevel}/${playerLvl.needed} XP</span></div>
-          <div style="height:5px;background:#1a1f2e;border-radius:3px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.6)"><div style="height:100%;width:${playerLvl.inLevel/playerLvl.needed*100}%;background:linear-gradient(90deg,#ffd700,#ff8c42);transition:width 0.3s;border-radius:3px;box-shadow:0 0 6px rgba(255,215,0,0.5)"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+            <span style="color:#ffd700;font-weight:bold;text-shadow:0 0 4px rgba(255,215,0,0.6)">🎖️ 训练等级 Lv.${playerLvl.level}</span>
+            <span style="color:#8b949e">${playerLvl.inLevel}/${playerLvl.needed} XP</span>
+          </div>
+          <div style="height:7px;background:#1a1f2e;border-radius:4px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.6);position:relative">
+            <div style="height:100%;width:${playerLvl.inLevel/playerLvl.needed*100}%;background:linear-gradient(90deg,#ffd700,#ff8c42);transition:width 0.5s;border-radius:4px;box-shadow:0 0 8px rgba(255,215,0,0.6)"></div>
+          </div>
+          <div style="text-align:center;font-size:10px;color:#8b949e;margin-top:2px">距下个天赋点：还差 ${1000-(saveData.totalXp%1000)} XP</div>
         </div>
       </div>
      </div>
 
      <div class="sj-col-right">
       <div class="menu-section">
+        ${_renderDailyCheckIn()}
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
           <button class="action-btn" id="startBtn">⚔️ 开始冒险</button>
           <button class="action-btn trial" id="trialBtn">🐉 Boss试炼</button>
@@ -1651,6 +2011,8 @@ function showMainMenu(){
   _bindTap(document.getElementById('startBtn'),startGame);
   _bindTap(document.getElementById('trialBtn'),startBossTrial);
   _bindTap(document.getElementById('endlessBtn'),startEndlessMode);
+  const _ciBtn=document.getElementById('dailyCheckInBtn');
+  if(_ciBtn)_bindTap(_ciBtn,claimDailyCheckIn);
   _bindTap(document.getElementById('talentBtn'),showTalentMenu);
   _bindTap(document.getElementById('bagBtn'),showBagMenu);
   _bindTap(document.getElementById('ranchBtn'),showRanchMenu);
@@ -2518,8 +2880,8 @@ let selectedSynthUids=[];
 let synthFilterRarity=null; // 合成筛选阶级，选中装备后只显示同阶级
 let gearFilterSlot=null;    // 装备图鉴部位筛选
 let gearFilterRarity=null;  // 装备图鉴稀有度筛选
-// 装备分解回报：按稀有度给积分
-const GEAR_DECOMPOSE_REWARDS={common:30,rare:80,epic:180,legendary:400,mythic:1000};
+// 装备分解回报：按稀有度给积分（定义在 save.js，这里仅注释说明）
+// const GEAR_DECOMPOSE_REWARDS 已在 save.js 中定义
 // 装备词条可视化：图标+数值条展示
 // 根据词条类型计算相对强度（0-100%），渲染为进度条
 function _renderStatBar(stat){
@@ -2626,12 +2988,11 @@ function _renderGearCompare(g){
 }
 function showGearMenu(){
   const ov=document.getElementById('gearOverlay'); ov.classList.remove('hidden');
-  const _essence=saveData.gearEssence||0;
   let html=`<h2>🎽 装备背包</h2>`;
-  // 精魄数量显示
-  html+=`<div style="text-align:center;margin:0 auto 8px;max-width:680px;padding:5px 10px;background:linear-gradient(90deg,rgba(188,140,255,0.1),rgba(88,166,255,0.1),rgba(188,140,255,0.1));border:1px solid #bc8cff;border-radius:6px">
-    <span style="color:#bc8cff;font-size:13px;font-weight:bold;letter-spacing:1px">💠 装备精魄：${_essence}</span>
-    <span style="color:#8b949e;font-size:10px;margin-left:8px">分解装备获得 · 用于定向重铸/升阶</span>
+  // 积分数量显示（简化后只显示积分，原精魄已合并）
+  html+=`<div style="text-align:center;margin:0 auto 8px;max-width:680px;padding:5px 10px;background:linear-gradient(90deg,rgba(212,160,23,0.1),rgba(255,217,112,0.1),rgba(212,160,23,0.1));border:1px solid #ffd970;border-radius:6px">
+    <span style="color:#ffd970;font-size:13px;font-weight:bold;letter-spacing:1px">🪙 当前积分：${saveData.totalScore||0}</span>
+    <span style="color:#8b949e;font-size:10px;margin-left:8px">分解装备获得 · 用于升阶/重铸</span>
   </div>`;
   // 专属词条总览（可折叠）- 让玩家了解传说/神话词条功效
   html+=`<details style="max-width:680px;margin:0 auto 8px;padding:6px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(212,160,23,0.25);border-radius:6px">
@@ -2787,8 +3148,8 @@ function showGearMenu(){
         <div style="display:flex;gap:2px;margin-top:3px;flex-wrap:wrap">
           <span style="font-size:8px;color:#58a6ff;flex:1">${selected?'取消':'装备'}</span>
           ${canSynth?`<button data-synth-btn="1" data-rar="${g.rarity}" class="sec-btn" style="font-size:8px;padding:1px 4px">${selected?'取消':'合成'}</button>`:''}
-          ${g.rarity!=='mythic'?`<button data-ascend="${g.uid}" class="sec-btn" style="font-size:8px;padding:1px 4px;color:#bc8cff;border-color:#bc8cff" title="消耗${GEAR_ASCEND_COST[g.rarity].essence}精魄+${GEAR_ASCEND_COST[g.rarity].score}积分升阶">⬆升阶</button>`:''}
-          <button data-decompose="${g.uid}" class="sec-btn" style="font-size:8px;padding:1px 4px;color:#f85149;border-color:#f85149" title="分解获得${GEAR_ESSENCE_REWARDS[g.rarity]}精魄+${GEAR_DECOMPOSE_REWARDS[g.rarity]}积分">分+${GEAR_DECOMPOSE_REWARDS[g.rarity]}💠${GEAR_ESSENCE_REWARDS[g.rarity]}</button>
+          ${g.rarity!=='mythic'?`<button data-ascend="${g.uid}" class="sec-btn" style="font-size:8px;padding:1px 4px;color:#bc8cff;border-color:#bc8cff" title="消耗${GEAR_ASCEND_COST[g.rarity]}积分升阶">⬆${GEAR_ASCEND_COST[g.rarity]}分</button>`:''}
+          <button data-decompose="${g.uid}" class="sec-btn" style="font-size:8px;padding:1px 4px;color:#f85149;border-color:#f85149" title="分解获得${GEAR_DECOMPOSE_REWARDS[g.rarity]}积分">分+${GEAR_DECOMPOSE_REWARDS[g.rarity]}🪙</button>
         </div>
       </div>`;
     }
@@ -2805,14 +3166,13 @@ function showGearMenu(){
   const decomposable=saveData.gearBag.filter(g=>['common','rare'].includes(g.rarity));
   if(decomposable.length>0){
     const totalReward=decomposable.reduce((s,g)=>s+GEAR_DECOMPOSE_REWARDS[g.rarity],0);
-    const totalEssence=decomposable.reduce((s,g)=>s+(GEAR_ESSENCE_REWARDS[g.rarity]||0),0);
-    html+=`<button class="sec-btn" id="oneClickDecompose" style="font-size:9px;padding:1px 5px;color:#f85149;border-color:#f85149">🔥分解${decomposable.length}件+${totalReward}分+${totalEssence}💠</button>`;
+    html+=`<button class="sec-btn" id="oneClickDecompose" style="font-size:9px;padding:1px 5px;color:#f85149;border-color:#f85149">🔥分解${decomposable.length}件+${totalReward}🪙</button>`;
   }
   html+=`</div>`;
   // ===== 词条重铸（紧凑横排，可折叠） =====
   const rerollable=saveData.gearBag.filter(g=>g.specialAffix && !g.specialAffix.bossAffix);
   if(rerollable.length>0){
-    html+=`<details style="max-width:680px;margin:4px auto 0"><summary style="color:#bc8cff;font-size:11px;cursor:pointer">🔮 词条重铸 · ${rerollable.length}件可重铸（随机300分或10精魄 / 定向${GEAR_REFORGE_COST.direct_legendary.essence}+${GEAR_REFORGE_COST.direct_legendary.score}分传说 / ${GEAR_REFORGE_COST.direct_mythic.essence}+${GEAR_REFORGE_COST.direct_mythic.score}分神话）</summary>`;
+    html+=`<details style="max-width:680px;margin:4px auto 0"><summary style="color:#bc8cff;font-size:11px;cursor:pointer">🔮 词条重铸 · ${rerollable.length}件可重铸（随机${GEAR_REFORGE_COST.random}分 / 定向${GEAR_REFORGE_COST.direct_legendary}分传说 / ${GEAR_REFORGE_COST.direct_mythic}分神话）</summary>`;
     html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px;margin-top:4px">`;
     for(const g of rerollable){
       const rc=GEAR_RARITIES[g.rarity].color;
@@ -2902,25 +3262,19 @@ function showGearMenu(){
   if(clearBtn)_bindTap(clearBtn,()=>{selectedSynthUids=[];synthFilterRarity=null;showGearMenu();});
   const resetFilterBtn=document.getElementById('resetFilter');
   if(resetFilterBtn)_bindTap(resetFilterBtn,()=>{synthFilterRarity=null;showGearMenu();});
-  // 词条重铸：随机（支持积分或精魄支付）
+  // 词条重铸：随机（只用积分支付）
   ov.querySelectorAll('[data-reroll]').forEach(btn=>{
     _bindTap(btn,()=>{
       const uid=btn.dataset.reroll; // 字符串比较，避免浮点数精度问题
       const g=saveData.gearBag.find(x=>String(x.uid)===String(uid));
       if(!g||!g.specialAffix)return;
-      // 优先用精魄（10精魄），其次用积分（300积分）
-      const canEssence=(saveData.gearEssence||0)>=GEAR_REFORGE_COST.random_essence;
-      const canScore=(saveData.totalScore||0)>=GEAR_REFORGE_COST.random_score;
-      if(!canEssence && !canScore){
-        showSynthResult({success:false,msg:`积分不足（需${GEAR_REFORGE_COST.random_score}分）或精魄不足（需${GEAR_REFORGE_COST.random_essence}精魄）`});
+      // 只用积分
+      const cost=GEAR_REFORGE_COST.random;
+      if((saveData.totalScore||0)<cost){
+        showSynthResult({success:false,msg:`积分不足，需要${cost}积分`});
         return;
       }
-      // 优先用精魄（更便宜，让低分玩家有出路）
-      if(canEssence){
-        saveData.gearEssence-=GEAR_REFORGE_COST.random_essence;
-      }else{
-        saveData.totalScore-=GEAR_REFORGE_COST.random_score;
-      }
+      saveData.totalScore-=cost;
       const pool=g.rarity==='mythic'?GEAR_MYTHIC_AFFIXES:GEAR_LEGENDARY_AFFIXES;
       // 排除当前词条
       const candidates=pool.filter(a=>a.id!==g.specialAffix.id);
@@ -2944,7 +3298,7 @@ function showGearMenu(){
       const pool=isMythic?GEAR_MYTHIC_AFFIXES:GEAR_LEGENDARY_AFFIXES;
       // 弹出词条选择面板
       let rh=`<div style="color:#ffd700;font-size:13px;margin-bottom:8px;font-weight:bold">🔮 定向重铸 - ${g.name}</div>`;
-      rh+=`<div style="color:#8b949e;font-size:11px;margin-bottom:8px">当前：${g.specialAffix.icon} ${g.specialAffix.name}<br>消耗：${cost.essence}精魄 + ${cost.score}积分</div>`;
+      rh+=`<div style="color:#8b949e;font-size:11px;margin-bottom:8px">当前：${g.specialAffix.icon} ${g.specialAffix.name}<br>消耗：${cost}积分</div>`;
       rh+=`<div style="color:#8b949e;font-size:11px;margin-bottom:6px">选择目标词条：</div>`;
       rh+=`<div style="display:grid;grid-template-columns:1fr;gap:4px;max-height:50vh;overflow-y:auto">`;
       for(const aff of pool){
@@ -2986,7 +3340,7 @@ function showGearMenu(){
         <div style="color:#c9d1d9;font-size:12px;margin-bottom:8px">${GEAR_SLOT_ICONS[g.slot]} ${g.name} (${GEAR_RARITIES[g.rarity].name})</div>
         <div style="color:#8b949e;font-size:11px;margin-bottom:6px">→ 升阶为 <span style="color:${newRarityDef.color};font-weight:bold">${newRarityDef.name}</span> 品质</div>
         <div style="color:#f0883e;font-size:11px;margin-bottom:8px;padding:6px;background:rgba(255,136,62,0.08);border-radius:4px">⚠ 升阶会重新生成词条数值与专属词条<br>Boss传说装备升阶为神话后变为普通神话（失去Boss标记）</div>
-        <div style="color:#ffd700;font-size:12px;margin-bottom:10px">消耗：${cost.essence}💠精魄 + ${cost.score}积分</div>
+        <div style="color:#ffd700;font-size:12px;margin-bottom:10px">消耗：${cost}积分</div>
         <div style="display:flex;gap:8px;justify-content:center">
           <button class="main-btn" id="confirmAscend" style="background:linear-gradient(135deg,#bc8cff,#58a6ff);font-size:13px;padding:8px 18px">确认升阶</button>
           <button class="sec-btn" id="cancelAscend" style="font-size:13px;padding:8px 18px">取消</button>
@@ -3023,13 +3377,11 @@ function showGearMenu(){
       const decomposable=saveData.gearBag.filter(g=>decomposeRarities.includes(g.rarity));
       if(decomposable.length===0){flashMsg('没有可分解的装备');return;}
       const totalReward=decomposable.reduce((s,g)=>s+GEAR_DECOMPOSE_REWARDS[g.rarity],0);
-      const totalEssence=decomposable.reduce((s,g)=>s+(GEAR_ESSENCE_REWARDS[g.rarity]||0),0);
       const uids=new Set(decomposable.map(g=>g.uid));
       saveData.gearBag=saveData.gearBag.filter(g=>!uids.has(g.uid));
       saveData.totalScore+=totalReward;
-      saveData.gearEssence=(saveData.gearEssence||0)+totalEssence;
       saveSave();
-      flashMsg(`🔥 已分解 ${decomposable.length}件装备，+${totalReward}积分 +${totalEssence}精魄`);
+      flashMsg(`🔥 已分解 ${decomposable.length}件装备，+${totalReward}积分`);
       showGearMenu();
     });
   }
@@ -3042,16 +3394,14 @@ function showGearMenu(){
       if(idx<0)return;
       const g=saveData.gearBag[idx];
       const reward=GEAR_DECOMPOSE_REWARDS[g.rarity]||30;
-      const essence=GEAR_ESSENCE_REWARDS[g.rarity]||0;
       saveData.gearBag.splice(idx,1);
       saveData.totalScore+=reward;
-      saveData.gearEssence=(saveData.gearEssence||0)+essence;
       // 同步清除合成选中
       const sidx=selectedSynthUids.findIndex(u=>String(u)===String(uid));
       if(sidx>=0)selectedSynthUids.splice(sidx,1);
       if(selectedSynthUids.length===0)synthFilterRarity=null;
       saveSave();
-      flashMsg(`分解 ${g.name} +${reward}积分 +${essence}精魄`);
+      flashMsg(`分解 ${g.name} +${reward}积分`);
       showGearMenu();
     });
   });

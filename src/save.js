@@ -14,7 +14,7 @@ function getPlayerLevelInfo(){
 
 // ==================== 存档系统 ====================
 let saveData = {
-  version: 5,              // 存档版本号（用于增量迁移，须与 CURRENT_SAVE_VERSION 保持一致）
+  version: 7,              // 存档版本号（用于增量迁移，须与 CURRENT_SAVE_VERSION 保持一致）
   totalScore: 0, talentPoints: 0, talents: {},
   // 局外经验系统：累积获得的总经验，每1000经验奖励1天赋点
   totalXp: 0, totalXpClaimed: 0, // totalXp: 累积经验；totalXpClaimed: 已兑换天赋点的经验量
@@ -43,11 +43,16 @@ let saveData = {
   // 魂器系统
   ownedArtifacts: [],    // 已获得的魂器bossIdx列表
   equippedArtifact: null, // 当前装备的魂器bossIdx
+  artifactPityCounter: 0, // 魂器保底计数（5次未掉第6次必掉）
+  // 每日签到系统
+  lastCheckInDate: '',   // 上次签到日期 YYYY-MM-DD
+  checkInStreak: 0,      // 连续签到天数
+  tutorialShown: false,  // 是否已展示过新手教程
   hasShanHaiBook: false, // 是否拥有山海故事书
   storyViewed: false,    // 是否已看过开场故事
   shanhaiPages: [],      // 已收集的山海残页（bossIdx列表，0-9）
   shanhaiPagesRewardClaimed: false, // 山海图卷奖励是否已发放
-  gearEssence: 0,        // 装备精魄（分解装备获得，用于定向重铸/升阶）
+  gearEssence: 0,        // [已废弃] 装备精魄已合并到积分，保留字段为0兼容旧代码
 };
 
 // ==================== 存档迁移函数表 ====================
@@ -92,10 +97,26 @@ const SAVE_MIGRATIONS = {
     if(d.shanhaiPagesRewardClaimed === undefined) d.shanhaiPagesRewardClaimed = false;
     if(d.gearEssence === undefined) d.gearEssence = 0;
   },
+  // v5->v6: 魂器保底计数器 + 每日签到 + 新手教程
+  5: (d) => {
+    if(d.artifactPityCounter === undefined) d.artifactPityCounter = 0;
+    if(d.lastCheckInDate === undefined) d.lastCheckInDate = '';
+    if(d.checkInStreak === undefined) d.checkInStreak = 0;
+    if(d.tutorialShown === undefined) d.tutorialShown = false;
+  },
+  // v6->v7: 简化装备系统 — 把装备精魄按 1精魄=20分 折算合并到积分
+  6: (d) => {
+    const essence = d.gearEssence || 0;
+    if(essence > 0){
+      d.totalScore = (d.totalScore || 0) + essence * 20;
+      console.log(`[存档] 装备精魄简化：${essence} 精魄 → ${essence * 20} 积分`);
+    }
+    d.gearEssence = 0; // 字段保留为0兼容，但不再使用
+  },
   // 未来新增迁移在这里追加：
-  // 5: (d) => { ... }
+  // 7: (d) => { ... }
 };
-const CURRENT_SAVE_VERSION = 5;
+const CURRENT_SAVE_VERSION = 7;
 
 // ==================== 本局统计（死亡复盘用） ====================
 // 不存档，每次开始游戏时重置
@@ -920,22 +941,23 @@ const GEAR_RARITIES = {
 };
 const GEAR_RARITY_ORDER = ['common','rare','epic','legendary','mythic'];
 // ==================== 装备精魄系统 ====================
-// 分解装备按稀有度获得精魄（用于定向重铸/升阶）
-const GEAR_ESSENCE_REWARDS = { common:1, rare:3, epic:8, legendary:20, mythic:50 };
-// 定向重铸：选择指定词条替换（消耗精魄+少量积分）
-// 随机重铸：保持300积分/次，新增10精魄可代替（让低分玩家有出路）
+// 分解装备按稀有度获得积分（已合并精魄到积分，1精魄≈20分折算）
+const GEAR_DECOMPOSE_REWARDS = { common:50, rare:140, epic:340, legendary:800, mythic:2000 };
+// 兼容旧代码：保留 GEAR_ESSENCE_REWARDS 为空对象，避免引用错误
+const GEAR_ESSENCE_REWARDS = { common:0, rare:0, epic:0, legendary:0, mythic:0 };
+// 定向重铸：选择指定词条替换（消耗积分）
+// 随机重铸：300积分/次
 const GEAR_REFORGE_COST = {
-  random_score: 300,    // 随机重铸：300积分
-  random_essence: 10,   // 随机重铸：10精魄
-  direct_legendary: { essence:30, score:200 },  // 定向传说词条：30精魄+200积分
-  direct_mythic:    { essence:80, score:500 },  // 定向神话词条：80精魄+500积分
+  random: 300,                // 随机重铸：300积分
+  direct_legendary: 800,      // 定向传说词条：800积分
+  direct_mythic:    2100,     // 定向神话词条：2100积分
 };
-// 装备升阶：消耗精魄+积分提升稀有度（神话不可升阶，Boss专属装备不可升阶）
+// 装备升阶：消耗积分提升稀有度（神话不可升阶，Boss专属装备不可升阶）
 const GEAR_ASCEND_COST = {
-  common:    { essence:20,  score:200  }, // →rare
-  rare:      { essence:50,  score:500  }, // →epic
-  epic:      { essence:100, score:1000 }, // →legendary
-  legendary: { essence:200, score:2000 }, // →mythic（普通神话，非Boss专属）
+  common:    600,   // →rare
+  rare:      1500,  // →epic
+  epic:      3000,  // →legendary
+  legendary: 6000,  // →mythic（普通神话，非Boss专属）
 };
 const GEAR_NAMES = {
   helmet: ['玄铁盔','鹿角冠','凤羽帽','龙鳞兜','星辰冠','盘古盔'],
@@ -1253,7 +1275,7 @@ function synthesizeGears(uids){
     return{success:false,msg:'合成失败！装备已消耗'};
   }
 }
-// 装备升阶：消耗精魄+积分提升一件装备的稀有度（神话不可升阶，Boss专属神话只能掉落）
+// 装备升阶：消耗积分提升一件装备的稀有度（神话不可升阶，Boss专属神话只能掉落）
 // Boss传说装备升阶为神话后变成普通神话（不带Boss标记和Boss词条）
 function ascendGear(uid){
   const idx=saveData.gearBag.findIndex(g=>String(g.uid)===String(uid));
@@ -1262,11 +1284,9 @@ function ascendGear(uid){
   if(g.rarity==='mythic')return{success:false,msg:'神话装备已是最高品质'};
   const cost=GEAR_ASCEND_COST[g.rarity];
   if(!cost)return{success:false,msg:'该装备不可升阶'};
-  if((saveData.gearEssence||0)<cost.essence)return{success:false,msg:`精魄不足，需要${cost.essence}精魄`};
-  if((saveData.totalScore||0)<cost.score)return{success:false,msg:`积分不足，需要${cost.score}积分`};
+  if((saveData.totalScore||0)<cost)return{success:false,msg:`积分不足，需要${cost}积分`};
   // 扣除消耗
-  saveData.gearEssence-=cost.essence;
-  saveData.totalScore-=cost.score;
+  saveData.totalScore-=cost;
   // 升阶
   const curIdx=GEAR_RARITY_ORDER.indexOf(g.rarity);
   const newRarity=GEAR_RARITY_ORDER[curIdx+1];
@@ -1320,15 +1340,13 @@ function directReforge(uid, targetAffixId){
   // Boss专属神话装备不可重铸（词条绑定Boss）
   if(g.specialAffix.bossAffix)return{success:false,msg:'Boss专属神话词条不可重铸'};
   const cost=isMythic?GEAR_REFORGE_COST.direct_mythic:GEAR_REFORGE_COST.direct_legendary;
-  if((saveData.gearEssence||0)<cost.essence)return{success:false,msg:`精魄不足，需要${cost.essence}精魄`};
-  if((saveData.totalScore||0)<cost.score)return{success:false,msg:`积分不足，需要${cost.score}积分`};
+  if((saveData.totalScore||0)<cost)return{success:false,msg:`积分不足，需要${cost}积分`};
   const pool=isMythic?GEAR_MYTHIC_AFFIXES:GEAR_LEGENDARY_AFFIXES;
   const target=pool.find(a=>a.id===targetAffixId);
   if(!target)return{success:false,msg:'未找到目标词条'};
   if(target.id===g.specialAffix.id)return{success:false,msg:'目标词条与当前相同'};
   // 扣除消耗
-  saveData.gearEssence-=cost.essence;
-  saveData.totalScore-=cost.score;
+  saveData.totalScore-=cost;
   const oldName=g.specialAffix.name;
   g.specialAffix={id:target.id,name:target.name,icon:target.icon,desc:target.desc,special:true};
   saveSave();

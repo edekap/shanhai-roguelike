@@ -1001,4 +1001,8 @@ if(!saveData.storyViewed){
 }else{
   showUpdateNotice();
 }
+// 新手引导：首次进入或未看过教程时显示（与故事/公告串行，内部会等待它们关闭）
+if(!saveData.tutorialShown && typeof showTutorial === 'function'){
+  showTutorial();
+}
 requestAnimationFrame(gameLoop);

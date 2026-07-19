@@ -140,20 +140,22 @@ function spawnSuperBoss(){
 function showFinalBossPrompt(){
   // 暂停游戏，防止弹窗被Boss出场覆盖
   gameState='upgrade'; // 临时切换到upgrade状态暂停游戏循环
+  // 第5关强制刑天：UI提示"通关之战"，decline按钮改为"进入无尽模式"
+  const isLevel5Force = _level5FinalBossDone && !bossTrialMode && !resumeTrialAfterFinalBoss;
   const ov=document.getElementById('overlay');
   ov.classList.remove('hidden');
   ov.innerHTML=`
     <div style="text-align:center;max-width:500px;margin:auto">
-      <h2 style="color:#8b0000;font-size:28px;text-shadow:0 0 20px #8b0000">⚔️ 最终Boss降临</h2>
+      <h2 style="color:#8b0000;font-size:28px;text-shadow:0 0 20px #8b0000">${isLevel5Force?'⚔️ 通关之战 · 最终Boss':'⚔️ 最终Boss降临'}</h2>
       <p style="color:#c9d1d9;font-size:15px;margin:16px 0;line-height:1.8">
-        大地震颤，战意冲天...<br>
+        ${isLevel5Force?'你已击败五大异兽，征服山海！<br>':''}大地震颤，战意冲天...<br>
         <span style="color:#ff6347;font-size:18px;font-weight:bold">刑天</span>，无头战神，感知到了你的气息。<br>
         「<span style="color:#bc8cff">吾虽无首，战意不灭！来战！</span>」<br><br>
-        <span style="color:#8b949e;font-size:13px">刑天为最终Boss，拥有多阶段机制，难度极高。<br>击败后掉落山海故事书与专属武器。</span>
+        <span style="color:#8b949e;font-size:13px">刑天为最终Boss，拥有多阶段机制，难度极高。<br>击败后掉落山海故事书与专属武器。${isLevel5Force?'<br>或跳过刑天，直接进入无尽模式挑战':''}</span>
       </p>
       <div style="display:flex;gap:12px;justify-content:center;margin-top:20px">
         <button class="main-btn" id="acceptFinalBoss" style="background:linear-gradient(135deg,#8b0000,#ff4500);font-size:16px;padding:10px 30px">⚔️ 挑战刑天</button>
-        <button class="sec-btn" id="declineFinalBoss" style="font-size:14px;padding:10px 24px">放弃</button>
+        <button class="sec-btn" id="declineFinalBoss" style="font-size:14px;padding:10px 24px">${isLevel5Force?'♾️ 进入无尽':'放弃'}</button>
       </div>
     </div>
   `;
@@ -177,8 +179,19 @@ function showFinalBossPrompt(){
       }else{
         bossTrialMode=false; gameOver();
       }
+    }else if(isLevel5Force){
+      // 冒险5关后放弃刑天：直接进入无尽模式（不进入第6关）
+      endlessMode=true; endlessWave=0;
+      currentLevel=8; currentWave=1;
+      bullets=[]; enemies=[]; enemyBullets=[]; drops=[];
+      fireEffects=[]; lightningStrikes=[]; tornadoes=[];
+      minions=minions.filter(m=>m.permanent&&m.alive);
+      floatingTexts=[]; bossWarnings=[];
+      if(boss)boss.alive=false; boss=null;
+      showWaveAnnounce('♾️ 无尽模式','挑战无限波次！',true);
+      gameTimeout(()=>{if(gameState!=='upgrade'&&gameState!=='wavePrepare')return;enterEndlessWave();},1500);
     }else{
-      // 冒险模式：继续正常流程
+      // 冒险模式（RNG触发）：继续正常流程
       onBossDefeated({isFinalBoss:false,isSuper:true});
     }
   };
@@ -327,6 +340,7 @@ function startBossTrial(){
   pendingFinalBoss=false; // 重置刑天触发标记
   resumeTrialAfterFinalBoss=false;
   trialXingtianTriggered=false; // 重置试炼刑天触发标记（每次试炼最多触发一次刑天）
+  _level5FinalBossDone=false; // 重置冒险5关强制刑天标记
   // 死亡复盘：重置本局统计
   resetRunStats();
   // 重置升级流程标记，防止上一局普通模式遗留的 pendingProceedNext 在试炼升级后错误触发 proceedToNextLevel
@@ -628,6 +642,13 @@ function proceedToNextLevel(){
     }else{
       bossTrialMode=false; gameOver();
     }
+    return;
+  }
+  // 冒险模式：通关5关后强制刑天（替代旧的8关+RNG机制，缩短单局时长）
+  // _level5FinalBossDone 防止 decline 后再次进入此处导致死循环
+  if(!endlessMode && !bossTrialMode && currentLevel>=5 && !_level5FinalBossDone){
+    _level5FinalBossDone=true;
+    startFinalBoss();
     return;
   }
   currentLevel++; currentWave=1;
