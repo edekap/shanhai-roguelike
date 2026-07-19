@@ -3967,6 +3967,9 @@ class Boss {
       }
       // jpg透明化处理（首次调用处理，后续从缓存读取）
       const tImg=_makeBossTransparent(drawImg);
+      // 跨域 fallback 时 tImg 仍是原图(带黑底)，用圆形 clip 兜底避免显示方形黑底
+      const _isFallback = (tImg === drawImg);
+      if(_isFallback){ ctx.save(); ctx.beginPath(); ctx.arc(0,0,imgS*0.95,0,Math.PI*2); ctx.clip(); }
       ctx.drawImage(tImg,-imgS,-imgS,imgS*2,imgS*2);
       // 受击白色闪光叠加
       if(this.hitFlash>0){
@@ -3976,6 +3979,7 @@ class Boss {
         ctx.drawImage(tImg,-imgS,-imgS,imgS*2,imgS*2);
         ctx.restore();
       }
+      if(_isFallback) ctx.restore();
       // 攻击蓄力：粒子汇聚效果（不画圈）
       if(this.attackAnim>0){
         const ap=this.attackAnim/(this.attackAnimMax||0.8);
@@ -4026,6 +4030,8 @@ class Boss {
           const cS=c.size*2.2;
           // 分身也使用透明化处理后的图片
           const tCImg=_makeBossTransparent(cImg);
+          const _isFallbackC = (tCImg === cImg);
+          if(_isFallbackC){ ctx.beginPath(); ctx.arc(0,0,cS*0.95,0,Math.PI*2); ctx.clip(); }
           ctx.drawImage(tCImg,-cS,-cS,cS*2,cS*2);
         }else{
           ctx.fillStyle=c.color;
@@ -4150,6 +4156,9 @@ class Boss {
       ctx.save();
       ctx.scale(breath,breath);
       const imgS=s*2.2;
+      // 跨域 fallback 时 tXt 仍是原图(带黑底)，用圆形 clip 兜底
+      const _isFallbackX = (tXt === xtImg);
+      if(_isFallbackX){ ctx.beginPath(); ctx.arc(0,0,imgS*0.95,0,Math.PI*2); ctx.clip(); }
       ctx.drawImage(tXt,-imgS,-imgS,imgS*2,imgS*2);
       // 受击白色闪光叠加
       if(this.hitFlash>0){

@@ -128,7 +128,7 @@ function gameLoop(timestamp){
       drawAimReticle(); // 瞄准准星（在玩家、粒子之上，让玩家始终能看见自己在瞄哪里）
       drawBossIndicator();
       updateFloatingTexts(dt); drawFloatingTexts();
-      // 连击数显示（移到画面下方，避免与顶部 HUD/经验条/倒计时重叠）
+      // 连击数显示（移到画面中央偏上，避开顶部HUD和底部摇杆/技能按钮）
       if(comboCount>=3){
         const comboAlpha=Math.min(1,comboTimer/2);
         const comboColor=comboCount>=10?'#ffd700':comboCount>=5?'#bc8cff':'#58a6ff';
@@ -138,12 +138,12 @@ function gameLoop(timestamp){
         ctx.font=`bold ${22+Math.min(comboCount,18)}px STKaiti,KaiTi,serif`;
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.shadowColor=comboColor; ctx.shadowBlur=15;
-        ctx.fillText(`${comboCount} 连击!`,CONFIG.WIDTH/2,CONFIG.HEIGHT-110);
+        ctx.fillText(`${comboCount} 连击!`,CONFIG.WIDTH/2,CONFIG.HEIGHT*0.42);
         if(comboCount>=5){
           ctx.font='13px STKaiti,KaiTi,serif';
           ctx.fillStyle='#8b949e';
           ctx.shadowBlur=0;
-          ctx.fillText(`分数加成 +${comboCount*5}%`,CONFIG.WIDTH/2,CONFIG.HEIGHT-85);
+          ctx.fillText(`分数加成 +${comboCount*5}%`,CONFIG.WIDTH/2,CONFIG.HEIGHT*0.42+25);
         }
         ctx.restore();
       }
@@ -220,7 +220,7 @@ function gameLoop(timestamp){
       updateFloatingTexts(dt); drawFloatingTexts();
       // 连击计时器递减（Boss战中也保持）
       if(comboTimer>0){comboTimer-=dt; if(comboTimer<=0)comboCount=0;}
-      // 连击数显示（移到画面下方，避免与顶部 HUD/经验条/倒计时重叠）
+      // 连击数显示（移到画面中央偏上，避开顶部HUD和底部摇杆/技能按钮）
       if(comboCount>=3){
         const comboAlpha=Math.min(1,comboTimer/2);
         const comboColor=comboCount>=10?'#ffd700':comboCount>=5?'#bc8cff':'#58a6ff';
@@ -230,12 +230,12 @@ function gameLoop(timestamp){
         ctx.font=`bold ${22+Math.min(comboCount,18)}px STKaiti,KaiTi,serif`;
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.shadowColor=comboColor; ctx.shadowBlur=15;
-        ctx.fillText(`${comboCount} 连击!`,CONFIG.WIDTH/2,CONFIG.HEIGHT-110);
+        ctx.fillText(`${comboCount} 连击!`,CONFIG.WIDTH/2,CONFIG.HEIGHT*0.42);
         if(comboCount>=5){
           ctx.font='13px STKaiti,KaiTi,serif';
           ctx.fillStyle='#8b949e';
           ctx.shadowBlur=0;
-          ctx.fillText(`分数加成 +${comboCount*5}%`,CONFIG.WIDTH/2,CONFIG.HEIGHT-85);
+          ctx.fillText(`分数加成 +${comboCount*5}%`,CONFIG.WIDTH/2,CONFIG.HEIGHT*0.42+25);
         }
         ctx.restore();
       }

@@ -955,9 +955,9 @@ function startGame(){
       pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2+30,'暴击+20% 暴伤+50% 穿透+2 吸血+3%','#ffd970',2.5);
     },1500);
   }
-  // 手机端首次进入游戏：提示摇杆自动锁定机制（仅在玩家未看过提示时显示）
-  if(isTouchDevice && touchConfirmed && !saveData._aimTipShown){
-    saveData._aimTipShown = true; saveSave();
+  // 手机端首次进入游戏：提示摇杆自动锁定机制（仅本次会话首次显示，不污染存档）
+  if(isTouchDevice && touchConfirmed && !sessionStorage.getItem('_aimTipShown')){
+    sessionStorage.setItem('_aimTipShown', '1');
     gameTimeout(()=>{
       pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2-60,'🎯 右摇杆不动=自动锁定最近敌人','#ffd970',4);
       pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2-30,'推动右摇杆=手动瞄准射击','#bc8cff',4);
