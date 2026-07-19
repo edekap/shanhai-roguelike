@@ -25,7 +25,7 @@ let saveData = {
   bonusClicks: 3,        // +300分按钮剩余次数（降低避免开局即可买顶级装备）
   difficulty: 'normal',  // normal/hard/hell/godslayer
   difficultyCleared: { normal:false, hard:false, hell:false, godslayer:false }, // 各难度Boss试炼通关标记（用于解锁后续难度）
-  cheatRevealed: false, // 弑神难度试炼通关后揭示作弊方法
+  titleGodslayer: false, // 弑神难度试炼通关后解锁「弑神者」特殊称号
   ranchPets: [],         // 牧场中的宠物索引列表
   eggs: [],              // 蛋列表 {type:'normal'|'epic', def:bossIdx}
   // 装备系统
@@ -81,7 +81,12 @@ const SAVE_MIGRATIONS = {
     if(!d.ownedArtifacts) d.ownedArtifacts = [];
     if(d.equippedArtifact === undefined) d.equippedArtifact = null;
     if(!d.difficultyCleared) d.difficultyCleared = {normal:false, hard:false, hell:false, godslayer:false};
-    if(d.cheatRevealed === undefined) d.cheatRevealed = false;
+      if(d.titleGodslayer === undefined){
+      // 兼容旧存档：曾通关弑神难度的玩家自动解锁称号
+      d.titleGodslayer = !!(d.difficultyCleared && d.difficultyCleared.godslayer);
+    }
+    // 兼容旧存档：清理已废弃的 cheatRevealed 字段
+    if('cheatRevealed' in d) delete d.cheatRevealed;
     if(d.storyViewed === undefined) d.storyViewed = false;
   },
   // v2->v3: 确保装备系统字段存在

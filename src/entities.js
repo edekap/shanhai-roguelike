@@ -282,7 +282,7 @@ let pendingBossCapture=null;
 // 新增：Boss试炼/超级Boss复仇/弑神双Boss状态
 let bossTrialMode=false;       // 是否处于Boss试炼模式
 let _lastRunWasTrial=false;    // 上一局是否为试炼模式（gameOver 显示结算时用，避免 bossTrialMode 被提前重置导致 wasTrial 失效）
-let _showCheatReveal=false;   // 弑神难度试炼首次通关后标记，触发作弊方法揭示弹窗
+let _showTitleReveal=false;   // 弑神难度试炼首次通关后标记，触发称号解锁弹窗
 let bossTrialIndex=0;          // Boss试炼当前索引(0-5)
 let trialBossOrder=[0,1,2,3,4,5]; // 试炼Boss顺序（随机打乱）
 let pendingSuperRevenge=false; // 普通Boss死后是否触发超级Boss复仇

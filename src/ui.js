@@ -1879,10 +1879,10 @@ function gameOver(){
     else if(diff==='hell')af.trialHellCleared=true;
     else if(diff==='godslayer'){
       af.trialGodslayerCleared=true;
-      // 弑神难度试炼通关：揭示作弊方法（首次揭示）
-      if(!saveData.cheatRevealed){
-        saveData.cheatRevealed=true;
-        _showCheatReveal=true; // 标记，稍后在结算界面显示
+      // 弑神难度试炼通关：解锁特殊称号（首次解锁）
+      if(!saveData.titleGodslayer){
+        saveData.titleGodslayer=true;
+        _showTitleReveal=true; // 标记，稍后在结算界面显示
       }
     }
   }
@@ -1999,10 +1999,10 @@ function gameOver(){
   _bindTap(backToMenuBtnEl, showMainMenu);
   const shareBtnEl=document.getElementById('shareScoreBtn');
   if(shareBtnEl)_bindTap(shareBtnEl, ()=>shareRunResult(score, wasTrial, recapHtml));
-  // 弑神难度试炼首次通关：揭示开发者彩蛋（作弊方法）
-  if(typeof _showCheatReveal!=='undefined' && _showCheatReveal){
-    _showCheatReveal=false;
-    setTimeout(()=>showCheatRevealModal(), 600);
+  // 弑神难度试炼首次通关：解锁特殊称号
+  if(typeof _showTitleReveal!=='undefined' && _showTitleReveal){
+    _showTitleReveal=false;
+    setTimeout(()=>showTitleRevealModal(), 600);
   }
 }
 
@@ -2104,32 +2104,30 @@ function shareRunResult(finalScore, wasTrial, recapHtml){
     showToast('生成失败：'+err.message,'⚠️',2000);
   }
 }
-// 开发者彩蛋揭示弹窗（仅在弑神难度试炼首次通关后显示）
-function showCheatRevealModal(){
-  const html=`<div id="cheatRevealOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)">
-    <div style="background:linear-gradient(180deg,#1a0a2a,#2a1040);border:2px solid #bc8cff;border-radius:14px;max-width:480px;width:100%;padding:24px 22px;box-shadow:0 0 50px rgba(188,140,255,0.5);font-family:STKaiti,KaiTi,serif;text-align:center">
+// 弑神称号解锁弹窗（仅在弑神难度试炼首次通关后显示）
+function showTitleRevealModal(){
+  const html=`<div id="titleRevealOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)">
+    <div style="background:linear-gradient(180deg,#1a0a2a,#2a1040);border:2px solid #ffd970;border-radius:14px;max-width:480px;width:100%;padding:24px 22px;box-shadow:0 0 50px rgba(255,217,112,0.5);font-family:STKaiti,KaiTi,serif;text-align:center">
       <div style="font-size:48px;margin-bottom:8px">⚔️✨</div>
-      <h2 style="color:#bc8cff;letter-spacing:4px;margin:0 0 8px;font-size:22px">弑神封印·开发者彩蛋</h2>
-      <div style="color:#ffd970;font-size:13px;margin-bottom:16px;letter-spacing:1px">恭喜你通过弑神难度Boss试炼！</div>
-      <div style="background:rgba(22,27,34,0.7);border:1px solid rgba(188,140,255,0.4);border-radius:10px;padding:14px;margin:10px 0;text-align:left">
-        <div style="color:#ffd970;font-size:13px;margin-bottom:8px;text-align:center">✦ 开发者彩蛋 · 隐藏功能 ✦</div>
-        <div style="color:#c9d1d9;font-size:13px;line-height:1.8">
-          在主菜单 <b style="color:#bc8cff">连续点击「📖 图鉴」按钮 5 次</b><br>
-          即可获得开发者祝福：<br>
-          <span style="color:#ffd970">✦ +100,000 积分</span><br>
-          <span style="color:#ffd970">✦ +50 天赋点</span>
+      <h2 style="color:#ffd970;letter-spacing:4px;margin:0 0 8px;font-size:22px">弑神封印·称号解锁</h2>
+      <div style="color:#bc8cff;font-size:13px;margin-bottom:16px;letter-spacing:1px">恭喜你通过弑神难度Boss试炼！</div>
+      <div style="background:rgba(22,27,34,0.7);border:1px solid rgba(255,217,112,0.4);border-radius:10px;padding:14px;margin:10px 0;text-align:center">
+        <div style="color:#ffd970;font-size:13px;margin-bottom:10px">✦ 你获得了特殊称号 ✦</div>
+        <div style="color:#ffd970;font-size:24px;font-weight:bold;letter-spacing:6px;text-shadow:0 0 12px rgba(255,217,112,0.7);margin:8px 0">弑神者</div>
+        <div style="color:#c9d1d9;font-size:12px;line-height:1.8;margin-top:8px">
+          以凡躯斩神魂，以勇毅破神威<br>
+          此后你的名字将永远铭刻于主菜单
         </div>
-        <div style="color:#8b949e;font-size:11px;margin-top:10px;text-align:center">（每次点击间隔需在 7 秒内）</div>
       </div>
-      <div style="color:#daa520;font-size:12px;margin:10px 0;letter-spacing:1px">这是开发者留给通关勇者的隐藏礼物<br>从此难度选择界面将显示彩蛋标记</div>
-      <button id="cheatRevealCloseBtn" style="margin-top:14px;width:100%;padding:12px;background:linear-gradient(180deg,#bc8cff,#8b5cf6);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:3px;cursor:pointer;font-family:STKaiti,KaiTi,serif">✦ 收下这份战利品 ✦</button>
+      <div style="color:#daa520;font-size:12px;margin:10px 0;letter-spacing:1px">这是属于通关勇者的荣耀印记<br>难度选择界面将显示称号徽章</div>
+      <button id="titleRevealCloseBtn" style="margin-top:14px;width:100%;padding:12px;background:linear-gradient(180deg,#ffd970,#d4a017);color:#1a0a2a;border:none;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:3px;cursor:pointer;font-family:STKaiti,KaiTi,serif">✦ 收下这份荣耀 ✦</button>
     </div>
   </div>`;
   document.body.insertAdjacentHTML('beforeend', html);
-  const closeBtn=document.getElementById('cheatRevealCloseBtn');
+  const closeBtn=document.getElementById('titleRevealCloseBtn');
   const closeFn=(e)=>{
     if(e&&e.preventDefault)e.preventDefault();
-    const el=document.getElementById('cheatRevealOverlay');
+    const el=document.getElementById('titleRevealOverlay');
     if(el)el.remove();
   };
   _bindTap(closeBtn, closeFn);
@@ -2527,8 +2525,7 @@ function renderRanchScene(){
 }
 
 // ==================== 主菜单 ====================
-// 图鉴作弊点击计数器（全局，不随主菜单重渲染而重置）
-let _pediaClickCount=0, _pediaClickTimer=null;
+// （已移除图鉴作弊点击计数器）
 
 // 每日签到系统
 function _getTodayStr(){
@@ -2879,8 +2876,8 @@ function showMainMenu(){
             }
           }).join('')}
         </div>
-        ${(!saveData.difficultyCleared||!saveData.difficultyCleared.godslayer)?`<div style="text-align:center;font-size:10px;color:#bc8cff;margin-top:4px;letter-spacing:1px">⚔️ 通关弑神难度Boss试炼有惊喜！</div>`:''}
-        ${saveData.cheatRevealed?`<div style="text-align:center;font-size:10px;color:#ffd970;margin-top:2px">✦ 开发者彩蛋已解锁 ✦</div>`:''}
+        ${(!saveData.difficultyCleared||!saveData.difficultyCleared.godslayer)?`<div style="text-align:center;font-size:10px;color:#bc8cff;margin-top:4px;letter-spacing:1px">⚔️ 通关弑神难度Boss试炼解锁特殊称号！</div>`:''}
+        ${saveData.titleGodslayer?`<div style="text-align:center;font-size:11px;color:#ffd970;margin-top:4px;letter-spacing:2px;text-shadow:0 0 6px rgba(255,217,112,0.5);font-weight:bold">⚔️ 弑神者 ⚔️</div>`:''}
       </div>
 
       <div style="margin:4px 0;text-align:center">
@@ -2941,29 +2938,9 @@ function showMainMenu(){
   if(_guideMobileBtn){
     _bindTap(_guideMobileBtn, (e)=>{ if(e&&e.stopPropagation)e.stopPropagation(); showPediaMenu('guide'); });
   }
-  // 图鉴按钮：连续点击5次触发内置作弊（10万积分+50天赋点）
-  const _pediaCheat=()=>{
-    _pediaClickCount++;
-    if(_pediaClickTimer)clearTimeout(_pediaClickTimer);
-    _pediaClickTimer=setTimeout(()=>{_pediaClickCount=0;},7000);
-    if(_pediaClickCount>=5){
-      _pediaClickCount=0;
-      saveData.totalScore+=100000;
-      saveData.talentPoints+=50;
-      saveSave();
-      // 弹出居中提示
-      const _toast=document.createElement('div');
-      _toast.textContent='✦ 开发者奖励 +100,000积分 +50天赋点 ✦';
-      _toast.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:20px 40px;background:linear-gradient(135deg,#2a1a0a,#5a3a1a);border:2px solid #ffd700;border-radius:12px;color:#ffd970;font-size:18px;font-weight:bold;letter-spacing:2px;text-shadow:0 0 10px rgba(255,215,0,0.6);z-index:99999;box-shadow:0 0 30px rgba(255,215,0,0.5);font-family:STKaiti,KaiTi,serif';
-      document.body.appendChild(_toast);
-      setTimeout(()=>{_toast.remove();showMainMenu();},1500);
-      return true;
-    }
-    return false;
-  };
+  // 图鉴按钮：直接打开图鉴
   const _pediaBtnEl=document.getElementById('pediaBtn');
   _bindTap(_pediaBtnEl,()=>{
-    if(_pediaCheat())return;
     showPediaMenu();
   });
   const bookBtn=document.getElementById('bookBtn');
