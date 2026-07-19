@@ -2000,10 +2000,13 @@ function gameOver(){
       ? rs.upgradesTaken.map(u=>`<span style="display:inline-block;background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.3);border-radius:3px;padding:1px 5px;margin:1px;font-size:10px;color:#58a6ff">${u}</span>`).join('')
       : '<span style="color:#8b949e;font-size:11px">无强化</span>';
     recapHtml=`
-      <details open style="max-width:520px;margin:6px auto;padding:6px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(136,144,150,0.3);border-radius:8px">
-        <summary style="cursor:pointer;color:#bc8cff;font-size:13px;letter-spacing:1px">📊 死亡复盘（点击折叠/展开）</summary>
+      <details style="max-width:520px;margin:6px auto;padding:6px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(136,144,150,0.3);border-radius:8px">
+        <summary style="cursor:pointer;color:#bc8cff;font-size:13px;letter-spacing:1px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span>📊 死亡复盘</span>
+          <span style="color:#f85149;font-size:12px;font-weight:bold">💀 ${rs.deathCause}</span>
+          <span style="color:#8b949e;font-size:10px;margin-left:auto">点击展开详细</span>
+        </summary>
         <div style="margin-top:8px;font-size:11px">
-          <div style="color:#f85149;margin-bottom:6px;font-size:12px;font-weight:bold">💀 死因：${rs.deathCause}</div>
           <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px">
             <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px"><span style="color:#8b949e">⏱ 局时长</span><br><b style="color:#c9d1d9">${_fmtTime(rs.duration)}</b></div>
             <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px"><span style="color:#8b949e">⚔ 击杀数</span><br><b style="color:#3fb950">${rs.kills}</b> <span style="color:#8b949e;font-size:10px">(Boss ${rs.bossKills})</span></div>
