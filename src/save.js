@@ -14,7 +14,7 @@ function getPlayerLevelInfo(){
 
 // ==================== 存档系统 ====================
 let saveData = {
-  version: 7,              // 存档版本号（用于增量迁移，须与 CURRENT_SAVE_VERSION 保持一致）
+  version: 9,              // 存档版本号（用于增量迁移，须与 CURRENT_SAVE_VERSION 保持一致）
   totalScore: 0, talentPoints: 0, talents: {},
   // 局外经验系统：累积获得的总经验，每1000经验奖励1天赋点
   totalXp: 0, totalXpClaimed: 0, // totalXp: 累积经验；totalXpClaimed: 已兑换天赋点的经验量
@@ -129,10 +129,44 @@ const SAVE_MIGRATIONS = {
     if(!d.chestHistory) d.chestHistory = {bronze:0, silver:0, gold:0, purple:0, orange:0};
     if(d.dailyGoals === undefined) d.dailyGoals = null;
   },
+  // v8->v9: 清档 — 重置所有进度数据，让玩家从干净状态开始测试
+  // 保留：难度解锁（difficultyCleared）、称号（titleGodslayer）、山海残页（shanhaiPages）、剧情状态
+  8: (d) => {
+    console.log('[存档] v8->v9 清档：重置所有进度数据（保留难度解锁/称号/剧情收集）');
+    d.totalScore = 0;
+    d.talentPoints = 0;
+    d.talents = {};
+    d.totalXp = 0;
+    d.totalXpClaimed = 0;
+    d.ownedWeapons = { pistol: 1 };
+    d.currentWeapon = 'pistol';
+    d.weaponCrafts = {};
+    d.ownedPets = [];
+    d.selectedPet = null;
+    d.bonusClicks = 3;
+    d.ranchPets = [];
+    d.eggs = [];
+    d.equippedGear = { helmet:null, armor:null, boots:null, ring:null };
+    d.gearBag = [];
+    d.bossPedia = {};
+    d.achievements = {};
+    d.achievementFlags = { totalKills:0, totalBossKills:0, totalRuns:0, totalScore:0 };
+    d.bestEndlessWave = 0;
+    d.ownedSkins = [];
+    d.equippedSkins = {};
+    d.ownedArtifacts = [];
+    d.equippedArtifact = null;
+    d.artifactPityCounter = 0;
+    d.pendingChests = [];
+    d.chestHistory = { bronze:0, silver:0, gold:0, purple:0, orange:0 };
+    d.dailyGoals = null;
+    // 保留：difficultyCleared、titleGodslayer、shanhaiPages、shanhaiPagesRewardClaimed、
+    //       hasShanHaiBook、storyViewed、lastCheckInDate、checkInStreak、tutorialShown
+  },
   // 未来新增迁移在这里追加：
-  // 8: (d) => { ... }
+  // 9: (d) => { ... }
 };
-const CURRENT_SAVE_VERSION = 8;
+const CURRENT_SAVE_VERSION = 9;
 
 // ==================== 本局统计（死亡复盘用） ====================
 // 不存档，每次开始游戏时重置
