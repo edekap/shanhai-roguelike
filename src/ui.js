@@ -3,6 +3,9 @@
 // click 加 _isSynthesizedClick 守卫防止触屏笔记本双触发
 // touchstart 带 preventDefault 阻止合成 click 事件
 // 检查 el.disabled 防止 disabled 按钮在 touchstart 上仍触发（HTML disabled 只阻止 click 不阻止 touchstart）
+// 天赋菜单记忆：玩家点击天赋后重渲染会丢失滚动位置，用这两个变量记录并恢复
+let _talentMenuLastId=null;     // 上次点击的天赋id（用于重渲染后高亮闪烁）
+let _talentMenuScrollTop=0;     // 上次点击时的滚动位置（用于重渲染后恢复）
 function _bindTap(el, handler){
   if(!el || typeof handler !== 'function') return;
   el.addEventListener('click', e=>{ if(el.disabled)return; if(typeof _isSynthesizedClick==='function'&&_isSynthesizedClick())return; handler(e); });
@@ -3157,13 +3160,27 @@ function showTalentMenu(){
     <button class="sec-btn" id="backFromTalent2" style="font-size:13px;padding:10px 16px;min-height:44px">← 返回</button>
   </div>`;
   ov.innerHTML=html;
-  // 滚动到顶（避免上一次位置残留）
-  ov.scrollTop=0;
+  // 恢复上次点击位置：避免玩家点完天赋后视图跳回顶部找不到原节点
+  if(_talentMenuScrollTop)ov.scrollTop=_talentMenuScrollTop;
+  // 高亮闪烁上次点击的节点：让玩家立即看到刚点过的位置
+  if(_talentMenuLastId){
+    const node=ov.querySelector(`.talent-node[data-talent="${_talentMenuLastId}"]`);
+    if(node){
+      node.scrollIntoView({block:'center', behavior:'instant'});
+      node.classList.add('talent-flash');
+      setTimeout(()=>node.classList.remove('talent-flash'), 1500);
+    }
+    _talentMenuLastId=null;
+  }
   ov.querySelectorAll('.talent-node').forEach(el=>{
     _bindTap(el,()=>{
       const id=el.dataset.talent;
+      // 记录点击的节点 id 和当前滚动位置，重渲染后恢复
+      _talentMenuLastId=id;
+      _talentMenuScrollTop=ov.scrollTop;
       if(upgradeTalent(id))showTalentMenu();
       else{
+        _talentMenuLastId=null; // 升级失败不恢复高亮
         // 提示互斥或积分不足
         const t=TALENTS.find(x=>x.id===id);
         if(t&&t.exclusiveWith&&getTalentLevel(t.exclusiveWith)>0){
@@ -4206,7 +4223,7 @@ function showGearMenu(){
       const _bossIcon=(g.bossIdx!==undefined && g.bossIdx!==null && BOSS_TYPES[g.bossIdx])?BOSS_TYPES[g.bossIdx].icon:'';
       const _isBossMythic=g.rarity==='mythic' && g.bossIdx!==undefined && g.bossIdx!==null;
       const _bossName=(_bossIcon && BOSS_TYPES[g.bossIdx])?BOSS_TYPES[g.bossIdx].name:'';
-      html+=`<div style="background:#161b22;border:1px solid ${selected?'#ffd970':rc};border-left:3px solid ${rc};border-radius:5px;padding:6px;cursor:pointer;position:relative" data-equip="${g.uid}">
+      html+=`<div style="background:#161b22;border:1px solid ${selected?'#ffd970':rc};border-left:3px solid ${rc};border-radius:5px;padding:6px;cursor:default;position:relative" data-equip="${g.uid}">
         ${_bossIcon?`<div style="position:absolute;top:2px;right:4px;font-size:14px;${_isBossMythic?'filter:drop-shadow(0 0 3px #ffd700)':''}" title="${_bossName}装备">${_bossIcon}</div>`:''}
         <div style="display:flex;justify-content:space-between;align-items:center">
           <span style="color:${rc};font-weight:bold;font-size:11px">${GEAR_SLOT_ICONS[g.slot]} ${g.name}${selected?' <span style="color:#ffd970">✓</span>':''}</span>
@@ -4216,10 +4233,10 @@ function showGearMenu(){
         ${g.specialAffix?`<div style="font-size:9px;color:${g.rarity==='mythic'?'#ff4444':'#ffd700'};margin-top:3px;padding:2px 4px;background:${g.rarity==='mythic'?'rgba(255,68,68,0.1)':'rgba(255,215,0,0.1)'};border-radius:3px;${_isBossMythic?'border:1px solid #ffd700;':''}">${g.specialAffix.icon} ${g.specialAffix.name}${_isBossMythic?' 👑':''}</div>`:''}
         ${_renderGearCompare(g)}
         <div style="display:flex;gap:2px;margin-top:3px;flex-wrap:wrap">
-          <span style="font-size:8px;color:#58a6ff;flex:1">${selected?'取消':'装备'}</span>
-          ${canSynth?`<button data-synth-btn="1" data-rar="${g.rarity}" class="sec-btn" style="font-size:8px;padding:1px 4px">${selected?'取消':'合成'}</button>`:''}
-          ${g.rarity!=='mythic'?`<button data-ascend="${g.uid}" class="sec-btn" style="font-size:8px;padding:1px 4px;color:#bc8cff;border-color:#bc8cff" title="消耗${GEAR_ASCEND_COST[g.rarity]}积分升阶">⬆${GEAR_ASCEND_COST[g.rarity]}分</button>`:''}
-          <button data-decompose="${g.uid}" class="sec-btn" style="font-size:8px;padding:1px 4px;color:#f85149;border-color:#f85149" title="分解获得${GEAR_DECOMPOSE_REWARDS[g.rarity]}积分">分+${GEAR_DECOMPOSE_REWARDS[g.rarity]}🪙</button>
+          <button data-equip-btn="${g.uid}" class="sec-btn" style="font-size:9px;padding:2px 8px;color:#58a6ff;border-color:#58a6ff;flex:1;min-height:28px">✓ 装备</button>
+          ${canSynth?`<button data-synth-btn="1" data-rar="${g.rarity}" class="sec-btn" style="font-size:9px;padding:2px 6px;min-height:28px">${selected?'取消':'合成'}</button>`:''}
+          ${g.rarity!=='mythic'?`<button data-ascend="${g.uid}" class="sec-btn" style="font-size:8px;padding:1px 4px;color:#bc8cff;border-color:#bc8cff;min-height:28px" title="消耗${GEAR_ASCEND_COST[g.rarity]}积分升阶">⬆${GEAR_ASCEND_COST[g.rarity]}分</button>`:''}
+          <button data-decompose="${g.uid}" class="sec-btn" style="font-size:8px;padding:1px 4px;color:#f85149;border-color:#f85149;min-height:28px" title="分解获得${GEAR_DECOMPOSE_REWARDS[g.rarity]}积分">分+${GEAR_DECOMPOSE_REWARDS[g.rarity]}🪙</button>
         </div>
       </div>`;
     }
@@ -4260,31 +4277,53 @@ function showGearMenu(){
   ov.querySelectorAll('[data-unequip]').forEach(el=>{
     _bindTap(el,()=>{
       const slot=el.dataset.unequip;
-      if(saveData.equippedGear[slot]){saveData.gearBag.push(saveData.equippedGear[slot]);saveData.equippedGear[slot]=null;saveSave();showGearMenu();}
-    });
-  });
-  ov.querySelectorAll('[data-equip]').forEach(el=>{
-    _bindTap(el,()=>{
-      const uid=el.dataset.equip; // 保持字符串，避免浮点数精度问题
-      const sidx=selectedSynthUids.findIndex(u=>String(u)===String(uid));
-      if(sidx>=0){
-        selectedSynthUids.splice(sidx,1);
-        if(selectedSynthUids.length===0)synthFilterRarity=null;
-        showGearMenu();
-      }else{
-        const idx=saveData.gearBag.findIndex(g=>String(g.uid)===String(uid));
-        if(idx>=0){
-          const g=saveData.gearBag.splice(idx,1)[0];
-          if(saveData.equippedGear[g.slot])saveData.gearBag.push(saveData.equippedGear[g.slot]);
-          saveData.equippedGear[g.slot]=g; saveSave();
-        }
+      if(saveData.equippedGear[slot]){
+        saveData.gearBag.push(saveData.equippedGear[slot]);
+        saveData.equippedGear[slot]=null;
+        saveSave();
+        // 卸下后自动按该部位筛选：玩家卸下头部后看到的全是头部装备，方便挑选替换
+        gearFilterSlot=slot;
+        // 清空合成/品质筛选，避免多重筛选导致看不到装备
+        synthFilterRarity=null;
+        selectedSynthUids=[];
+        gearFilterRarity=null;
+        // 重置页码：筛选变化时 getPagedState 内部会自动重置
+        const _gst=getPagedState('gear');
+        _gst.page=1;
+        _gst._lastFilter=null; // 强制触发筛选变化重置
         showGearMenu();
       }
     });
-    const synthBtn2=el.querySelector('[data-synth-btn]');
-    if(synthBtn2)_bindTap(synthBtn2,e=>{
+  });
+  // 装备按钮：独立的"装备"操作，不再和"加入合成"共用卡片点击
+  // 修复 bug：之前点卡片既可能"装备"也可能"取消合成"，玩家以为装备失败
+  ov.querySelectorAll('[data-equip-btn]').forEach(btn=>{
+    _bindTap(btn,e=>{
       e.stopPropagation();
-      const uid=el.dataset.equip;
+      const uid=btn.dataset.equipBtn;
+      const idx=saveData.gearBag.findIndex(g=>String(g.uid)===String(uid));
+      if(idx>=0){
+        const g=saveData.gearBag.splice(idx,1)[0];
+        // 该部位已有装备时，原装备自动回背包
+        if(saveData.equippedGear[g.slot])saveData.gearBag.push(saveData.equippedGear[g.slot]);
+        saveData.equippedGear[g.slot]=g; saveSave();
+        // 装备后保持该部位筛选，方便继续看同部位装备
+        gearFilterSlot=g.slot;
+        const _gst=getPagedState('gear');
+        _gst.page=1; _gst._lastFilter=null;
+        // 装备成功提示
+        flashMsg(`✓ 已装备 ${g.name}`);
+      }
+      showGearMenu();
+    });
+  });
+  // 合成按钮：独立的"加入/取消合成组"操作
+  ov.querySelectorAll('[data-synth-btn]').forEach(btn=>{
+    _bindTap(btn,e=>{
+      e.stopPropagation();
+      const card=btn.closest('[data-equip]');
+      const uid=card?card.dataset.equip:null;
+      if(!uid)return;
       const g=saveData.gearBag.find(x=>String(x.uid)===String(uid));
       if(!g)return;
       const sidx=selectedSynthUids.findIndex(u=>String(u)===String(uid));
