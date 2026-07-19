@@ -19,6 +19,295 @@ function gameTimeout(fn, delay){
     // token 不匹配：静默丢弃（旧局回调，新局已开始）
   }, delay);
 }
+
+// ==================== Boss出场戏剧化系统 ====================
+// 出场序列（总时长约2.0秒）：
+//   0.0~0.35s  黑屏快速淡入（0→0.82 alpha），屏幕逐渐暗下来
+//   0.35~0.50s 屏幕中央出现红色闪电状裂缝 + 短促屏震 + 低频轰鸣
+//   0.50~0.95s 黑屏从中央向四周淡出，Boss轮廓（spawnAnim同步）渐显
+//   0.95~1.60s Boss名字打字机显示（金色大字，逐字浮现）+ 副标题淡入
+//   1.60~2.00s 名字放大并淡出，戏剧化结束，战斗正式开始
+// 出场期间 Boss.frozen=true（玩家可移动，Boss不动不攻击），避免出场动画期间被秒杀
+let bossIntro={active:false, timer:0, name:'', sub:'', color:'#ff6b6b', isFinalBoss:false, typedChars:0, _crackSeed:0};
+function startBossIntro(b, title, sub){
+  if(!b)return;
+  bossIntro.active=true;
+  bossIntro.timer=0;
+  bossIntro.name=title||b.name||'BOSS';
+  bossIntro.sub=sub||'';
+  bossIntro.color=b.color||'#ff6b6b';
+  bossIntro.isFinalBoss=!!b.isFinalBoss;
+  bossIntro.typedChars=0;
+  bossIntro._crackSeed=Math.floor(Math.random()*10000);
+  // 出场期间冻结Boss，玩家可继续移动但Boss不攻击（spawnAnim自然结束时同时解冻）
+  b.frozen=true; b.frozenTimer=2.0;
+  // 出场瞬间静音BGM 0.1s，再让 bossSpawn 号角声穿透出来
+  if(typeof playSound==='function')playSound('bossSpawn');
+}
+function updateBossIntro(dt){
+  if(!bossIntro.active)return;
+  const prevT=bossIntro.timer;
+  bossIntro.timer+=dt;
+  // 裂缝出现瞬间触发屏震（仅触发一次，跨过0.35s阈值时）
+  if(prevT<0.35 && bossIntro.timer>=0.35){
+    if(typeof screenShake!=='undefined')screenShake=Math.max(screenShake,0.6);
+  }
+  // 名字打字机：0.95s~1.60s 期间逐字显示
+  if(bossIntro.timer>=0.95 && bossIntro.timer<=1.65){
+    const progress=(bossIntro.timer-0.95)/0.70;
+    bossIntro.typedChars=Math.min(bossIntro.name.length, Math.floor(progress*bossIntro.name.length)+1);
+  }else if(bossIntro.timer>1.65){
+    bossIntro.typedChars=bossIntro.name.length;
+  }
+  if(bossIntro.timer>=2.0){
+    bossIntro.active=false;
+  }
+}
+// 绘制Boss出场戏剧化动画（叠加在所有内容之上）
+function drawBossIntro(){
+  if(!bossIntro.active)return;
+  const t=bossIntro.timer;
+  const cx=CONFIG.WIDTH/2, cy=CONFIG.HEIGHT/2;
+  // ===== 阶段0~2: 黑屏淡入/淡出 =====
+  // 0.00~0.35s: alpha 0→0.82（淡入）
+  // 0.35~0.95s: 保持/淡出（裂缝期间保持0.82，0.5s开始淡出到0）
+  // 0.95~2.00s: 不再绘制黑屏（让玩家看到Boss本体和名字）
+  let blackAlpha=0;
+  if(t<0.35){
+    blackAlpha=(t/0.35)*0.82;
+  }else if(t<0.50){
+    blackAlpha=0.82; // 裂缝期间保持
+  }else if(t<0.95){
+    blackAlpha=0.82*(1-(t-0.50)/0.45); // 淡出
+  }
+  if(blackAlpha>0.01){
+    ctx.save();
+    ctx.fillStyle=`rgba(0,0,0,${blackAlpha})`;
+    ctx.fillRect(0,0,CONFIG.WIDTH,CONFIG.HEIGHT);
+    ctx.restore();
+  }
+  // ===== 阶段1: 红色闪电裂缝（0.35~0.55s） =====
+  if(t>=0.35 && t<0.55){
+    const cp=(t-0.35)/0.20; // 0~1
+    const crackAlpha=cp<0.5?cp*2:(1-cp)*2; // 中间最亮
+    ctx.save();
+    ctx.globalAlpha=crackAlpha;
+    // 闪电状裂缝：从屏幕中心向8个方向辐射
+    const seed=bossIntro._crackSeed;
+    const baseColor=bossIntro.isFinalBoss?'255,80,40':'255,60,60';
+    for(let i=0;i<8;i++){
+      const angle=(i/8)*Math.PI*2+seed*0.001;
+      const len=200+((seed+i*137)%180);
+      ctx.strokeStyle=`rgba(${baseColor},1)`;
+      ctx.lineWidth=3;
+      ctx.shadowColor=`rgb(${baseColor})`;
+      ctx.shadowBlur=20;
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      let x=cx, y=cy;
+      const steps=8;
+      for(let s=1;s<=steps;s++){
+        const sp=s/steps;
+        const wobble=((seed+i*53+s*31)%100)/100-0.5;
+        const px=cx+Math.cos(angle+wobble*0.3)*len*sp;
+        const py=cy+Math.sin(angle+wobble*0.3)*len*sp;
+        ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+      // 中心爆点
+      ctx.fillStyle=`rgba(255,255,255,${crackAlpha})`;
+      ctx.beginPath();ctx.arc(cx,cy,12,0,Math.PI*2);ctx.fill();
+    }
+    ctx.restore();
+  }
+  // ===== 阶段3~4: 名字打字机+副标题（0.95~2.00s） =====
+  if(t>=0.95){
+    let nameAlpha=1, subAlpha=1, nameScale=1;
+    if(t<1.05){
+      // 名字刚开始，淡入
+      nameAlpha=(t-0.95)/0.10;
+    }
+    if(t>=1.10){
+      // 副标题从1.10s开始淡入
+      subAlpha=Math.min(1,(t-1.10)/0.30);
+    }
+    if(t>=1.65){
+      // 整体淡出+放大
+      const fp=(t-1.65)/0.35;
+      nameAlpha=1-fp;
+      subAlpha=1-fp;
+      nameScale=1+fp*0.25;
+    }
+    // 名字打字机显示
+    const nameSize=bossIntro.isFinalBoss?76:60;
+    const visibleName=bossIntro.name.substring(0, bossIntro.typedChars);
+    if(visibleName.length>0){
+      ctx.save();
+      ctx.globalAlpha=nameAlpha;
+      ctx.font=`900 ${nameSize}px STKaiti,KaiTi,serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      // 名字下方光带（金色光晕横线）
+      const glowColor=bossIntro.isFinalBoss?'#8b0000':'#ffd700';
+      ctx.fillStyle=glowColor;
+      ctx.shadowColor=glowColor;
+      ctx.shadowBlur=40;
+      // 字符逐个绘制（带轻微抖动效果）
+      const totalW=ctx.measureText(visibleName).width;
+      let charX=cx-totalW/2;
+      for(let i=0;i<visibleName.length;i++){
+        const ch=visibleName[i];
+        const cw=ctx.measureText(ch).width;
+        // 最新浮现的字额外放大+震动
+        if(i===visibleName.length-1 && bossIntro.typedChars<bossIntro.name.length){
+          const popT=(t-0.95-(i/bossIntro.name.length)*0.70);
+          if(popT<0.10){
+            const pop=1+(0.10-popT)*4;
+            ctx.save();
+            ctx.translate(charX+cw/2, cy-40);
+            ctx.scale(pop*nameScale, pop*nameScale);
+            ctx.fillText(ch, 0, 0);
+            ctx.restore();
+          }else{
+            ctx.save();
+            ctx.translate(charX+cw/2, cy-40);
+            ctx.scale(nameScale, nameScale);
+            ctx.fillText(ch, 0, 0);
+            ctx.restore();
+          }
+        }else{
+          ctx.save();
+          ctx.translate(charX+cw/2, cy-40);
+          ctx.scale(nameScale, nameScale);
+          ctx.fillText(ch, 0, 0);
+          ctx.restore();
+        }
+        charX+=cw;
+      }
+      // 名字下方金色光带
+      ctx.shadowBlur=20;
+      ctx.fillStyle=`rgba(255,215,0,${nameAlpha*0.6})`;
+      ctx.fillRect(cx-200, cy-40+nameSize/2+8, 400, 2);
+      ctx.restore();
+    }
+    // 副标题
+    if(bossIntro.sub && subAlpha>0.01){
+      ctx.save();
+      ctx.globalAlpha=subAlpha;
+      ctx.font='500 22px STKaiti,KaiTi,serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle='#d4a017';
+      ctx.shadowColor='#d4a017';
+      ctx.shadowBlur=12;
+      ctx.fillText(bossIntro.sub, cx, cy+30);
+      ctx.restore();
+    }
+  }
+}
+
+// ==================== Boss死亡戏剧化系统 ====================
+// 死亡序列（约1.6秒，叠加在现有粒子爆炸/慢动作之上）：
+//   0.0~0.5s  Boss轮廓急速缩小+变白（白色光晕包裹Boss位置）
+//   0.3~0.8s  全屏白闪+垂直金色光柱从Boss位置冲向天空（戏剧化高潮）
+//   0.5~1.5s  持续生成金色碎片向外爆裂（金光闪闪的"陨落"感）
+//   1.5~1.6s  特效结束（已有粒子/慢动作继续完成）
+// 不影响Boss死亡逻辑（onBossDefeated/刑天/超级分支等照常执行），仅作视觉增强
+let bossDeathFx={active:false, timer:0, x:0, y:0, size:50, color:'#ff6b6b', name:'', isSuper:false, isFinalBoss:false};
+function startBossDeathFx(b){
+  if(!b)return;
+  bossDeathFx.active=true;
+  bossDeathFx.timer=0;
+  bossDeathFx.x=b.x;
+  bossDeathFx.y=b.y;
+  bossDeathFx.size=b.size||50;
+  bossDeathFx.color=b.color||'#ff6b6b';
+  bossDeathFx.name=b.name||'BOSS';
+  bossDeathFx.isSuper=!!b.isSuper;
+  bossDeathFx.isFinalBoss=!!b.isFinalBoss;
+  // 死亡瞬间生成大量金色碎片粒子（叠加在die()已有粒子之上）
+  if(typeof spawnParticles==='function'){
+    spawnParticles(b.x, b.y, '#ffd700', 60);
+    spawnParticles(b.x, b.y, '#ffffff', 30);
+    if(b.isFinalBoss||b.isSuper){
+      spawnParticles(b.x, b.y, '#ff6b6b', 40);
+    }
+  }
+}
+function updateBossDeathFx(dt){
+  if(!bossDeathFx.active)return;
+  bossDeathFx.timer+=dt;
+  if(bossDeathFx.timer>=1.6){
+    bossDeathFx.active=false;
+  }
+}
+function drawBossDeathFx(){
+  if(!bossDeathFx.active)return;
+  const t=bossDeathFx.timer;
+  const df=bossDeathFx;
+  // ===== 阶段1: 0~0.5s Boss轮廓缩小+变白 =====
+  if(t<0.5){
+    const p=t/0.5;
+    const scale=1-p*0.6; // 缩小到40%
+    const alpha=1-p*0.3;
+    ctx.save();
+    ctx.globalAlpha=alpha;
+    ctx.translate(df.x, df.y);
+    ctx.scale(scale, scale);
+    // 白色光晕包裹
+    const grad=ctx.createRadialGradient(0,0,0,0,0,df.size*1.6);
+    grad.addColorStop(0,'rgba(255,255,255,0.85)');
+    grad.addColorStop(0.5,'rgba(255,215,0,0.55)');
+    grad.addColorStop(1,'rgba(255,215,0,0)');
+    ctx.fillStyle=grad;
+    ctx.beginPath();ctx.arc(0,0,df.size*1.6,0,Math.PI*2);ctx.fill();
+    // 白色Boss轮廓
+    ctx.fillStyle='rgba(255,255,255,0.75)';
+    ctx.beginPath();ctx.arc(0,0,df.size,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  }
+  // ===== 阶段2: 0.3~0.8s 全屏白闪+垂直金色光柱 =====
+  if(t>=0.3 && t<0.85){
+    const p=(t-0.3)/0.55;
+    const flashAlpha=p<0.5?p*2:(1-p)*2; // 中间最亮
+    // 全屏白闪（仅前0.15秒，避免过度刺眼）
+    if(t<0.5){
+      ctx.save();
+      ctx.fillStyle=`rgba(255,255,255,${flashAlpha*0.35})`;
+      ctx.fillRect(0,0,CONFIG.WIDTH,CONFIG.HEIGHT);
+      ctx.restore();
+    }
+    // 垂直金色光柱（从Boss位置冲向天空）
+    ctx.save();
+    const beamW=df.size*1.8*(1-p*0.2);
+    const beamH=CONFIG.HEIGHT*1.3;
+    const beamAlpha=flashAlpha*0.85;
+    const beamGrad=ctx.createLinearGradient(0, df.y, 0, df.y-beamH);
+    beamGrad.addColorStop(0,`rgba(255,255,255,${beamAlpha})`);
+    beamGrad.addColorStop(0.25,`rgba(255,215,0,${beamAlpha*0.8})`);
+    beamGrad.addColorStop(0.6,`rgba(255,180,40,${beamAlpha*0.4})`);
+    beamGrad.addColorStop(1,'rgba(255,215,0,0)');
+    ctx.fillStyle=beamGrad;
+    ctx.fillRect(df.x-beamW/2, df.y-beamH, beamW, beamH);
+    // 光柱底部圆形光晕
+    const haloGrad=ctx.createRadialGradient(df.x, df.y, 0, df.x, df.y, df.size*3.2);
+    haloGrad.addColorStop(0,`rgba(255,255,255,${beamAlpha})`);
+    haloGrad.addColorStop(0.4,`rgba(255,215,0,${beamAlpha*0.6})`);
+    haloGrad.addColorStop(1,'rgba(255,215,0,0)');
+    ctx.fillStyle=haloGrad;
+    ctx.beginPath();ctx.arc(df.x, df.y, df.size*3.2, 0, Math.PI*2);ctx.fill();
+    // 光柱中心高亮线
+    ctx.fillStyle=`rgba(255,255,255,${beamAlpha*0.9})`;
+    ctx.fillRect(df.x-3, df.y-beamH, 6, beamH);
+    ctx.restore();
+  }
+  // ===== 阶段3: 0.5~1.4s 持续生成金色碎片 =====
+  if(t>=0.5 && t<1.4){
+    if(typeof spawnParticles==='function' && Math.random()<0.55){
+      const a=Math.random()*Math.PI*2;
+      const r=df.size*0.4;
+      spawnParticles(df.x+Math.cos(a)*r, df.y+Math.sin(a)*r, '#ffd700', 3);
+    }
+  }
+}
 function getWaveEnemyCount(wave){return Math.ceil((5+wave*3+Math.floor(wave/2)*2)*getDifficulty().enemyCountMul);}
 function getWaveEnemyTypes(wave){
   const t=['grunt']; if(wave>=2)t.push('runner'); if(wave>=3)t.push('tank','spiky'); if(wave>=4)t.push('shooter','invincible'); if(wave>=5)t.push('giant','bomber');
@@ -89,11 +378,15 @@ function startBoss(){
   bossHealthBar.classList.remove('hidden');
   bossName.style.color=''; // 重置颜色（刑天用红色，需清空）
   bossName.textContent=bossVariant?`变异BOSS - ${boss.name}`:`BOSS - ${boss.name}`;
-  playSound('bossSpawn'); // Boss出场号角声
   playBossSound(boss.bossIdx); // Boss专属音效
   const petDef=getPetDef(boss.bossIndex);
   updateBossUI();
-  showWaveAnnounce(bossVariant?'⚠️ 变异Boss!':'BOSS战！',`${boss.name} 出现了！${bossVariant?'\n🔥 变异体：技能混搭，掉落更佳！':''}${petDef?'\n⚡'+petDef.desc:''}`,true);
+  // 出场戏剧化动画（黑屏→裂缝→名字打字机），1.8秒后显示waveAnnounce
+  startBossIntro(boss, boss.name, petDef?('⚡'+petDef.desc):'');
+  gameTimeout(()=>{
+    if(gameState!=='boss')return;
+    showWaveAnnounce(bossVariant?'⚠️ 变异Boss!':'BOSS战！',`${boss.name} 出现了！${bossVariant?'\n🔥 变异体：技能混搭，掉落更佳！':''}${petDef?'\n⚡'+petDef.desc:''}`,true);
+  }, 1900);
   maxLevelTime=CONFIG.BOSS_TIME; levelTimer=maxLevelTime;
   // 启动时间挑战
   startTimeChallenge();
@@ -133,7 +426,13 @@ function spawnSuperBoss(){
   bossWarnings=[]; boss=new Boss(currentLevel,true);
   bossHealthBar.classList.remove('hidden'); bossName.style.color=''; bossName.textContent=`超级BOSS - ${boss.name}`;
   const petDef=getPetDef(boss.bossIndex);
-  updateBossUI(); showWaveAnnounce('超级Boss复仇！',`${boss.name} 降临！${petDef?'\n⚡'+petDef.desc:''}`,true);
+  updateBossUI();
+  // 超级Boss出场戏剧化动画
+  startBossIntro(boss, boss.name, petDef?('⚡'+petDef.desc):'');
+  gameTimeout(()=>{
+    if(gameState!=='boss')return;
+    showWaveAnnounce('超级Boss复仇！',`${boss.name} 降临！${petDef?'\n⚡'+petDef.desc:''}`,true);
+  }, 1900);
   maxLevelTime=CONFIG.BOSS_TIME*1.5; levelTimer=maxLevelTime;
 }
 // ===== 刑天最终Boss触发 =====
@@ -225,9 +524,14 @@ function startFinalBoss(){
   bossName.style.color='#8b0000';
   playBossSound(9);
   updateBossUI();
-  showWaveAnnounce('最终Boss！','刑天 — 无头战神降临！',true);
+  // 刑天专属出场戏剧化动画（红色调）
+  startBossIntro(boss, '刑天', '无头战神 · 战意不灭');
+  gameTimeout(()=>{
+    if(gameState!=='boss')return;
+    showWaveAnnounce('最终Boss！','刑天 — 无头战神降临！',true);
+    showToast('⚔️ 最终Boss刑天降临！','#8b0000',3000);
+  }, 1900);
   maxLevelTime=CONFIG.BOSS_TIME*2.5; levelTimer=maxLevelTime; // 刑天给更多时间
-  showToast('⚔️ 最终Boss刑天降临！','#8b0000',3000);
 }
 // ===== 刑天击败后胜利结算 =====
 function showFinalBossVictory(gotNewWeapon){

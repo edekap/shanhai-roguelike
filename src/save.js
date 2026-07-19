@@ -53,6 +53,11 @@ let saveData = {
   shanhaiPages: [],      // 已收集的山海残页（bossIdx列表，0-9）
   shanhaiPagesRewardClaimed: false, // 山海图卷奖励是否已发放
   gearEssence: 0,        // [已废弃] 装备精魄已合并到积分，保留字段为0兼容旧代码
+  // 宝箱系统：局末按表现发放，主菜单开箱
+  pendingChests: [],      // 待开宝箱列表 {quality, source, ts, runScore, runBossKills}
+  chestHistory: {bronze:0, silver:0, gold:0, purple:0, orange:0}, // 历史开箱统计
+  // 每日目标系统：每天3个目标，跨天重置
+  dailyGoals: null,       // {date:'YYYY-MM-DD', goals:[{id,type,target,progress,claimed}], allClaimed:bool}
 };
 
 // ==================== 存档迁移函数表 ====================
@@ -113,10 +118,16 @@ const SAVE_MIGRATIONS = {
     }
     d.gearEssence = 0; // 字段保留为0兼容，但不再使用
   },
+  // v7->v8: 宝箱系统 + 每日目标字段
+  7: (d) => {
+    if(!d.pendingChests) d.pendingChests = [];
+    if(!d.chestHistory) d.chestHistory = {bronze:0, silver:0, gold:0, purple:0, orange:0};
+    if(d.dailyGoals === undefined) d.dailyGoals = null;
+  },
   // 未来新增迁移在这里追加：
-  // 7: (d) => { ... }
+  // 8: (d) => { ... }
 };
-const CURRENT_SAVE_VERSION = 7;
+const CURRENT_SAVE_VERSION = 8;
 
 // ==================== 本局统计（死亡复盘用） ====================
 // 不存档，每次开始游戏时重置
@@ -240,17 +251,24 @@ function loadSave() {
       let fromVer = originalVer;
       if(fromVer < CURRENT_SAVE_VERSION) {
         console.log(`[存档] 从版本 ${fromVer} 迁移到 ${CURRENT_SAVE_VERSION}`);
+        // 迁移失败时记录已成功的最高版本号，下次启动可从该版本重试
+        // 避免单步迁移失败导致版本号被强行提升、字段永久缺失
+        let migratedTo = fromVer;
         for(let v = fromVer; v < CURRENT_SAVE_VERSION; v++) {
           if(SAVE_MIGRATIONS[v]) {
             try {
               SAVE_MIGRATIONS[v](d);
               console.log(`[存档] 迁移 v${v}->v${v+1} 完成`);
+              migratedTo = v + 1;
             } catch(migErr) {
-              console.error(`[存档] 迁移 v${v}->v${v+1} 失败:`, migErr);
+              console.error(`[存档] 迁移 v${v}->v${v+1} 失败，已保留版本号 v${migratedTo} 供下次重试:`, migErr);
+              break;
             }
+          } else {
+            migratedTo = v + 1;
           }
         }
-        d.version = CURRENT_SAVE_VERSION;
+        d.version = migratedTo;
       }
       saveData = d;
     }
@@ -786,9 +804,9 @@ function triggerArtifactSkill(px,py){
     // 紫色漩涡(中等范围，强拉拽)
     fireEffects.push({x:cx,y:cy,radius:r,damage:1.5,life:5,maxLife:5,burnDmg:0,tick:0,chain:0,blackhole:true,devourMaw:true});
     // 5波拉拽+伤害(每0.5秒一次)，拉拽强度递增
+    // 使用 gameTimeout 获得 _runToken 跨局竞态防护：玩家死亡/返回主菜单后旧回调被静默丢弃
     for(let wave=0;wave<5;wave++){
-      setTimeout(()=>{
-        if(gameState!=='fighting'&&gameState!=='boss')return;
+      gameTimeout(()=>{
         if(!player||!player.alive)return; // 玩家死亡后停止魂器脉冲，避免污染死亡画面/统计
         for(const e of enemies){
           if(!e.alive)continue;
@@ -854,9 +872,9 @@ function triggerArtifactSkill(px,py){
       });
     }
     // 4波维度脉冲：每0.8秒对所有裂缝上的敌人造成伤害+从裂缝喷出追踪弹
+    // 使用 gameTimeout 获得 _runToken 跨局竞态防护
     for(let wave=0;wave<4;wave++){
-      setTimeout(()=>{
-        if(gameState!=='fighting'&&gameState!=='boss')return;
+      gameTimeout(()=>{
         if(!player||!player.alive)return; // 玩家死亡后停止魂器脉冲，避免污染死亡画面/统计
         screenShake=0.3;
         for(const r of rifts){

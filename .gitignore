@@ -12,3 +12,18 @@ __pycache__/
 # 系统文件
 Thumbs.db
 .DS_Store
+
+# 开发调试文件（不上架 taptap）
+test_*.py
+probe_*.js
+server.js
+setup_flux.ps1
+flux_schnell_gguf_workflow.json
+pip/
+test_visibility/
+screenshots/
+
+# Trae/IDE 工作区文件
+.trae/
+.idea/
+.vscode/

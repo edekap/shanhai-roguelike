@@ -33,6 +33,175 @@ function _hideGearModal(){
   const modal=document.getElementById('gearModal');
   if(modal)modal.style.display='none';
 }
+// ==================== 战斗中Boss图鉴快捷按钮 ====================
+// 战斗中点击血条旁的📖按钮，弹出当前Boss的背景故事/弱点/技能
+// 自动暂停游戏，关闭后恢复（仅当未被玩家手动暂停时才恢复）
+let _bossPediaPausedByUs = false;
+function showBossWeaknessModal(){
+  // 清理可能残留的上一次监听器（防御性：避免重复调用导致监听器泄漏）
+  if(_bossPediaBgHandler){
+    const oldModal = document.getElementById('gearModal');
+    if(oldModal) oldModal.removeEventListener('click', _bossPediaBgHandler);
+    _bossPediaBgHandler = null;
+  }
+  if(typeof boss==='undefined' || !boss){
+    if(typeof _showSaveToast==='function')_showSaveToast('当前没有Boss');
+    return;
+  }
+  const idx = (typeof boss.bossIndex==='number') ? boss.bossIndex : (typeof boss.bossIdx==='number' ? boss.bossIdx : 0);
+  const b = (typeof BOSS_TYPES!=='undefined') ? BOSS_TYPES[idx] : null;
+  const lore = (typeof BOSS_LORE!=='undefined') ? BOSS_LORE[idx] : null;
+  if(!b || !lore){
+    if(typeof _showSaveToast==='function')_showSaveToast('暂无该Boss的图鉴信息');
+    return;
+  }
+  // 自动暂停游戏（仅当游戏在战斗中且未暂停时）
+  if(typeof isPaused!=='undefined' && !isPaused && typeof gameState!=='undefined' && (gameState==='fighting' || gameState==='boss')){
+    if(typeof togglePause==='function'){
+      togglePause();
+      _bossPediaPausedByUs = true;
+    }
+  }else{
+    _bossPediaPausedByUs = false;
+  }
+  const isSuper = !!b.isSuper;
+  const isFinalBoss = !!b.isFinalBoss;
+  const isVariant = !!boss.isVariant;
+  // 模态弹窗HTML（移动端友好：大字号、可滚动、底部固定关闭按钮）
+  const html = `
+    <div style="background:linear-gradient(180deg,#1a1410,#0d0a08);border:2px solid ${b.color};border-radius:14px;padding:0;max-width:480px;width:100%;margin:12px auto;box-shadow:0 0 40px ${b.color}66, 0 12px 40px rgba(0,0,0,0.8);overflow:hidden;font-family:'STKaiti','KaiTi','Microsoft YaHei',serif">
+      <div style="background:linear-gradient(135deg,${b.color}33,${b.color}11);padding:16px 18px;border-bottom:1px solid ${b.color}55;display:flex;align-items:center;gap:12px">
+        <div style="font-size:36px;filter:drop-shadow(0 0 8px ${b.color}aa)">${b.icon}</div>
+        <div style="flex:1;text-align:left">
+          <div style="font-size:22px;font-weight:900;color:${b.color};text-shadow:0 0 10px ${b.color}66;letter-spacing:2px">${boss.name||b.name}</div>
+          <div style="font-size:11px;color:#8b949e;margin-top:3px">${b.desc}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
+          ${isFinalBoss?'<span style="font-size:10px;color:#ff4444;background:rgba(255,68,68,0.18);padding:2px 8px;border-radius:4px;border:1px solid #ff4444;font-weight:bold">最终Boss</span>':''}
+          ${isSuper?'<span style="font-size:10px;color:#ffd700;background:rgba(255,215,0,0.18);padding:2px 8px;border-radius:4px;border:1px solid #ffd700;font-weight:bold">超级Boss</span>':''}
+          ${isVariant?'<span style="font-size:10px;color:#bc8cff;background:rgba(188,140,255,0.18);padding:2px 8px;border-radius:4px;border:1px solid #bc8cff;font-weight:bold">⚡变异</span>':''}
+        </div>
+      </div>
+      <div style="padding:14px 18px;max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+        <div style="font-size:12px;color:#d4c5a0;margin-bottom:6px;letter-spacing:1px">📜 <b>山海经·背景故事</b></div>
+        <div style="font-size:13px;color:#c9d1d9;line-height:1.85;margin-bottom:14px;padding:10px 12px;background:rgba(212,197,160,0.06);border-left:3px solid #d4c5a0;border-radius:0 6px 6px 0;text-align:left">${lore.story}</div>
+        <div style="font-size:12px;color:#ff6347;margin-bottom:6px;letter-spacing:1px">⚔️ <b>弱点提示</b></div>
+        <div style="font-size:13px;color:#ffa0a0;line-height:1.8;margin-bottom:14px;padding:10px 12px;background:rgba(255,99,71,0.10);border-left:3px solid #ff6347;border-radius:0 6px 6px 0;text-align:left">${lore.weakness}</div>
+        <div style="font-size:12px;color:#58a6ff;margin-bottom:8px;letter-spacing:1px">✨ <b>Boss技能</b></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+          ${lore.skills.map((s,si)=>`<span style="font-size:12px;color:#c9d1d9;background:rgba(88,166,255,0.12);border:1px solid rgba(88,166,255,0.35);padding:4px 12px;border-radius:14px">${si+1}. ${s}</span>`).join('')}
+        </div>
+      </div>
+      <div style="padding:12px 18px;border-top:1px solid #30363d;background:rgba(13,10,8,0.6);position:sticky;bottom:0">
+        <button class="sec-btn" id="bossPediaCloseBtn" style="width:100%;padding:12px;font-size:15px;letter-spacing:2px;background:linear-gradient(135deg,${b.color}44,#1a1f2e);border-color:${b.color}99;color:${b.color}">✕ 关闭（继续战斗）</button>
+      </div>
+    </div>`;
+  const modal = _showGearModal(html);
+  // 关闭弹窗的统一处理：隐藏弹窗 + 若我们暂停了游戏则恢复
+  const _closeBossPedia = ()=>{
+    _hideGearModal();
+    // 清理一次性背景点击监听器，避免污染后续 _showGearModal 调用
+    if(modal && _bossPediaBgHandler){
+      modal.removeEventListener('click', _bossPediaBgHandler);
+      _bossPediaBgHandler = null;
+    }
+    if(_bossPediaPausedByUs && typeof isPaused!=='undefined' && isPaused && typeof togglePause==='function'){
+      togglePause();
+    }
+    _bossPediaPausedByUs = false;
+  };
+  // 绑定关闭按钮
+  const closeBtn = document.getElementById('bossPediaCloseBtn');
+  if(closeBtn){
+    _bindTap(closeBtn, _closeBossPedia);
+  }
+  // 一次性背景点击监听器：原_showGearModal已绑定背景点击关闭，但不会恢复暂停
+  // 这里追加一个监听器，仅在本次弹窗期间生效，关闭时移除
+  if(modal){
+    _bossPediaBgHandler = (e)=>{ if(e.target===modal) _closeBossPedia(); };
+    modal.addEventListener('click', _bossPediaBgHandler);
+  }
+}
+let _bossPediaBgHandler = null;
+// 绑定战斗中Boss图鉴快捷按钮（静态HTML元素，脚本加载时绑定一次）
+(function _initBossPediaBtn(){
+  const btn = document.getElementById('bossPediaBtn');
+  if(btn){
+    _bindTap(btn, ()=>{
+      // 战斗中且Boss存在时才打开（避免主菜单误触）
+      if(typeof gameState!=='undefined' && (gameState==='fighting' || gameState==='boss') && typeof boss!=='undefined' && boss){
+        showBossWeaknessModal();
+      }
+    });
+  }
+})();
+// ==================== 进度填充感系统 ====================
+// 主菜单5大功能按钮上展示X/Y进度，满进度时变金色+✦徽章，激发收集欲
+// 返回 fb-tag 内部HTML（含进度数字+可选满进度徽章）
+// 满进度时返回的HTML带 .fb-tag-full 类，由CSS渲染金色样式
+function _progressTag(current, total, labelIfEmpty){
+  if(typeof total!=='number' || total<=0) return labelIfEmpty||'';
+  const cur = Math.max(0, Math.min(total, current||0));
+  const full = cur >= total;
+  if(full){
+    return `<span class="fb-tag-full">✦ ${cur}/${total} 完成</span>`;
+  }
+  return `<span class="fb-tag-progress">${cur}<span class="fb-tag-sep">/</span>${total}</span>`;
+}
+// 计算各模块当前进度（统一入口，便于维护）
+function _getModuleProgress(){
+  // 天赋：已点亮天赋数 / 总天赋数（互斥分支按已点亮计算）
+  const talentCur = Object.keys(saveData.talents||{}).filter(k=>(saveData.talents[k]||0)>0).length;
+  const talentTotal = (typeof TALENTS!=='undefined') ? TALENTS.length : 13;
+  // 牧场：放养中的不同Boss宠物种类数 / 总Boss宠物种类数
+  let ranchPets = 0;
+  try { ranchPets = Array.isArray(saveData.ranchPets) ? new Set(saveData.ranchPets.filter(p=>p&&p.def!==undefined).map(p=>p.def)).size : 0; } catch(e){ ranchPets = 0; }
+  const ranchTotal = (typeof BOSS_PET_DEFS!=='undefined') ? BOSS_PET_DEFS.length : 9;
+  // 羁绊：已激活的羁绊数 / 总羁绊数（try-catch 保护，避免 ownedPets 元素异常导致整个主菜单崩溃）
+  let bondCur = 0;
+  try { if(typeof BONDS!=='undefined' && typeof getActiveBonds==='function') bondCur = getActiveBonds().length; } catch(e){ bondCur = 0; }
+  const bondTotal = (typeof BONDS!=='undefined') ? BONDS.length : 6;
+  // 图鉴：Boss击杀种类 + 成就解锁数 的综合完成度
+  const bossCur = Object.keys(saveData.bossPedia||{}).length;
+  const bossTotal = (typeof BOSS_TYPES!=='undefined') ? BOSS_TYPES.length : 10;
+  const achCur = Object.keys(saveData.achievements||{}).length;
+  const achTotal = (typeof ACHIEVEMENTS!=='undefined') ? ACHIEVEMENTS.length : 23;
+  // 图鉴综合进度：Boss击杀 + 成就解锁 / (Boss总数 + 成就总数)
+  const pediaCur = bossCur + achCur;
+  const pediaTotal = bossTotal + achTotal;
+  // 背包：装备+武器+宠物+魂器 综合完成度
+  let gearCur = 0;
+  try { if(typeof getOwnedBossMythics==='function') gearCur = getOwnedBossMythics().size; } catch(e){ gearCur = 0; }
+  const gearTotal = 10; // 10个Boss对应10件神话装备
+  const weaponCur = Object.keys(saveData.ownedWeapons||{}).length;
+  const weaponTotal = (typeof WEAPONS!=='undefined') ? Object.keys(WEAPONS).length : 9;
+  let petCur = 0;
+  try { petCur = new Set((saveData.ownedPets||[]).filter(p=>p&&p.def!==undefined).map(p=>p.def)).size; } catch(e){ petCur = 0; }
+  const petTotal = (typeof BOSS_PET_DEFS!=='undefined') ? BOSS_PET_DEFS.length : 9;
+  const artCur = (saveData.ownedArtifacts||[]).length;
+  const artTotal = (typeof SOUL_ARTIFACTS!=='undefined') ? SOUL_ARTIFACTS.length : 3;
+  // 背包综合进度（4个子项求和）
+  const bagCur = gearCur + weaponCur + petCur + artCur;
+  const bagTotal = gearTotal + weaponTotal + petTotal + artTotal;
+  return {
+    talent: {cur:talentCur, total:talentTotal},
+    bag: {cur:bagCur, total:bagTotal, subs:[
+      {name:'装备', cur:gearCur, total:gearTotal},
+      {name:'武器', cur:weaponCur, total:weaponTotal},
+      {name:'宠物', cur:petCur, total:petTotal},
+      {name:'魂器', cur:artCur, total:artTotal},
+    ]},
+    ranch: {cur:Math.min(ranchPets, ranchTotal), total:ranchTotal},
+    bond: {cur:bondCur, total:bondTotal},
+    pedia: {cur:pediaCur, total:pediaTotal, subs:[
+      {name:'Boss', cur:bossCur, total:bossTotal},
+      {name:'成就', cur:achCur, total:achTotal},
+    ]},
+  };
+}
+
+
+
 // 性能优化：缓存所有DOM引用，避免每帧调用getElementById
 const _ui = {
   healthText:null, healthBar:null, shieldBarWrap:null, shieldBar:null,
@@ -74,6 +243,13 @@ function updateUI(){
   if(hpTxt!==_ui._lastHealth){_ui.healthText.textContent=hpTxt;_ui._lastHealth=hpTxt;}
   const hpPct=Math.max(0,player.health/player.maxHealth*100)+'%';
   _ui.healthBar.style.width=hpPct;
+  // 玩家低血裂纹：血量<30%时血条变暗+震动+脉冲红光（强化"濒死"危机感）
+  const hpRatio=player.health/player.maxHealth;
+  if(hpRatio<=0.30 && hpRatio>0){
+    _ui.healthBar.classList.add('lowhp-crack');
+  }else{
+    _ui.healthBar.classList.remove('lowhp-crack');
+  }
   // 护盾
   const shTxt=player.shield>0?'block':'none';
   if(_ui._lastShield!==shTxt){
@@ -129,6 +305,26 @@ function updateBossUI(){
   if(!_ui._initDone)_initUICache();
   const pct=Math.max(0,boss.health/boss.maxHealth*100);
   if(Math.abs(pct-_ui._lastBossHp)>0.5){_ui.bossBarFill.style.width=pct+'%';_ui._lastBossHp=pct;}
+  // 分段血条阶段切换：跨过66.66%/33.33%时触发一次金色脉冲闪光
+  // 视觉上让玩家感受到"Boss进入下一阶段"的反馈（如半血机制/狂暴切换）
+  if(_ui._lastBossSeg===undefined)_ui._lastBossSeg=Math.ceil(pct/33.33);
+  const seg=Math.ceil(pct/33.33);
+  if(seg<_ui._lastBossSeg){
+    const flash=document.getElementById('bossPhaseFlash');
+    if(flash){
+      flash.classList.remove('flash');
+      void flash.offsetWidth; // 强制reflow，让动画可重启
+      flash.classList.add('flash');
+    }
+    // Boss本体阶段切换闪光（红色warning flash）
+    if(boss)boss.hitFlash=Math.max(boss.hitFlash||0,0.4);
+  }
+  _ui._lastBossSeg=seg;
+  // Boss低血金震：血量<25%时血条整体金色脉动，强化"即将击杀"的紧张感
+  if(_ui.bossBarFill){
+    if(pct<=25 && pct>0)_ui.bossBarFill.classList.add('boss-lowhp-shake');
+    else _ui.bossBarFill.classList.remove('boss-lowhp-shake');
+  }
 }
 function updateTimerUI(){
   if(!_ui._initDone)_initUICache();
@@ -154,6 +350,9 @@ function updateTimerUI(){
 // 静态背景（网格+边界）缓存到离屏canvas，避免每帧重画80+次stroke
 let _bgCacheCanvas = null;
 let _bgCacheCtx = null;
+// 视差背景层缓存：远山剪影 + 云海波浪，预绘制一次，绘制时按玩家位置偏移
+let _bgParallaxClouds = null; // 云海层（最远，慢速）
+let _bgParallaxMountains = null; // 远山层（中远，中速）
 function _ensureBgCache(){
   if(_bgCacheCanvas) return;
   _bgCacheCanvas = document.createElement('canvas');
@@ -182,6 +381,60 @@ function _ensureBgCache(){
   _bgCacheCtx.strokeStyle = '#30363d';
   _bgCacheCtx.lineWidth = 3;
   _bgCacheCtx.strokeRect(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT);
+
+  // ===== 视差背景层预绘制：云海（最远层） =====
+  // 浅金色透明云海波浪，营造山海经古风氛围
+  _bgParallaxClouds = document.createElement('canvas');
+  _bgParallaxClouds.width = CONFIG.WIDTH;
+  _bgParallaxClouds.height = CONFIG.HEIGHT;
+  const ccx = _bgParallaxClouds.getContext('2d');
+  // 4层云海波浪，越靠下越浓
+  const cloudLayers = [
+    {y: CONFIG.HEIGHT * 0.55, alpha: 0.04, color: '212,160,23', amp: 18, freq: 0.008, speed: 0},
+    {y: CONFIG.HEIGHT * 0.68, alpha: 0.06, color: '212,160,23', amp: 22, freq: 0.011, speed: 0},
+    {y: CONFIG.HEIGHT * 0.80, alpha: 0.08, color: '165,40,56', amp: 26, freq: 0.013, speed: 0},
+    {y: CONFIG.HEIGHT * 0.92, alpha: 0.10, color: '165,40,56', amp: 30, freq: 0.016, speed: 0},
+  ];
+  for(const cl of cloudLayers){
+    ccx.fillStyle = `rgba(${cl.color},${cl.alpha})`;
+    ccx.beginPath();
+    ccx.moveTo(0, cl.y);
+    for(let x = 0; x <= CONFIG.WIDTH; x += 4){
+      const y = cl.y + Math.sin(x * cl.freq) * cl.amp + Math.sin(x * cl.freq * 2.3) * cl.amp * 0.4;
+      ccx.lineTo(x, y);
+    }
+    ccx.lineTo(CONFIG.WIDTH, CONFIG.HEIGHT);
+    ccx.lineTo(0, CONFIG.HEIGHT);
+    ccx.closePath();
+    ccx.fill();
+  }
+
+  // ===== 视差背景层预绘制：远山（中远层） =====
+  // 3层山峦剪影，深紫蓝色，越远越淡
+  _bgParallaxMountains = document.createElement('canvas');
+  _bgParallaxMountains.width = CONFIG.WIDTH;
+  _bgParallaxMountains.height = CONFIG.HEIGHT;
+  const mcx = _bgParallaxMountains.getContext('2d');
+  const mountainLayers = [
+    {y: CONFIG.HEIGHT * 0.55, color: 'rgba(40,30,55,0.35)', amp: 60, freq: 0.005, seed: 1},
+    {y: CONFIG.HEIGHT * 0.68, color: 'rgba(30,25,45,0.50)', amp: 75, freq: 0.007, seed: 2},
+    {y: CONFIG.HEIGHT * 0.82, color: 'rgba(20,18,35,0.65)', amp: 90, freq: 0.009, seed: 3},
+  ];
+  for(const ml of mountainLayers){
+    mcx.fillStyle = ml.color;
+    mcx.beginPath();
+    mcx.moveTo(0, CONFIG.HEIGHT);
+    mcx.lineTo(0, ml.y);
+    for(let x = 0; x <= CONFIG.WIDTH; x += 6){
+      // 多频率叠加生成自然山形
+      const y = ml.y - Math.abs(Math.sin(x * ml.freq + ml.seed)) * ml.amp
+                       - Math.sin(x * ml.freq * 2.7 + ml.seed * 1.3) * ml.amp * 0.3;
+      mcx.lineTo(x, y);
+    }
+    mcx.lineTo(CONFIG.WIDTH, CONFIG.HEIGHT);
+    mcx.closePath();
+    mcx.fill();
+  }
 }
 function drawBackground(dt){
   _ensureBgCache();
@@ -200,6 +453,20 @@ function drawBackground(dt){
   }
   // 整体blit缓存背景（1次drawImage替代80+次stroke）
   ctx.drawImage(_bgCacheCanvas, 0, 0);
+  // ===== 视差背景层：远山+云海，根据玩家位置产生微小位移，营造场景纵深感 =====
+  // 仅在战斗/Boss状态绘制（菜单等静态界面不需要）
+  if(_bgParallaxClouds && _bgParallaxMountains && player && (gameState==='fighting'||gameState==='boss')){
+    // 视差偏移：玩家相对屏幕中心的位移 × 系数（远层慢，近层快）
+    const px = (player.x - CONFIG.WIDTH/2);
+    // 云海（最远层，慢速）：偏移 ±0.03 × WIDTH ≈ ±24px
+    const cloudOffsetX = -px * 0.04;
+    ctx.drawImage(_bgParallaxClouds, cloudOffsetX, 0);
+    ctx.drawImage(_bgParallaxClouds, cloudOffsetX + CONFIG.WIDTH, 0); // 拼接右半部分避免边缘缝隙
+    // 远山（中远层，中速）：偏移 ±0.08 × WIDTH ≈ ±48px
+    const mtnOffsetX = -px * 0.08;
+    ctx.drawImage(_bgParallaxMountains, mtnOffsetX, 0);
+    ctx.drawImage(_bgParallaxMountains, mtnOffsetX + CONFIG.WIDTH, 0);
+  }
   ctx.restore();
   // 屏幕闪光效果
   if(screenFlash&&screenFlash.life>0){
@@ -659,10 +926,10 @@ function startGame(){
   document.getElementById('upgradeOverlay').classList.add('hidden');
   showWaveAnnounce(`第 ${currentWave} 波`,'准备战斗！');
   gameTimeout(()=>{if(gameState!=='upgrade'&&gameState!=='wavePrepare')return;startWave();},1500); updateUI();
-  // 检查神话套装是否激活，显示提示
+  // 检查神话套装是否激活，显示提示（使用 gameTimeout 防止跨局残留）
   const _mythicCnt=Object.values(saveData.equippedGear).filter(g=>g&&g.rarity==='mythic').length;
   if(_mythicCnt>=4){
-    setTimeout(()=>{
+    gameTimeout(()=>{
       pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2-40,'🔥 神话套装已激活！','#ff4444',3);
       pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2,'伤害×1.6 移速×1.3 生命×1.3','#ffd970',2.5);
       pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2+30,'暴击+20% 暴伤+50% 穿透+2 吸血+3%','#ffd970',2.5);
@@ -793,12 +1060,13 @@ function triggerDeathAnimation(){
     const a=(i/20)*Math.PI*2;
     particles.push({x:px,y:py,vx:Math.cos(a)*300,vy:Math.sin(a)*300,life:0.5,maxLife:0.5,size:8,color:'#fff8e0'});
   }
-  deathAnimation={x:px,y:py,t:0,maxT:1.5,particles};
+  deathAnimation={x:px,y:py,t:0,maxT:1.6,particles};
   // 隐藏玩家
   if(player)player.alive=false;
-  // 1.2秒后触发gameOver — 使用 gameTimeout 获得跨局竞态保护（_runToken 自动校验）
+  // 1.6秒后触发gameOver — 使用 gameTimeout 获得跨局竞态保护（_runToken 自动校验）
   // 现有 clearTimeout(deathTimeout) 调用点无需修改，gameTimeout 返回的就是 setTimeout ID
-  deathTimeout=gameTimeout(()=>{deathAnimation=null; deathTimeout=null; gameOver();},1200);
+  // 延长到1.6秒是为了让"魂魄飞出+漩涡"轮回动画有充足时间呈现
+  deathTimeout=gameTimeout(()=>{deathAnimation=null; deathTimeout=null; gameOver();},1600);
 }
 function updateDeathAnimation(dt){
   if(!deathAnimation)return;
@@ -837,6 +1105,92 @@ function drawDeathAnimation(){
     ctx.beginPath(); ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2); ctx.fill();
   }
   ctx.globalAlpha=1;
+  // ===== 轮回动画：魂魄飞出+金色漩涡（progress 0.3~1.0） =====
+  // 在爆炸闪光结束后（progress>0.3）开始呈现轮回戏剧化：
+  //   - 0.3~0.5 屏幕暗红色蒙版渐入
+  //   - 0.4~0.8 玩家位置出现金色魂魄（光球向上飘起）
+  //   - 0.6~1.0 屏幕中央出现金色漩涡（旋转粒子环），魂魄被吸入
+  if(progress>=0.30){
+    const cx=CONFIG.WIDTH/2, cy=CONFIG.HEIGHT/2;
+    // 暗红色蒙版（progress 0.3→1.0 alpha 0→0.7）
+    const darkAlpha=Math.min(0.7, (progress-0.30)/0.70 * 0.7);
+    ctx.save();
+    ctx.fillStyle=`rgba(20,5,5,${darkAlpha})`;
+    ctx.fillRect(0,0,CONFIG.WIDTH,CONFIG.HEIGHT);
+    ctx.restore();
+    // 金色魂魄（从玩家位置向上飘起，progress 0.4~0.9）
+    if(progress>=0.40 && progress<0.95){
+      const sp=(progress-0.40)/0.55; // 0~1
+      const soulX=da.x + Math.sin(sp*Math.PI*2)*15; // 轻微左右摆动
+      const soulY=da.y - sp*100; // 向上飘
+      const soulAlpha=sp<0.7?1:(1-(sp-0.7)/0.3); // 后段淡出（被吸入）
+      const soulScale=0.8+sp*0.5;
+      ctx.save();
+      ctx.globalAlpha=soulAlpha;
+      // 魂魄光晕
+      const sgrad=ctx.createRadialGradient(soulX,soulY,0,soulX,soulY,20*soulScale);
+      sgrad.addColorStop(0,'rgba(255,255,255,1)');
+      sgrad.addColorStop(0.4,'rgba(255,215,0,0.85)');
+      sgrad.addColorStop(1,'rgba(255,215,0,0)');
+      ctx.fillStyle=sgrad;
+      ctx.beginPath();ctx.arc(soulX,soulY,20*soulScale,0,Math.PI*2);ctx.fill();
+      // 魂魄核心
+      ctx.fillStyle='#fff8e0';
+      ctx.beginPath();ctx.arc(soulX,soulY,5*soulScale,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+      // 魂魄拖尾粒子
+      if(Math.random()<0.5){
+        spawnParticles(soulX, soulY, '#ffd700', 1);
+      }
+    }
+    // 金色漩涡（屏幕中央，progress 0.6~1.0）
+    if(progress>=0.60){
+      const vp=(progress-0.60)/0.40; // 0~1
+      const vAlpha=vp<0.7?1:(1-(vp-0.7)/0.3);
+      const vRotate=_NOW*0.005; // 旋转角度
+      const vRadius=80+vp*60; // 漩涡半径扩大
+      ctx.save();
+      ctx.globalAlpha=vAlpha;
+      // 漩涡中心黑洞
+      const vgrad=ctx.createRadialGradient(cx,cy,0,cx,cy,vRadius*1.2);
+      vgrad.addColorStop(0,'rgba(0,0,0,0.85)');
+      vgrad.addColorStop(0.5,'rgba(60,30,10,0.6)');
+      vgrad.addColorStop(0.9,'rgba(212,160,23,0.3)');
+      vgrad.addColorStop(1,'rgba(212,160,23,0)');
+      ctx.fillStyle=vgrad;
+      ctx.beginPath();ctx.arc(cx,cy,vRadius*1.2,0,Math.PI*2);ctx.fill();
+      // 漩涡旋转粒子环（3层）
+      for(let ring=0;ring<3;ring++){
+        const r=vRadius*(0.6+ring*0.2);
+        const segs=24+ring*4;
+        for(let i=0;i<segs;i++){
+          const a=(i/segs)*Math.PI*2+vRotate*(1+ring*0.3);
+          const px=cx+Math.cos(a)*r;
+          const py=cy+Math.sin(a)*r;
+          const sz=2+ring;
+          ctx.fillStyle=`rgba(255,${215-ring*30},${100+ring*40},${0.7-ring*0.15})`;
+          ctx.beginPath();ctx.arc(px,py,sz,0,Math.PI*2);ctx.fill();
+        }
+      }
+      // 漩涡中心金色光点（吸引魂魄）
+      ctx.fillStyle=`rgba(255,255,255,${vAlpha})`;
+      ctx.beginPath();ctx.arc(cx,cy,8,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }
+  }
+}
+// 死亡复盘条形图：横向条形图直观展示本局各项数据
+function _genRecapBar(label, value, max, color){
+  const v=Number(value)||0;
+  const m=Math.max(0.0001, Number(max)||1);
+  const pct=Math.min(100, Math.max(2, (v/m)*100)); // 最小2%保证可见
+  return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:10px">
+    <div style="width:78px;color:#b0a090;text-align:right;letter-spacing:0.3px">${label}</div>
+    <div style="flex:1;height:10px;background:rgba(0,0,0,0.5);border-radius:5px;overflow:hidden;border:1px solid rgba(255,255,255,0.08)">
+      <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,${color}aa,${color});border-radius:5px;box-shadow:0 0 6px ${color}88;transition:width 0.8s ease"></div>
+    </div>
+    <div style="width:50px;color:${color};font-weight:bold;text-align:right">${v}</div>
+  </div>`;
 }
 // 死亡提战力建议：根据死因/本局表现给出针对性提示
 function generateDeathTip(){
@@ -909,6 +1263,510 @@ function generateDeathTip(){
     <div style="color:#ffd700;font-size:13px;font-weight:bold;margin-bottom:6px;letter-spacing:1px">💡 提战力小贴士</div>
     ${showTips.map(t=>`<div style="color:#d4c5a0;font-size:12px;line-height:1.7;margin:3px 0;word-break:break-word">▸ ${t}</div>`).join('')}
   </div>`;
+}
+
+// ==================== 宝箱系统 ====================
+// 局末按表现发放宝箱：铜/银/金/紫/橙 5档
+// 品质判定：基于本局得分、Boss击杀数、模式（试炼/无尽/冒险）、是否通关
+// 开箱时机：主菜单点击"📦 宝箱"按钮，依次开箱（带动画）
+const CHEST_TYPES = {
+  bronze: { name:'铜宝箱', color:'#cd7f32', glow:'#a0522d', icon:'🥉', rewards:{score:[50,150],   gearChance:0,    gearRarity:null,        talent:0} },
+  silver: { name:'银宝箱', color:'#c0c0c0', glow:'#d8d8d8', icon:'🥈', rewards:{score:[150,400],  gearChance:0.15, gearRarity:'rare',      talent:0} },
+  gold:   { name:'金宝箱', color:'#ffd700', glow:'#ffaa00', icon:'🥇', rewards:{score:[400,1000], gearChance:0.35, gearRarity:'epic',      talent:0} },
+  purple: { name:'紫宝箱', color:'#bc8cff', glow:'#9d5cff', icon:'🔮', rewards:{score:[1000,2500],gearChance:0.60, gearRarity:'legendary', talent:1} },
+  orange: { name:'橙宝箱', color:'#ff6b35', glow:'#ff8c00', icon:'🎃', rewards:{score:[2500,5000],gearChance:1.00, gearRarity:'epic', mythicChance:0.30, talent:3} },
+};
+const CHEST_QUALITY_ORDER = ['bronze','silver','gold','purple','orange'];
+
+// 根据本局表现判定宝箱品质
+function evaluateChestQuality(rs, wasTrial, endlessWave, currentLevel, bossTrialIndex){
+  if(!rs) return 'bronze';
+  const sc = rs.goldEarned || 0;
+  const bk = rs.bossKills || 0;
+  // 橙箱：通关弑神试炼 OR 极高表现
+  if(wasTrial && saveData.difficulty==='godslayer' && typeof trialBossOrder!=='undefined' && bossTrialIndex>=trialBossOrder.length) return 'orange';
+  if(sc>=10000 || bk>=5) return 'orange';
+  // 紫箱：通关任意难度试炼 OR 高分 OR 无尽10波+
+  if(wasTrial && typeof trialBossOrder!=='undefined' && bossTrialIndex>=trialBossOrder.length) return 'purple';
+  if(endlessWave>=10) return 'purple';
+  if(sc>=5000 || bk>=3) return 'purple';
+  // 金箱：中高分
+  if(sc>=2000 || bk>=2) return 'gold';
+  // 银箱：基础表现
+  if(sc>=500 || bk>=1) return 'silver';
+  // 铜箱：参与就给
+  return 'bronze';
+}
+
+// 在局末（gameOver）调用：根据本局表现生成宝箱并存入 pendingChests
+function grantRunChest(){
+  if(typeof runStats==='undefined' || !runStats || !runStats.startTime) return null;
+  const quality = evaluateChestQuality(runStats, _lastRunWasTrial, endlessWave, currentLevel, bossTrialIndex);
+  const chest = {
+    quality,
+    source: _lastRunWasTrial ? 'trial' : (endlessMode ? 'endless' : 'run'),
+    ts: Date.now(),
+    runScore: runStats.goldEarned || 0,
+    runBossKills: runStats.bossKills || 0,
+  };
+  if(!saveData.pendingChests) saveData.pendingChests = [];
+  saveData.pendingChests.push(chest);
+  // 限制最多8个未开宝箱，防止囤积：超限时自动开掉最旧的（直接发奖励到积分）
+  while(saveData.pendingChests.length > 8){
+    const old = saveData.pendingChests.shift();
+    const r = CHEST_TYPES[old.quality].rewards;
+    const bonus = Math.floor(r.score[0] + Math.random()*(r.score[1]-r.score[0]));
+    saveData.totalScore = (saveData.totalScore||0) + bonus;
+  }
+  saveSave();
+  return chest;
+}
+
+// 开箱抽奖：返回奖励详情并发放到存档
+function _openChestRoll(chest){
+  const def = CHEST_TYPES[chest.quality];
+  const r = def.rewards;
+  const scoreGain = Math.floor(r.score[0] + Math.random()*(r.score[1]-r.score[0]));
+  const result = { quality: chest.quality, score: scoreGain, gear: null, talent: r.talent || 0 };
+  // 装备奖励
+  if(r.gearRarity && Math.random() < r.gearChance){
+    let rarity = r.gearRarity;
+    // 橙箱有概率出神话
+    if(r.mythicChance && Math.random() < r.mythicChance){
+      rarity = 'mythic';
+    }
+    const slot = GEAR_SLOTS[randInt(0, GEAR_SLOTS.length-1)];
+    result.gear = generateGear(slot, rarity);
+  }
+  // 发放奖励
+  saveData.totalScore = (saveData.totalScore||0) + scoreGain;
+  if(result.talent > 0){
+    saveData.talentPoints = (saveData.talentPoints||0) + result.talent;
+  }
+  if(result.gear){
+    saveData.gearBag.push(result.gear);
+  }
+  // 更新统计
+  if(!saveData.chestHistory) saveData.chestHistory = {bronze:0, silver:0, gold:0, purple:0, orange:0};
+  saveData.chestHistory[chest.quality] = (saveData.chestHistory[chest.quality]||0) + 1;
+  saveSave();
+  // 每日目标：开箱进度更新
+  _updateDailyGoalsOnChestOpen();
+  return result;
+}
+
+// 开箱动画 overlay
+let _chestOpenState = null;
+let _chestStylesInjected = false;
+function _ensureChestStyles(){
+  if(_chestStylesInjected) return;
+  _chestStylesInjected = true;
+  const style = document.createElement('style');
+  style.textContent = `
+.chest-container{position:relative;width:200px;height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.chest-glow{position:absolute;width:280px;height:280px;border-radius:50%;pointer-events:none;filter:blur(8px)}
+.chest-glow-idle{animation:chestGlowIdle 2.4s ease-in-out infinite}
+.chest-glow-pulse{animation:chestGlowPulse 0.3s ease-in-out infinite}
+@keyframes chestGlowIdle{0%,100%{transform:scale(1);opacity:0.6}50%{transform:scale(1.15);opacity:0.9}}
+@keyframes chestGlowPulse{0%,100%{transform:scale(1);opacity:0.7}50%{transform:scale(1.3);opacity:1}}
+.chest-body{position:relative;width:160px;height:140px;border:3px solid #cd7f32;border-radius:12px 12px 8px 8px;overflow:visible;z-index:2}
+.chest-lid{position:absolute;top:0;left:-3px;right:-3px;height:50px;border-radius:12px 12px 0 0;box-shadow:0 4px 8px rgba(0,0,0,0.4);transform-origin:center bottom;transition:transform 0.3s}
+.chest-base{position:absolute;bottom:0;left:0;right:0;height:95px;border-radius:0 0 8px 8px}
+.chest-lock{position:absolute;top:38px;left:50%;transform:translateX(-50%);width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;z-index:3}
+.chest-label{margin-top:14px;font-size:16px;font-weight:bold;letter-spacing:2px;font-family:STKaiti,KaiTi,serif}
+.chest-shake{animation:chestShake 0.08s ease-in-out infinite}
+@keyframes chestShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-1deg)}75%{transform:translateX(4px) rotate(1deg)}}
+.chest-burst{animation:chestBurst 0.6s ease-out forwards}
+@keyframes chestBurst{0%{transform:scale(1)}40%{transform:scale(1.15)}70%{transform:scale(1.3)}100%{transform:scale(1.5);opacity:0}}
+.chest-burst-flash{position:absolute;width:400px;height:400px;border-radius:50%;pointer-events:none;animation:chestFlash 0.6s ease-out forwards;z-index:4}
+@keyframes chestFlash{0%{opacity:0;transform:scale(0.3)}30%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(2)}}
+.chest-burst-body{animation:chestBodyBurst 0.5s ease-out forwards}
+@keyframes chestBodyBurst{0%{transform:scale(1)}100%{transform:scale(1.4);opacity:0.3}}
+.chest-lid-fly{animation:chestLidFly 0.6s ease-out forwards}
+@keyframes chestLidFly{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(-120px) rotate(-25deg);opacity:0}}
+.chest-lock-fly{animation:chestLockFly 0.5s ease-out forwards}
+@keyframes chestLockFly{0%{transform:translateX(-50%) translateY(0)}100%{transform:translateX(-50%) translateY(-80px);opacity:0}}
+.chest-rays{position:absolute;width:500px;height:500px;border-radius:50%;pointer-events:none;animation:chestRays 0.8s linear forwards;z-index:1;opacity:0}
+@keyframes chestRays{0%{opacity:0;transform:scale(0.2) rotate(0)}30%{opacity:0.8}100%{opacity:0;transform:scale(2) rotate(180deg)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 12px rgba(255,215,0,0.4)}50%{box-shadow:0 0 24px rgba(255,215,0,0.8)}}
+@keyframes cardEnter{0%{opacity:0;transform:translateY(20px) scale(0.95)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes titleFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+`;
+  document.head.appendChild(style);
+}
+function openChestOverlay(){
+  if(!saveData.pendingChests || saveData.pendingChests.length===0){
+    _showSaveToast('暂无待开宝箱，多打几局就有了');
+    return;
+  }
+  _ensureChestStyles();
+  const chest = saveData.pendingChests[0];
+  let ov = document.getElementById('chestOverlay');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'chestOverlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.88);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px;box-sizing:border-box;overflow-y:auto;-webkit-overflow-scrolling:touch';
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML = '';
+  ov.style.display = 'flex';
+  _chestOpenState = { chest, phase: 'idle', result: null };
+  _renderChestOverlay();
+}
+
+function _renderChestOverlay(){
+  const ov = document.getElementById('chestOverlay');
+  if(!ov || !_chestOpenState) return;
+  const st = _chestOpenState;
+  const def = CHEST_TYPES[st.chest.quality];
+  const remaining = (saveData.pendingChests||[]).length;
+  const srcLabel = st.chest.source==='trial'?'Boss试炼':st.chest.source==='endless'?'无尽模式':'冒险模式';
+
+  if(st.phase === 'idle' || st.phase === 'shaking'){
+    const shakeClass = st.phase === 'shaking' ? ' chest-shake' : '';
+    const glowClass = st.phase === 'shaking' ? 'chest-glow-pulse' : 'chest-glow-idle';
+    ov.innerHTML = `
+      <div style="color:#ffd700;font-size:13px;letter-spacing:2px;margin-bottom:10px;text-shadow:0 0 8px rgba(255,215,0,0.5)">📦 待开宝箱 ${remaining} 个</div>
+      <div style="color:#8b949e;font-size:11px;margin-bottom:20px">来源：${srcLabel} · 本局 ${st.chest.runScore||0}分 / ${st.chest.runBossKills||0}Boss</div>
+      <div class="chest-container${shakeClass}" id="chestBox">
+        <div class="chest-glow ${glowClass}" style="background:radial-gradient(circle, ${def.glow}88 0%, transparent 70%)"></div>
+        <div class="chest-body" style="border-color:${def.color};box-shadow:0 0 40px ${def.glow}aa, inset 0 0 20px ${def.color}44">
+          <div class="chest-lid" style="background:linear-gradient(180deg, ${def.color}, ${def.glow})"></div>
+          <div class="chest-base" style="background:linear-gradient(180deg, ${def.glow}, ${def.color})"></div>
+          <div class="chest-lock" style="background:${def.color};box-shadow:0 0 12px ${def.glow}">${def.icon}</div>
+        </div>
+        <div class="chest-label" style="color:${def.color};text-shadow:0 0 8px ${def.glow}">${def.name}</div>
+      </div>
+      ${st.phase==='idle' ? `<button class="action-btn" id="chestOpenBtn" style="margin-top:28px;background:linear-gradient(135deg,${def.color},${def.glow});font-size:16px;padding:14px 36px;min-height:48px;animation:pulseGlow 1.5s ease-in-out infinite">✨ 点击开箱</button>` : `<div style="margin-top:28px;color:${def.color};font-size:13px;letter-spacing:2px;animation:pulseGlow 0.6s ease-in-out infinite">开箱中...</div>`}
+      <button class="sec-btn" id="chestSkipBtn" style="margin-top:14px;font-size:12px;padding:8px 18px;min-height:36px">稍后再开</button>
+    `;
+    if(st.phase==='idle'){
+      const openBtn = document.getElementById('chestOpenBtn');
+      if(openBtn) _bindTap(openBtn, _triggerChestOpen);
+    }
+    const skipBtn = document.getElementById('chestSkipBtn');
+    if(skipBtn) _bindTap(skipBtn, _closeChestOverlay);
+  } else if(st.phase === 'opening'){
+    // 开箱爆裂动画
+    ov.innerHTML = `
+      <div style="color:#ffd700;font-size:13px;letter-spacing:2px;margin-bottom:14px">📦 开箱中...</div>
+      <div class="chest-container chest-burst" id="chestBox">
+        <div class="chest-burst-flash" style="background:radial-gradient(circle, #fff 0%, ${def.glow} 30%, transparent 70%)"></div>
+        <div class="chest-body chest-burst-body" style="border-color:${def.color}">
+          <div class="chest-lid chest-lid-fly" style="background:linear-gradient(180deg, ${def.color}, ${def.glow})"></div>
+          <div class="chest-base" style="background:linear-gradient(180deg, ${def.glow}, ${def.color});opacity:0.5"></div>
+          <div class="chest-lock chest-lock-fly">${def.icon}</div>
+        </div>
+        <div class="chest-rays" style="background:conic-gradient(from 0deg, transparent, ${def.glow}aa, transparent, ${def.color}aa, transparent, ${def.glow}aa, transparent, ${def.color}aa, transparent)"></div>
+      </div>
+    `;
+  } else if(st.phase === 'reward'){
+    // 显示奖励
+    const r = st.result;
+    let gearHtml = '';
+    if(r.gear){
+      const gr = GEAR_RARITIES[r.gear.rarity];
+      gearHtml = `<div style="background:rgba(22,27,34,0.9);border:2px solid ${gr.color};border-radius:10px;padding:12px 16px;margin:10px 0;box-shadow:0 0 20px ${gr.color}66;animation:cardEnter 0.6s">
+        <div style="color:${gr.color};font-size:12px;font-weight:bold;letter-spacing:1px;margin-bottom:4px">${GEAR_SLOT_ICONS[r.gear.slot]} ${gr.name}装备</div>
+        <div style="color:#e0d8c8;font-size:13px;font-weight:bold;margin-bottom:4px">${r.gear.name}</div>
+        <div style="font-size:11px;color:#c9d1d9">${r.gear.stats.map(s=>`<div>${s.icon} ${s.name} +${s.value}</div>`).join('')}</div>
+        ${r.gear.specialAffix?`<div style="color:${gr.color};font-size:11px;margin-top:6px">✦ ${r.gear.specialAffix.name}：${r.gear.specialAffix.desc}</div>`:''}
+      </div>`;
+    }
+    let talentHtml = r.talent > 0 ? `<div style="color:#ffd700;font-size:18px;font-weight:bold;margin:6px 0;text-shadow:0 0 10px rgba(255,215,0,0.6)">⭐ +${r.talent} 天赋点</div>` : '';
+
+    ov.innerHTML = `
+      <div style="color:${def.color};font-size:14px;letter-spacing:2px;margin-bottom:8px;text-shadow:0 0 8px ${def.glow}">${def.icon} ${def.name} 已开启</div>
+      <div style="background:rgba(22,27,34,0.85);border:1px solid ${def.color}66;border-radius:14px;padding:20px 24px;max-width:360px;width:100%;text-align:center;box-shadow:0 0 30px ${def.glow}66">
+        <div style="color:#ffd700;font-size:36px;font-weight:bold;margin:6px 0;text-shadow:0 0 15px rgba(255,215,0,0.7);animation:titleFloat 2s ease-in-out infinite">+${r.score}</div>
+        <div style="color:#8b949e;font-size:12px;margin-bottom:8px">🪙 积分</div>
+        ${talentHtml}
+        ${gearHtml}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;justify-content:center">
+        ${remaining > 1 ? `<button class="action-btn" id="chestNextBtn" style="background:linear-gradient(135deg,${def.color},${def.glow});font-size:15px;padding:12px 28px;min-height:44px">📦 继续开箱 (${remaining-1})</button>` : ''}
+        <button class="sec-btn" id="chestDoneBtn" style="font-size:14px;padding:12px 24px;min-height:44px">完成</button>
+      </div>
+    `;
+    const nextBtn = document.getElementById('chestNextBtn');
+    if(nextBtn) _bindTap(nextBtn, _openNextChest);
+    const doneBtn = document.getElementById('chestDoneBtn');
+    if(doneBtn) _bindTap(doneBtn, _closeChestOverlay);
+  }
+}
+
+function _triggerChestOpen(){
+  if(!_chestOpenState || _chestOpenState.phase !== 'idle') return;
+  _chestOpenState.phase = 'shaking';
+  _renderChestOverlay();
+  // 抖动0.8秒后进入爆裂
+  setTimeout(()=>{
+    if(!_chestOpenState || _chestOpenState.phase !== 'shaking') return;
+    _chestOpenState.phase = 'opening';
+    _renderChestOverlay();
+    // 爆裂0.6秒后显示奖励
+    setTimeout(()=>{
+      if(!_chestOpenState || _chestOpenState.phase !== 'opening') return;
+      const chest = _chestOpenState.chest;
+      const result = _openChestRoll(chest);
+      _chestOpenState.result = result;
+      _chestOpenState.phase = 'reward';
+      // 从 pendingChests 中移除已开的宝箱
+      if(saveData.pendingChests && saveData.pendingChests.length > 0){
+        saveData.pendingChests.shift();
+        saveSave();
+      }
+      _renderChestOverlay();
+      // 开箱音效（复用 bossHit 增强反馈）
+      if(typeof playSound === 'function') playSound('bossHit');
+    }, 600);
+  }, 800);
+}
+
+function _openNextChest(){
+  _chestOpenState = null;
+  if(!saveData.pendingChests || saveData.pendingChests.length === 0){
+    _closeChestOverlay();
+    _showSaveToast('所有宝箱已开完');
+    return;
+  }
+  openChestOverlay();
+}
+
+function _closeChestOverlay(){
+  _chestOpenState = null;
+  const ov = document.getElementById('chestOverlay');
+  if(ov){
+    ov.style.display = 'none';
+    ov.innerHTML = '';
+  }
+  // 刷新主菜单（如果在主菜单状态）
+  if(gameState === 'menu' && typeof showMainMenu === 'function'){
+    showMainMenu();
+  }
+}
+
+// ==================== 每日目标系统 ====================
+// 每天3个目标，跨天重置；完成单个得积分，全部完成额外奖励
+const DAILY_GOAL_POOL = [
+  { id:'kill_enemies_30', type:'kill_enemies', target:30, name:'击杀 30 只小怪', reward:{score:100} },
+  { id:'kill_enemies_50', type:'kill_enemies', target:50, name:'击杀 50 只小怪', reward:{score:150} },
+  { id:'kill_enemies_80', type:'kill_enemies', target:80, name:'击杀 80 只小怪', reward:{score:200} },
+  { id:'kill_boss_1',  type:'kill_bosses', target:1, name:'击败 1 个 Boss', reward:{score:150} },
+  { id:'kill_boss_2',  type:'kill_bosses', target:2, name:'击败 2 个 Boss', reward:{score:250} },
+  { id:'kill_boss_3',  type:'kill_bosses', target:3, name:'击败 3 个 Boss', reward:{score:400} },
+  { id:'score_500',   type:'score_once', target:500, name:'单局得到 500 分', reward:{score:100} },
+  { id:'score_1500',  type:'score_once', target:1500, name:'单局得到 1500 分', reward:{score:200} },
+  { id:'score_3000',  type:'score_once', target:3000, name:'单局得到 3000 分', reward:{score:300} },
+  { id:'combo_10', type:'combo_once', target:10, name:'单局 10 连击', reward:{score:100} },
+  { id:'combo_20', type:'combo_once', target:20, name:'单局 20 连击', reward:{score:200} },
+  { id:'reach_lv3', type:'reach_level', target:3, name:'到达第 3 关', reward:{score:150} },
+  { id:'reach_lv5', type:'reach_level', target:5, name:'到达第 5 关', reward:{score:300} },
+  { id:'open_chest_1', type:'open_chests', target:1, name:'开 1 个宝箱', reward:{score:50} },
+  { id:'open_chest_3', type:'open_chests', target:3, name:'开 3 个宝箱', reward:{score:150} },
+  { id:'trial_1', type:'trial_count', target:1, name:'完成 1 次试炼', reward:{score:200} },
+  { id:'endless_3', type:'endless_wave', target:3, name:'无尽达到 3 波', reward:{score:200} },
+  { id:'endless_5', type:'endless_wave', target:5, name:'无尽达到 5 波', reward:{score:300} },
+];
+const DAILY_ALL_COMPLETE_BONUS = { score:500, chest:'gold' };
+
+// _getTodayStr() 复用签到系统中已有的实现（下方定义）
+// 刷新每日目标：跨天时重新生成3个目标
+function _refreshDailyGoals(){
+  const today = _getTodayStr();
+  if(!saveData.dailyGoals || saveData.dailyGoals.date !== today){
+    // 从目标池中随机选3个（不同type避免重复）
+    const byType = {};
+    for(const g of DAILY_GOAL_POOL){
+      if(!byType[g.type]) byType[g.type] = [];
+      byType[g.type].push(g);
+    }
+    const types = Object.keys(byType);
+    // 简单洗牌
+    for(let i=types.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [types[i],types[j]]=[types[j],types[i]];
+    }
+    const selected = [];
+    for(const t of types){
+      if(selected.length>=3) break;
+      const arr = byType[t];
+      const pick = arr[Math.floor(Math.random()*arr.length)];
+      selected.push({ id:pick.id, type:pick.type, target:pick.target, name:pick.name, reward:pick.reward, progress:0, claimed:false });
+    }
+    saveData.dailyGoals = { date: today, goals: selected, allClaimed: false };
+    saveSave();
+  }
+}
+
+// 更新每日目标进度（在局末 gameOver 中批量更新）
+function _updateDailyGoalsOnRunEnd(rs, wasTrial, endlessWave, currentLevel){
+  if(!saveData.dailyGoals || !saveData.dailyGoals.goals) return;
+  let changed = false;
+  for(const g of saveData.dailyGoals.goals){
+    if(g.claimed) continue;
+    const oldP = g.progress;
+    switch(g.type){
+      case 'kill_enemies':
+        g.progress = Math.min(g.target, g.progress + (rs.kills||0));
+        break;
+      case 'kill_bosses':
+        g.progress = Math.min(g.target, g.progress + (rs.bossKills||0));
+        break;
+      case 'score_once':
+        g.progress = Math.min(g.target, Math.max(g.progress, rs.goldEarned||0));
+        break;
+      case 'combo_once':
+        g.progress = Math.min(g.target, Math.max(g.progress, rs.maxCombo||0));
+        break;
+      case 'reach_level':
+        g.progress = Math.min(g.target, Math.max(g.progress, currentLevel||0));
+        break;
+      case 'trial_count':
+        if(wasTrial) g.progress = Math.min(g.target, g.progress + 1);
+        break;
+      case 'endless_wave':
+        g.progress = Math.min(g.target, Math.max(g.progress, endlessWave||0));
+        break;
+    }
+    if(g.progress !== oldP) changed = true;
+  }
+  if(changed) saveSave();
+}
+
+// 开箱时更新开箱进度
+function _updateDailyGoalsOnChestOpen(){
+  if(!saveData.dailyGoals || !saveData.dailyGoals.goals) return;
+  let changed = false;
+  for(const g of saveData.dailyGoals.goals){
+    if(g.claimed) continue;
+    if(g.type === 'open_chests'){
+      g.progress = Math.min(g.target, g.progress + 1);
+      changed = true;
+    }
+  }
+  if(changed) saveSave();
+}
+
+// 领取单个目标奖励
+function claimDailyGoal(idx){
+  if(!saveData.dailyGoals || !saveData.dailyGoals.goals) return;
+  const g = saveData.dailyGoals.goals[idx];
+  if(!g || g.claimed) return;
+  if(g.progress < g.target){
+    _showSaveToast('目标未完成');
+    return;
+  }
+  g.claimed = true;
+  const r = g.reward || {};
+  if(r.score){
+    saveData.totalScore = (saveData.totalScore||0) + r.score;
+  }
+  if(r.chest){
+    if(!saveData.pendingChests) saveData.pendingChests = [];
+    saveData.pendingChests.push({ quality:r.chest, source:'daily', ts:Date.now(), runScore:0, runBossKills:0 });
+  }
+  if(r.talent){
+    saveData.talentPoints = (saveData.talentPoints||0) + r.talent;
+  }
+  saveSave();
+  _showSaveToast(`✦ 领取 ${r.score||0} 积分${r.chest?` + ${CHEST_TYPES[r.chest].name}`:''}${r.talent?` + ${r.talent}天赋点`:''}`);
+  // 检查是否全部领取
+  _checkDailyAllClaimed();
+  // 刷新主菜单
+  if(gameState === 'menu' && typeof showMainMenu === 'function'){
+    showMainMenu();
+  }
+}
+
+// 领取全部完成额外奖励
+function claimDailyAllBonus(){
+  if(!saveData.dailyGoals || saveData.dailyGoals.allClaimed) return;
+  // 检查是否所有目标都已领取
+  const allClaimed = saveData.dailyGoals.goals.every(g => g.claimed);
+  if(!allClaimed){
+    _showSaveToast('请先领取所有目标奖励');
+    return;
+  }
+  saveData.dailyGoals.allClaimed = true;
+  const b = DAILY_ALL_COMPLETE_BONUS;
+  saveData.totalScore = (saveData.totalScore||0) + b.score;
+  if(b.chest){
+    if(!saveData.pendingChests) saveData.pendingChests = [];
+    saveData.pendingChests.push({ quality:b.chest, source:'daily_all', ts:Date.now(), runScore:0, runBossKills:0 });
+  }
+  saveSave();
+  _showSaveToast(`🎉 全部完成！+${b.score} 积分 + ${CHEST_TYPES[b.chest].name}`);
+  if(gameState === 'menu' && typeof showMainMenu === 'function'){
+    showMainMenu();
+  }
+}
+
+function _checkDailyAllClaimed(){
+  if(!saveData.dailyGoals) return;
+  // allClaimed 标记仅在领取额外奖励后设为 true，这里只检查是否可领取
+  // 实际"是否可领额外奖励"通过 goals.every(g=>g.claimed) 判断
+}
+
+// 渲染主菜单中的每日目标卡片
+function _renderDailyGoals(){
+  _refreshDailyGoals();
+  if(!saveData.dailyGoals || !saveData.dailyGoals.goals) return '';
+  const dg = saveData.dailyGoals;
+  const allDone = dg.goals.every(g => g.progress >= g.target);
+  const allClaimed = dg.goals.every(g => g.claimed);
+  const goalsHtml = dg.goals.map((g, i) => {
+    const pct = Math.min(100, (g.progress / g.target) * 100);
+    const done = g.progress >= g.target;
+    const claimed = g.claimed;
+    const rewardStr = `${g.reward.score?`🪙${g.reward.score}`:''}${g.reward.chest?` +${CHEST_TYPES[g.reward.chest].icon}`:''}${g.reward.talent?` ⭐${g.reward.talent}`:''}`;
+    let btnHtml = '';
+    if(claimed){
+      btnHtml = `<span style="color:#3fb950;font-size:11px;font-weight:bold">✓ 已领取</span>`;
+    } else if(done){
+      btnHtml = `<button class="sec-btn" id="dailyGoalClaimBtn_${i}" style="font-size:11px;padding:4px 12px;min-height:28px;border-color:#ffd700;color:#ffd700;background:rgba(255,215,0,0.1)">领取 ${rewardStr}</button>`;
+    } else {
+      btnHtml = `<span style="color:#8b949e;font-size:11px">${rewardStr}</span>`;
+    }
+    const barColor = done ? '#3fb950' : '#ffd700';
+    return `<div style="background:rgba(22,27,34,0.7);border:1px solid ${done?'rgba(63,185,80,0.4)':'rgba(255,215,0,0.2)'};border-radius:6px;padding:6px 10px;margin:4px 0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="color:${done?'#3fb950':'#e0d8c8'};font-size:11px">${done?'✓ ':''}${g.name}</span>
+        ${btnHtml}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="flex:1;height:6px;background:#1a1f2e;border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${barColor},${barColor}cc);border-radius:3px;transition:width 0.4s;box-shadow:0 0 4px ${barColor}88"></div>
+        </div>
+        <span style="color:${done?'#3fb950':'#8b949e'};font-size:10px;min-width:48px;text-align:right">${g.progress}/${g.target}</span>
+      </div>
+    </div>`;
+  }).join('');
+  let bonusHtml = '';
+  if(allDone && !allClaimed){
+    bonusHtml = `<button class="action-btn" id="dailyAllBonusBtn" style="margin-top:6px;background:linear-gradient(135deg,#ffd700,#ff8c42);font-size:12px;padding:8px 16px;min-height:36px;animation:pulseGlow 1.5s ease-in-out infinite">🎉 领取全部完成奖励 +${DAILY_ALL_COMPLETE_BONUS.score}积分 +${CHEST_TYPES[DAILY_ALL_COMPLETE_BONUS.chest].icon}${CHEST_TYPES[DAILY_ALL_COMPLETE_BONUS.chest].name}</button>`;
+  } else if(allClaimed){
+    bonusHtml = `<div style="text-align:center;color:#3fb950;font-size:11px;margin-top:6px">✓ 今日全部完成，明日刷新</div>`;
+  }
+  return `<details style="margin:4px 0;padding:6px 10px;background:rgba(22,27,34,0.6);border:1px solid rgba(255,215,0,0.25);border-radius:8px" ${allDone&&!allClaimed?'open':''}>
+    <summary style="cursor:pointer;color:#ffd700;font-size:12px;letter-spacing:1px">🎯 每日目标 ${allClaimed?'✓':`(${dg.goals.filter(g=>g.claimed).length}/${dg.goals.length})`}</summary>
+    <div style="margin-top:6px">${goalsHtml}${bonusHtml}</div>
+  </details>`;
+}
+
+// 绑定每日目标按钮事件（在 showMainMenu 末尾调用）
+function _bindDailyGoalButtons(){
+  if(!saveData.dailyGoals || !saveData.dailyGoals.goals) return;
+  for(let i=0;i<saveData.dailyGoals.goals.length;i++){
+    const g = saveData.dailyGoals.goals[i];
+    if(!g.claimed && g.progress >= g.target){
+      const btn = document.getElementById(`dailyGoalClaimBtn_${i}`);
+      if(btn) _bindTap(btn, ()=>claimDailyGoal(i));
+    }
+  }
+  // 全部完成奖励按钮：只要按钮存在就绑定（claimDailyAllBonus 内部会校验领取条件）
+  const allBtn = document.getElementById('dailyAllBonusBtn');
+  if(allBtn) _bindTap(allBtn, claimDailyAllBonus);
 }
 function gameOver(){
   // 防重入：Boss 死亡触发的 onBossDefeated 与玩家死亡的 deathTimeout 可能同时调用 gameOver
@@ -1008,6 +1866,10 @@ function gameOver(){
   }
   // 检查成就解锁
   const newlyUnlocked=checkAchievements();
+  // 宝箱系统：根据本局表现发放宝箱（在成就检查后，确保 difficultyCleared 已设置）
+  const _grantedChest = grantRunChest();
+  // 每日目标系统：更新本局相关进度
+  _updateDailyGoalsOnRunEnd(runStats, wasTrial, endlessWave, currentLevel);
   // 牧场生蛋
   const newEggs=ranchLayEggs();
   // 成就解锁会修改saveData.totalScore（奖励积分），需补一次saveSave避免玩家关闭浏览器丢失
@@ -1053,6 +1915,16 @@ function gameOver(){
             <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px"><span style="color:#8b949e">🔥 最高连击</span><br><b style="color:#ffd700">${rs.maxCombo}</b></div>
             <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px"><span style="color:#8b949e">⭐ 经验获得</span><br><b style="color:#bc8cff">${rs.xpEarned} XP</b></div>
           </div>
+          <div style="background:rgba(13,17,23,0.7);padding:8px 10px;border-radius:5px;margin-bottom:6px">
+            <div style="color:#ffd700;font-size:11px;margin-bottom:6px;letter-spacing:1px">📈 战斗数据可视化</div>
+            ${_genRecapBar('⚔ 击杀', rs.kills, 50, '#3fb950')}
+            ${_genRecapBar('👑 Boss击杀', rs.bossKills, 5, '#bc8cff')}
+            ${_genRecapBar('🔥 最高连击', rs.maxCombo, 30, '#ffd700')}
+            ${_genRecapBar('⭐ 经验获得', rs.xpEarned, 500, '#79c0ff')}
+            <div style="margin-top:8px;color:#8b949e;font-size:10px;letter-spacing:0.5px">💥 输出 vs 承伤对比</div>
+            ${_genRecapBar('输出伤害', Math.round(rs.damageDealt), Math.max(rs.damageDealt, rs.damageTaken, 1000), '#ff6b6b')}
+            ${_genRecapBar('承受伤害', Math.round(rs.damageTaken), Math.max(rs.damageDealt, rs.damageTaken, 1000), '#f85149')}
+          </div>
           <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px;margin-bottom:6px">
             <div style="color:#ffd700;font-size:11px;margin-bottom:3px">🎒 装备Build</div>
             <div>${_equipBuild}</div>
@@ -1082,7 +1954,20 @@ function gameOver(){
       </div>
       <div style="color:#8b949e;font-size:11px;text-align:center;margin-top:6px">下次开局前记得装备上！</div>
     </div>` : '';
-  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:10px;padding-top:24px"><h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:28px;margin:4px 0">游戏结束</h1><div class="deco-line" style="margin:4px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>${wasTrial?'<p style="color:#bc8cff;font-size:13px;margin:4px 0">Boss试炼结束</p>':endlessMode?`<p style="color:#daa520;font-size:13px;margin:4px 0">♾️ 无尽模式 - 第 ${endlessWave} 波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' <span style="color:#ffd700">🏆 新纪录!</span>':''}</p>`:`<p style="font-size:13px;margin:4px 0">你到达了第 ${currentLevel} 关 第 ${currentWave} 波</p>`}<div id="finalScore" class="card-enter" style="font-size:48px">${score}</div><p class="subtitle" style="margin:2px 0">本局得分</p>${achHtml}${firstBonusHtml}${tipHtml}${recapHtml}<div style="display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap"><div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div><div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>${newEggs>0?`<div class="stat-pill" style="animation-delay:1s;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}</div><div style="background:rgba(22,27,34,0.7);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:8px 12px;margin:4px auto;max-width:340px;text-align:center;font-size:12px"><span style="color:#ffd700">🎖️ 训练等级 Lv.${(saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1}</span><br><span style="color:#8b949e">距下个天赋点：还差 <b style="color:#ffd970">${1000-((saveData.totalXp||0)%1000)} XP</b></span></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:6px;padding:12px 10px calc(12px + env(safe-area-inset-bottom, 0px));position:sticky;bottom:0;background:linear-gradient(180deg,transparent 0%,rgba(13,10,5,0.92) 25%);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:5"><button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle}">${replayBtnText}</button><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="sec-btn" id="backToMenuBtn" style="font-size:14px;padding:12px 24px;min-height:44px">🏠 返回主菜单</button><button class="sec-btn" id="shareScoreBtn" style="font-size:14px;padding:12px 24px;min-height:44px;border-color:#bc8cff;color:#bc8cff">📤 分享战绩</button></div><div class="subtitle" style="margin-top:2px;font-size:11px">按 R 键快速重新开始</div></div></div>`;
+  // 宝箱获得提示（局末按表现发放）
+  let chestNoticeHtml = '';
+  if(_grantedChest){
+    const _cd = CHEST_TYPES[_grantedChest.quality];
+    const _totalPending = (saveData.pendingChests||[]).length;
+    chestNoticeHtml = `
+      <div style="background:linear-gradient(135deg,${_cd.color}22,${_cd.glow}11);border:2px solid ${_cd.color};border-radius:12px;padding:12px 16px;margin:8px auto;max-width:420px;box-shadow:0 0 20px ${_cd.glow}66;animation:cardEnter 0.6s">
+        <div style="color:${_cd.color};font-size:14px;font-weight:bold;letter-spacing:2px;text-align:center;margin-bottom:4px;text-shadow:0 0 8px ${_cd.glow}">📦 本局获得 ${_cd.icon} ${_cd.name}</div>
+        <div style="color:#c9d1d9;font-size:12px;text-align:center;line-height:1.6">
+          主菜单可开箱领取奖励${_totalPending>1?` · 当前共 <b style="color:${_cd.color}">${_totalPending}</b> 个待开宝箱`:''}
+        </div>
+      </div>`;
+  }
+  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:10px;padding-top:24px"><h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:28px;margin:4px 0">游戏结束</h1><div class="deco-line" style="margin:4px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>${wasTrial?'<p style="color:#bc8cff;font-size:13px;margin:4px 0">Boss试炼结束</p>':endlessMode?`<p style="color:#daa520;font-size:13px;margin:4px 0">♾️ 无尽模式 - 第 ${endlessWave} 波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' <span style="color:#ffd700">🏆 新纪录!</span>':''}</p>`:`<p style="font-size:13px;margin:4px 0">你到达了第 ${currentLevel} 关 第 ${currentWave} 波</p>`}<div id="finalScore" class="card-enter" style="font-size:48px">${score}</div><p class="subtitle" style="margin:2px 0">本局得分</p>${achHtml}${firstBonusHtml}${chestNoticeHtml}${tipHtml}${recapHtml}<div style="display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap"><div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div><div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>${newEggs>0?`<div class="stat-pill" style="animation-delay:1s;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}</div><div style="background:rgba(22,27,34,0.7);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:8px 12px;margin:4px auto;max-width:340px;text-align:center;font-size:12px"><span style="color:#ffd700">🎖️ 训练等级 Lv.${(saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1}</span><br><span style="color:#8b949e">距下个天赋点：还差 <b style="color:#ffd970">${1000-((saveData.totalXp||0)%1000)} XP</b></span></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:6px;padding:12px 10px calc(12px + env(safe-area-inset-bottom, 0px));position:sticky;bottom:0;background:linear-gradient(180deg,transparent 0%,rgba(13,10,5,0.92) 25%);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:5"><button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle}">${replayBtnText}</button><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="sec-btn" id="backToMenuBtn" style="font-size:14px;padding:12px 24px;min-height:44px">🏠 返回主菜单</button><button class="sec-btn" id="shareScoreBtn" style="font-size:14px;padding:12px 24px;min-height:44px;border-color:#bc8cff;color:#bc8cff">📤 分享战绩</button></div><div class="subtitle" style="margin-top:2px;font-size:11px">按 R 键快速重新开始</div></div></div>`;
   saveSave();
   // 死亡界面按钮统一用 _bindTap（带 _isSynthesizedClick 守卫，防止触屏笔记本双触发）
   const startBtnEl=document.getElementById(replayBtnId);
@@ -1848,6 +2733,8 @@ function showMainMenu(){
   if(typeof resetTouchState==='function')resetTouchState();
   gameState='menu';
   stopBGM(); // 返回主菜单时停止背景音乐
+  // 计算各模块进度（用于功能按钮上的X/Y徽章）
+  const _prog = _getModuleProgress();
   // 后台预加载所有Boss图片：用户在主菜单操作时图片就在加载，
   // 进入游戏时大概率已加载完，避免手机端网络慢导致Boss显示fallback圆形
   if(typeof loadAllBossImages==='function')loadAllBossImages();
@@ -1939,15 +2826,22 @@ function showMainMenu(){
           <button class="action-btn trial" id="trialBtn">🐉 Boss试炼</button>
           <button class="action-btn endless" id="endlessBtn">♾️ 无尽模式 ${saveData.bestEndlessWave>0?`<span style="font-size:12px;opacity:0.9">最佳${saveData.bestEndlessWave}波</span>`:''}</button>
         </div>
+        ${(saveData.pendingChests&&saveData.pendingChests.length>0)?`
+        <div style="margin-top:8px;display:flex;justify-content:center">
+          <button class="action-btn" id="chestBtn" style="background:linear-gradient(135deg,#cd7f32,#ffd700);font-size:15px;padding:12px 28px;min-height:44px;border:2px solid #ffd700;box-shadow:0 0 16px rgba(255,215,0,0.5);animation:pulseGlow 1.5s ease-in-out infinite">
+            📦 开箱领奖 <span style="display:inline-block;background:#ff4444;color:#fff;border-radius:10px;padding:1px 8px;font-size:12px;margin-left:6px;box-shadow:0 0 6px rgba(255,68,68,0.8)">${saveData.pendingChests.length}</span>
+          </button>
+        </div>`:''}
+        ${_renderDailyGoals()}
       </div>
 
       <div class="menu-section" style="margin-top:4px">
         <div class="btn-grid">
-          <button class="feature-btn fb-gold" id="talentBtn"><div class="fb-icon">🌟</div><div class="fb-name">天赋</div><div class="fb-tag">强化属性</div></button>
-          <button class="feature-btn fb-gold" id="bagBtn"><div class="fb-icon">🎒</div><div class="fb-name">背包</div><div class="fb-tag">装备/武器/宠物</div></button>
-          <button class="feature-btn fb-green" id="ranchBtn"><div class="fb-icon">🐔</div><div class="fb-name">牧场</div><div class="fb-tag">放养·产蛋</div></button>
-          <button class="feature-btn fb-purple" id="bondBtn"><div class="fb-icon">🔗</div><div class="fb-name">羁绊</div><div class="fb-tag">被动加成</div></button>
-          <button class="feature-btn fb-blue" id="pediaBtn"><div class="fb-icon">📖</div><div class="fb-name">图鉴</div><div class="fb-tag">成就记录</div></button>
+          <button class="feature-btn fb-gold ${_prog.talent.cur>=_prog.talent.total?'fb-complete':''}" id="talentBtn"><div class="fb-icon">🌟</div><div class="fb-name">天赋</div><div class="fb-tag">${_progressTag(_prog.talent.cur, _prog.talent.total, '强化属性')}</div></button>
+          <button class="feature-btn fb-gold ${_prog.bag.cur>=_prog.bag.total?'fb-complete':''}" id="bagBtn" title="${_prog.bag.subs.map(s=>`${s.name}:${s.cur}/${s.total}`).join(' · ')}"><div class="fb-icon">🎒</div><div class="fb-name">背包</div><div class="fb-tag">${_progressTag(_prog.bag.cur, _prog.bag.total, '装备/武器/宠物')}</div></button>
+          <button class="feature-btn fb-green ${_prog.ranch.cur>=_prog.ranch.total?'fb-complete':''}" id="ranchBtn"><div class="fb-icon">🐔</div><div class="fb-name">牧场</div><div class="fb-tag">${_progressTag(_prog.ranch.cur, _prog.ranch.total, '放养·产蛋')}</div></button>
+          <button class="feature-btn fb-purple ${_prog.bond.cur>=_prog.bond.total?'fb-complete':''}" id="bondBtn"><div class="fb-icon">🔗</div><div class="fb-name">羁绊</div><div class="fb-tag">${_progressTag(_prog.bond.cur, _prog.bond.total, '被动加成')}</div></button>
+          <button class="feature-btn fb-blue ${_prog.pedia.cur>=_prog.pedia.total?'fb-complete':''}" id="pediaBtn" title="${_prog.pedia.subs.map(s=>`${s.name}:${s.cur}/${s.total}`).join(' · ')}"><div class="fb-icon">📖</div><div class="fb-name">图鉴</div><div class="fb-tag">${_progressTag(_prog.pedia.cur, _prog.pedia.total, '成就记录')}</div></button>
         </div>
       </div>
 
@@ -1981,7 +2875,7 @@ function showMainMenu(){
         <div class="ctrl-item"><span class="key">R</span><span class="desc">重开</span></div>
         <div class="ctrl-item"><span class="key">📱摇杆</span><span class="desc">手机端</span></div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0;flex-wrap:wrap">
+      <div class="home-diff-row" style="display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0;flex-wrap:wrap">
         <span class="subtitle" style="font-size:11px;margin:0">难度：${diff.icon} ${diff.name}</span>
         <button id="fullscreenBtn">⛶ 点我全屏</button>
         ${saveData.hasShanHaiBook?'<button id="bookBtn" style="margin:0;padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#8b0000,#ffd700);color:#fff;border:1px solid #ffd700;border-radius:6px;cursor:pointer">📖 山海故事</button>':''}
@@ -2011,6 +2905,9 @@ function showMainMenu(){
   _bindTap(document.getElementById('startBtn'),startGame);
   _bindTap(document.getElementById('trialBtn'),startBossTrial);
   _bindTap(document.getElementById('endlessBtn'),startEndlessMode);
+  const _chestBtnEl=document.getElementById('chestBtn');
+  if(_chestBtnEl)_bindTap(_chestBtnEl,openChestOverlay);
+  _bindDailyGoalButtons();
   const _ciBtn=document.getElementById('dailyCheckInBtn');
   if(_ciBtn)_bindTap(_ciBtn,claimDailyCheckIn);
   _bindTap(document.getElementById('talentBtn'),showTalentMenu);

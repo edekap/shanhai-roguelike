@@ -6,11 +6,31 @@ function triggerSlowMotion(duration=0.5, scale=0.3){
   slowMotion.timer=duration;
   slowMotion.scale=scale;
 }
+// Hit-stop：极短时间冻结（0.03-0.1秒），打击感的核心
+// 普通击杀不触发，精英/Boss击杀触发，让玩家有"打中了"的实感
+let hitStop={active:false, timer:0};
+function triggerHitStop(duration=0.05){
+  // 慢动作期间不触发hit-stop（避免叠加卡顿）
+  if(slowMotion.active) return;
+  // 取较大值：连续击杀时延长冻结时间
+  if(duration > hitStop.timer){
+    hitStop.active=true;
+    hitStop.timer=duration;
+  }
+}
 function gameLoop(timestamp){
   try{
     if(!lastTime)lastTime=timestamp;
     // 暂停时dt=0，所有更新都停止（但绘制继续）
     let dt=isPaused ? 0 : Math.min((timestamp-lastTime)/1000,0.05);
+    // Hit-stop：极短冻结（dt=0），强打击感
+    if(hitStop.active && !isPaused){
+      hitStop.timer-=dt;
+      if(hitStop.timer<=0){
+        hitStop.active=false;
+      }
+      dt=0; // 冻结期间所有更新归零，但绘制继续
+    }
     // 慢动作：Boss击杀时短暂减速，强化击杀感
     if(slowMotion.active && !isPaused){
       slowMotion.timer-=dt;
@@ -164,6 +184,9 @@ function gameLoop(timestamp){
       const bossRef=boss;
       if(bossRef&&bossRef.alive&&!_upgradeInterrupted){bossRef.update(dt);bossRef.updateWrathClones(dt);bossRef.updateOrbitingOrbs(dt);}
       if(!_upgradeInterrupted){updateFireEffects(dt); updateLightningStrikes(dt); updateTornadoes(dt);}
+      // Boss出场戏剧化动画更新（独立于Boss本体，确保即使Boss死亡也能完成淡出）
+      if(typeof updateBossIntro==='function')updateBossIntro(dt);
+      if(typeof updateBossDeathFx==='function')updateBossDeathFx(dt);
       updateDeathAnimation(dt);
       // 碰撞（仅当Boss存活且未触发升级面板）
       if(bossRef&&bossRef.alive&&!_upgradeInterrupted&&player&&player.alive)checkCollisions();
@@ -214,6 +237,10 @@ function gameLoop(timestamp){
         }
         ctx.restore();
       }
+      // Boss出场戏剧化动画绘制（叠加在所有内容之上，确保戏剧感）
+      if(typeof drawBossIntro==='function')drawBossIntro();
+      // Boss死亡戏剧化动画绘制（缩小+变白+光柱+金色碎片）
+      if(typeof drawBossDeathFx==='function')drawBossDeathFx();
       updateUI(); updateTimerUI(); updateBossUI();
     }else if(gameState==='upgrade'||gameState==='adventure'||gameState==='menu'||gameState==='gameover'||gameState==='wavePrepare'){
       // 静态界面：仅绘制玩家和粒子背景

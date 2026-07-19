@@ -245,9 +245,12 @@ function playSound(type){
       g.gain.setValueAtTime(0.001,t); g.gain.linearRampToValueAtTime(0.35,t+0.1); g.gain.setValueAtTime(0.35,t+1.0); g.gain.exponentialRampToValueAtTime(0.001,t+1.8);
       o1.connect(g); o2.connect(g); g.connect(master);
       o1.start(t); o2.start(t); o1.stop(t+1.8); o2.stop(t+1.8);
-      // 低频鼓点
-      setTimeout(()=>{
-        if(!audioCtx)return; const t2=audioCtx.currentTime;
+      // 低频鼓点（200ms后播放）：存储 timer ID，stopBGM 时清理，避免死亡界面漏出鼓点
+      if(_bossSpawnDrumTimer){clearTimeout(_bossSpawnDrumTimer); _bossSpawnDrumTimer=null;}
+      _bossSpawnDrumTimer=setTimeout(()=>{
+        _bossSpawnDrumTimer=null;
+        if(!audioCtx||!bgmPlaying)return; // BGM已停止（玩家死亡/退出）则不播放鼓点
+        const t2=audioCtx.currentTime;
         const o=audioCtx.createOscillator(); const og=audioCtx.createGain();
         o.type='sine'; o.frequency.setValueAtTime(60,t2); o.frequency.exponentialRampToValueAtTime(30,t2+0.3);
         og.gain.setValueAtTime(0.5,t2); og.gain.exponentialRampToValueAtTime(0.001,t2+0.4);
@@ -292,6 +295,8 @@ function playSound(type){
 
 // 程序化生成的循环BGM：使用简单的五声音阶旋律 + 低音线，营造山海经古风氛围
 let bgmGain=null, bgmNodes=[], bgmPlaying=false, bgmTimer=null, bgmMode='normal';
+// bossSpawn 鼓点 setTimeout ID：stopBGM 时清理，避免死亡界面漏出鼓点
+let _bossSpawnDrumTimer=null;
 const BGM_SCALE=[261.63,293.66,329.63,392.00,440.00]; // C D E G A (中国五声音阶宫调)
 const BGM_BASS=[130.81,146.83,164.81,196.00,220.00]; // 低音线
 // 试炼激昂BGM：小调色彩 + 更快节奏 + 鼓点，营造紧张战斗氛围
@@ -315,6 +320,8 @@ function startBGM(mode){
 function stopBGM(){
   bgmPlaying=false;
   if(bgmTimer){clearTimeout(bgmTimer); bgmTimer=null;}
+  // 清理 bossSpawn 鼓点残留定时器，避免死亡界面/主菜单漏出鼓点
+  if(_bossSpawnDrumTimer){clearTimeout(_bossSpawnDrumTimer); _bossSpawnDrumTimer=null;}
   for(const n of bgmNodes){try{n.stop();}catch(e){}}
   bgmNodes=[];
   if(bgmGain){try{bgmGain.disconnect();}catch(e){} bgmGain=null;}
