@@ -1349,11 +1349,10 @@ function generateDeathTip(){
     tips.push('💪 多打Boss试炼，凑齐4件神话装备激活圆弧护盾是质变');
     tips.push('📚 主菜单「图鉴」可查看Boss弱点与故事，了解机制才能更轻松');
   }
-  // 取前2条展示（紧凑布局，避免手机端溢出）
-  const showTips=tips.slice(0,2);
-  return `<div style="max-width:100%;width:100%;box-sizing:border-box;margin:4px auto;padding:6px 10px;background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(188,140,255,0.10));border:1px solid rgba(255,215,0,0.5);border-radius:6px;overflow-x:hidden;word-break:break-word">
-    <div style="color:#ffd700;font-size:12px;font-weight:bold;margin-bottom:3px;letter-spacing:1px">💡 提战力小贴士</div>
-    ${showTips.map(t=>`<div style="color:#d4c5a0;font-size:11px;line-height:1.5;margin:2px 0;word-break:break-word">▸ ${t}</div>`).join('')}
+  // 取前1条展示（紧凑一行布局，避免手机端溢出）
+  const showTips=tips.slice(0,1);
+  return `<div style="max-width:520px;width:100%;box-sizing:border-box;margin:3px auto;padding:4px 8px;background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(188,140,255,0.10));border:1px solid rgba(255,215,0,0.5);border-radius:4px;overflow-x:hidden;word-break:break-word;font-size:10px;color:#d4c5a0;line-height:1.4">
+    <span style="color:#ffd700;font-weight:bold">💡</span> ${showTips[0]||''}
   </div>`;
 }
 
@@ -1976,7 +1975,7 @@ function gameOver(){
   ov.classList.remove('hidden');
   let achHtml='';
   if(newlyUnlocked.length>0){
-    achHtml=`<div style="background:rgba(255,215,0,0.1);border:1px solid #ffd700;border-radius:8px;padding:10px;margin:8px 0"><div style="color:#ffd700;font-size:14px;font-weight:bold">🏆 成就解锁 ${newlyUnlocked.length} 个!</div>${newlyUnlocked.map(a=>`<div style="font-size:12px;color:#c9d1d9">${a.icon} ${a.name} +${a.reward}积分</div>`).join('')}</div>`;
+    achHtml=`<div style="background:rgba(255,215,0,0.1);border:1px solid #ffd700;border-radius:4px;padding:4px 8px;margin:3px auto;max-width:520px;font-size:10px;color:#ffd700">🏆 成就解锁 ${newlyUnlocked.length} 个: ${newlyUnlocked.map(a=>`${a.icon}${a.name}+${a.reward}分`).join(' · ')}</div>`;
   }
   // 死亡复盘：本局数据汇总（可折叠）
   let recapHtml='';
@@ -2000,43 +1999,20 @@ function gameOver(){
       ? rs.upgradesTaken.map(u=>`<span style="display:inline-block;background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.3);border-radius:3px;padding:1px 5px;margin:1px;font-size:10px;color:#58a6ff">${u}</span>`).join('')
       : '<span style="color:#8b949e;font-size:11px">无强化</span>';
     recapHtml=`
-      <details style="max-width:520px;margin:6px auto;padding:6px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(136,144,150,0.3);border-radius:8px">
-        <summary style="cursor:pointer;color:#bc8cff;font-size:13px;letter-spacing:1px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          <span>📊 死亡复盘</span>
-          <span style="color:#f85149;font-size:12px;font-weight:bold">💀 ${rs.deathCause}</span>
-          <span style="color:#8b949e;font-size:10px;margin-left:auto">点击展开详细</span>
-        </summary>
-        <div style="margin-top:8px;font-size:11px">
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px">
-            <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px"><span style="color:#8b949e">⏱ 局时长</span><br><b style="color:#c9d1d9">${_fmtTime(rs.duration)}</b></div>
-            <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px"><span style="color:#8b949e">⚔ 击杀数</span><br><b style="color:#3fb950">${rs.kills}</b> <span style="color:#8b949e;font-size:10px">(Boss ${rs.bossKills})</span></div>
-            <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px"><span style="color:#8b949e">💥 总伤害</span><br><b style="color:#ff6b6b">${Math.round(rs.damageDealt)}</b> <span style="color:#8b949e;font-size:10px">(DPS ${_dps})</span></div>
-            <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px"><span style="color:#8b949e">🩸 总受伤</span><br><b style="color:#f85149">${Math.round(rs.damageTaken)}</b></div>
-            <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px"><span style="color:#8b949e">🔥 最高连击</span><br><b style="color:#ffd700">${rs.maxCombo}</b></div>
-            <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px"><span style="color:#8b949e">⭐ 经验获得</span><br><b style="color:#bc8cff">${rs.xpEarned} XP</b></div>
-          </div>
-          <div style="background:rgba(13,17,23,0.7);padding:8px 10px;border-radius:5px;margin-bottom:6px">
-            <div style="color:#ffd700;font-size:11px;margin-bottom:6px;letter-spacing:1px">📈 战斗数据可视化</div>
-            ${_genRecapBar('⚔ 击杀', rs.kills, 50, '#3fb950')}
-            ${_genRecapBar('👑 Boss击杀', rs.bossKills, 5, '#bc8cff')}
-            ${_genRecapBar('🔥 最高连击', rs.maxCombo, 30, '#ffd700')}
-            ${_genRecapBar('⭐ 经验获得', rs.xpEarned, 500, '#79c0ff')}
-            <div style="margin-top:8px;color:#8b949e;font-size:10px;letter-spacing:0.5px">💥 输出 vs 承伤对比</div>
-            ${_genRecapBar('输出伤害', Math.round(rs.damageDealt), Math.max(rs.damageDealt, rs.damageTaken, 1000), '#ff6b6b')}
-            ${_genRecapBar('承受伤害', Math.round(rs.damageTaken), Math.max(rs.damageDealt, rs.damageTaken, 1000), '#f85149')}
-          </div>
-          <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px;margin-bottom:6px">
-            <div style="color:#ffd700;font-size:11px;margin-bottom:3px">🎒 装备Build</div>
-            <div>${_equipBuild}</div>
-            <div style="color:#bc8cff;font-size:11px;margin-top:5px;margin-bottom:3px">🔮 激活联动 (${(typeof activeGearSynergies!=='undefined'?activeGearSynergies.length:0)})</div>
-            <div>${_synergies}</div>
-          </div>
-          <div style="background:rgba(13,17,23,0.7);padding:6px 8px;border-radius:5px">
-            <div style="color:#58a6ff;font-size:11px;margin-bottom:3px">⚡ 强化Build (${rs.upgradesTaken.length}个)</div>
-            <div>${_upgrades}</div>
-          </div>
+      <div style="max-width:520px;margin:4px auto;padding:5px 8px;background:rgba(22,27,34,0.7);border:1px solid rgba(136,144,150,0.3);border-radius:6px;width:100%;box-sizing:border-box">
+        <div style="color:#f85149;font-size:11px;font-weight:bold;margin-bottom:4px;word-break:break-word">💀 死因：${rs.deathCause}</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px;font-size:10px;margin-bottom:3px">
+          <div style="background:rgba(13,17,23,0.7);padding:3px 5px;border-radius:3px"><span style="color:#8b949e">⏱</span> <b style="color:#c9d1d9">${_fmtTime(rs.duration)}</b></div>
+          <div style="background:rgba(13,17,23,0.7);padding:3px 5px;border-radius:3px"><span style="color:#8b949e">⚔</span> <b style="color:#3fb950">${rs.kills}</b><span style="color:#8b949e;font-size:9px">(${rs.bossKills}Boss)</span></div>
+          <div style="background:rgba(13,17,23,0.7);padding:3px 5px;border-radius:3px"><span style="color:#8b949e">🔥</span> <b style="color:#ffd700">${rs.maxCombo}</b></div>
+          <div style="background:rgba(13,17,23,0.7);padding:3px 5px;border-radius:3px"><span style="color:#8b949e">💥</span> <b style="color:#ff6b6b">${Math.round(rs.damageDealt)}</b></div>
+          <div style="background:rgba(13,17,23,0.7);padding:3px 5px;border-radius:3px"><span style="color:#8b949e">🩸</span> <b style="color:#f85149">${Math.round(rs.damageTaken)}</b></div>
+          <div style="background:rgba(13,17,23,0.7);padding:3px 5px;border-radius:3px"><span style="color:#8b949e">⭐</span> <b style="color:#bc8cff">${rs.xpEarned}</b></div>
         </div>
-      </details>`;
+        <div style="font-size:10px;color:#8b949e;line-height:1.4;word-break:break-word">
+          <span style="color:#ffd700">🎒</span> ${_equipBuild} · <span style="color:#58a6ff">⚡${rs.upgradesTaken.length}强化</span>
+        </div>
+      </div>`;
   }
   // 根据本局类型决定"再打一次"按钮的行为：试炼→再打一次试炼，无尽→再战无尽，冒险→再来一局冒险
   const wasEndless = !wasTrial && endlessMode; // gameOver 不重置 endlessMode，可据此判断
@@ -2045,51 +2021,40 @@ function gameOver(){
   const replayBtnHandler = wasTrial ? 'startBossTrial' : (wasEndless ? 'startEndlessMode' : 'startGame');
   const replayBtnStyle = wasTrial ? 'background:linear-gradient(135deg,#bc8cff,#8b5cf6);font-size:16px;padding:14px 28px;min-height:48px' : (wasEndless ? 'background:linear-gradient(135deg,#3fb950,#2a9d8f);font-size:16px;padding:14px 28px;min-height:48px' : 'font-size:16px;padding:14px 28px;min-height:48px');
   const tipHtml=generateDeathTip();
-  // 首局保底奖励提示
+  // 首局保底奖励提示（紧凑单行）
   const firstBonusHtml = firstRunBonus ? `
-    <div style="background:linear-gradient(135deg,rgba(212,160,23,0.2),rgba(165,40,56,0.15));border:2px solid #ffd700;border-radius:12px;padding:14px 18px;margin:8px auto;max-width:420px;box-shadow:0 0 20px rgba(255,215,0,0.3);animation:cardEnter 0.5s">
-      <div style="color:#ffd700;font-size:15px;font-weight:bold;letter-spacing:2px;text-align:center;margin-bottom:6px">🎁 新手首局礼包</div>
-      <div style="color:#c9d1d9;font-size:13px;line-height:1.8;text-align:center">
-        ✦ <b style="color:#ffd970">+${firstRunBonus.talents} 天赋点</b>（已可用于升级天赋）<br>
-        ${firstRunBonus.gear?`✦ <b style="color:#a855f7">+1件史诗装备</b>（${firstRunBonus.gear.name||'神秘装备'}）已放入背包`:''}
-      </div>
-      <div style="color:#8b949e;font-size:11px;text-align:center;margin-top:6px">下次开局前记得装备上！</div>
+    <div style="background:linear-gradient(135deg,rgba(212,160,23,0.2),rgba(165,40,56,0.15));border:1px solid #ffd700;border-radius:4px;padding:4px 8px;margin:3px auto;max-width:520px;font-size:10px;color:#ffd700;animation:cardEnter 0.5s">
+      🎁 新手礼包: +${firstRunBonus.talents}天赋${firstRunBonus.gear?` · +1史诗装备(${firstRunBonus.gear.name||''})`:''}
     </div>` : '';
-  // 宝箱获得提示（局末按表现发放）
+  // 宝箱获得提示（紧凑单行）
   let chestNoticeHtml = '';
   if(_grantedChest){
     const _cd = CHEST_TYPES[_grantedChest.quality];
     const _totalPending = (saveData.pendingChests||[]).length;
     chestNoticeHtml = `
-      <div style="background:linear-gradient(135deg,${_cd.color}22,${_cd.glow}11);border:2px solid ${_cd.color};border-radius:12px;padding:12px 16px;margin:8px auto;max-width:420px;box-shadow:0 0 20px ${_cd.glow}66;animation:cardEnter 0.6s">
-        <div style="color:${_cd.color};font-size:14px;font-weight:bold;letter-spacing:2px;text-align:center;margin-bottom:4px;text-shadow:0 0 8px ${_cd.glow}">📦 本局获得 ${_cd.icon} ${_cd.name}</div>
-        <div style="color:#c9d1d9;font-size:12px;text-align:center;line-height:1.6">
-          主菜单可开箱领取奖励${_totalPending>1?` · 当前共 <b style="color:${_cd.color}">${_totalPending}</b> 个待开宝箱`:''}
-        </div>
+      <div style="background:linear-gradient(135deg,${_cd.color}22,${_cd.glow}11);border:1px solid ${_cd.color};border-radius:4px;padding:4px 8px;margin:3px auto;max-width:520px;font-size:10px;color:${_cd.color};animation:cardEnter 0.6s">
+        📦 ${_cd.icon}${_cd.name}${_totalPending>1?` (共${_totalPending}个待开)`:''} · 主菜单开箱
       </div>`;
   }
-  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:8px;padding-top:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));min-height:100%;box-sizing:border-box">
-  <h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:24px;margin:2px 0">游戏结束</h1>
-  <div class="deco-line" style="margin:2px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>
-  <div id="finalScore" class="card-enter" style="font-size:40px;line-height:1.1;margin:2px 0">${score}</div>
-  <p class="subtitle" style="margin:1px 0 4px;font-size:11px">本局得分 · ${wasTrial?'Boss试炼':endlessMode?`无尽第${endlessWave}波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' 🏆新纪录':''}`:`第${currentLevel}关${currentWave}波`}</p>
-  <div style="display:flex;gap:6px;justify-content:center;margin:4px 0;flex-wrap:wrap">
-    <div class="stat-pill" style="animation:none"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div>
-    <div class="stat-pill" style="animation:none"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>
-    ${newEggs>0?`<div class="stat-pill" style="animation:none;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}
+  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:6px;padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px));min-height:100%;box-sizing:border-box;gap:2px">
+  <h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:20px;margin:0">游戏结束 · ${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</h1>
+  <div id="finalScore" class="card-enter" style="font-size:32px;line-height:1.05;margin:1px 0">${score}<span style="font-size:11px;color:#8b949e;margin-left:6px">${wasTrial?'试炼':endlessMode?`无尽${endlessWave}波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?'🏆':''}`:`${currentLevel}关${currentWave}波`}</span></div>
+  <div style="display:flex;gap:4px;justify-content:center;margin:2px 0;flex-wrap:wrap;font-size:11px">
+    <span style="color:#ffd970">🪙+${score}</span>
+    <span style="color:#bc8cff">⭐${saveData.talentPoints||0}天赋</span>
+    ${newEggs>0?`<span style="color:#3fb950">🥚x${newEggs}</span>`:''}
+    <span style="color:#8b949e">🎖️Lv.${(saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1}</span>
   </div>
-  <div style="background:rgba(22,27,34,0.85);border:1px solid rgba(255,215,0,0.4);border-radius:8px;padding:8px 10px;margin:6px auto;max-width:380px;display:flex;flex-direction:column;gap:6px;width:100%;box-sizing:border-box">
-    <button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle};width:100%;max-width:380px">${replayBtnText}</button>
-    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;width:100%">
-      <button class="sec-btn" id="backToMenuBtn" style="font-size:13px;padding:10px 14px;min-height:44px;flex:1;min-width:110px">🏠 返回主菜单</button>
-      <button class="sec-btn" id="shareScoreBtn" style="font-size:13px;padding:10px 14px;min-height:44px;border-color:#bc8cff;color:#bc8cff;flex:1;min-width:110px">📤 分享</button>
+  <div style="background:rgba(22,27,34,0.85);border:1px solid rgba(255,215,0,0.4);border-radius:6px;padding:5px 8px;margin:3px auto;max-width:380px;display:flex;flex-direction:column;gap:4px;width:100%;box-sizing:border-box">
+    <button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle};width:100%;max-width:380px;font-size:14px;padding:10px 20px;min-height:42px">${replayBtnText}</button>
+    <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;width:100%">
+      <button class="sec-btn" id="backToMenuBtn" style="font-size:12px;padding:8px 12px;min-height:40px;flex:1;min-width:100px">🏠 返回主菜单</button>
+      <button class="sec-btn" id="shareScoreBtn" style="font-size:12px;padding:8px 12px;min-height:40px;border-color:#bc8cff;color:#bc8cff;flex:1;min-width:100px">📤 分享</button>
     </div>
   </div>
   ${tipHtml}
   ${recapHtml}
   ${achHtml}${firstBonusHtml}${chestNoticeHtml}
-  <div style="background:rgba(22,27,34,0.7);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:6px 10px;margin:4px auto;max-width:340px;text-align:center;font-size:11px"><span style="color:#ffd700">🎖️ Lv.${(saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1}</span> <span style="color:#8b949e">· 距下个天赋点 <b style="color:#ffd970">${1000-((saveData.totalXp||0)%1000)} XP</b></span></div>
-  <div class="subtitle" style="margin:6px 0 4px;font-size:10px;text-align:center">按 R 键快速重新开始</div>
 </div>`;
   saveSave();
   // 死亡界面按钮统一用 _bindTap（带 _isSynthesizedClick 守卫，防止触屏笔记本双触发）
