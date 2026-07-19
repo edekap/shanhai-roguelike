@@ -81,7 +81,7 @@
   .ui-label { font-size: 11px; color: #d4a017; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
   .ui-value { font-size: 19px; font-weight: bold; color: #ffd970; text-shadow: 0 0 8px rgba(255,217,112,0.4); }
   .health-bar { width: 140px; height: 11px; background: #1a1f2e; border-radius: 6px; overflow: hidden; margin-top: 4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,160,23,0.2); }
-  .health-fill { height: 100%; background: linear-gradient(90deg, #a52838, #f85149, #fb8548); transition: width 0.2s ease; border-radius: 6px; box-shadow: 0 0 10px rgba(248,81,73,0.6), inset 0 1px 0 rgba(255,255,255,0.3); }
+  .health-fill { height: 100%; background: linear-gradient(90deg, #a52838, #f85149, #fb8548); transition: width 0.05s linear; border-radius: 6px; box-shadow: 0 0 10px rgba(248,81,73,0.6), inset 0 1px 0 rgba(255,255,255,0.3); }
   /* 玩家低血裂纹（<30%触发）：血条变暗+震动+脉冲红光，强化"濒死"危机感 */
   .health-fill.lowhp-crack { animation: lowHpCrack 0.6s ease-in-out infinite; background: linear-gradient(90deg, #5e1015, #a02028, #b03038); box-shadow: 0 0 18px rgba(255,40,40,0.95), inset 0 1px 0 rgba(255,255,255,0.2); }
   @keyframes lowHpCrack {
@@ -90,9 +90,9 @@
     75% { filter: brightness(1.25) hue-rotate(-8deg); transform: translateX(1px); }
   }
   .shield-bar { width: 140px; height: 7px; background: #1a1f2e; border-radius: 4px; overflow: hidden; margin-top: 3px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 0 0 1px rgba(74,155,142,0.2); }
-  .shield-fill { height: 100%; background: linear-gradient(90deg, #2a6fc4, #58a6ff, #79c0ff); transition: width 0.2s ease; border-radius: 4px; box-shadow: 0 0 10px rgba(88,166,255,0.6), inset 0 1px 0 rgba(255,255,255,0.3); }
+  .shield-fill { height: 100%; background: linear-gradient(90deg, #2a6fc4, #58a6ff, #79c0ff); transition: width 0.05s linear; border-radius: 4px; box-shadow: 0 0 10px rgba(88,166,255,0.6), inset 0 1px 0 rgba(255,255,255,0.3); }
   .skill-bar { width: 140px; height: 7px; background: #1a1f2e; border-radius: 4px; overflow: hidden; margin-top: 3px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 0 0 1px rgba(188,140,255,0.2); }
-  .skill-fill { height: 100%; background: linear-gradient(90deg, #7a3fb0, #bc8cff, #d2a8ff); transition: width 0.1s ease; border-radius: 4px; box-shadow: 0 0 10px rgba(188,140,255,0.6), inset 0 1px 0 rgba(255,255,255,0.3); }
+  .skill-fill { height: 100%; background: linear-gradient(90deg, #7a3fb0, #bc8cff, #d2a8ff); transition: width 0.05s linear; border-radius: 4px; box-shadow: 0 0 10px rgba(188,140,255,0.6), inset 0 1px 0 rgba(255,255,255,0.3); }
   .timer-bar { width: 200px; height: 9px; background: #1a1f2e; border-radius: 5px; overflow: hidden; margin-top: 4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,160,23,0.2); }
   .timer-fill { height: 100%; background: linear-gradient(90deg, #4a9b8e, #3fb950, #f0883e, #a52838); transition: width 0.3s ease; border-radius: 5px; box-shadow: 0 0 8px rgba(212,160,23,0.4), inset 0 1px 0 rgba(255,255,255,0.25); }
   /* 经验条：细且半透明，不遮挡视野 */
@@ -525,10 +525,10 @@
   /* ==================== 手机端适配 ==================== */
   /* 触摸控制元素：覆盖全屏，但父级 pointer-events:none，仅子区域启用 */
   #touchControls { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 15; pointer-events: none; }
-  /* 资源加载指示器（右上角） */
-  #loadingIndicator { position: absolute; top: calc(8px + env(safe-area-inset-top, 0px)); right: calc(10px + env(safe-area-inset-right, 0px)); z-index: 30; padding: 4px 12px; border-radius: 12px; background: rgba(22,27,34,0.85); border: 1px solid rgba(212,160,23,0.5); color: #ffd970; font-size: 11px; backdrop-filter: blur(8px); pointer-events: none; display: none; }
-  /* 暂停按钮（手机左上角） */
-  #pauseBtn { display: none; position: absolute; top: calc(8px + env(safe-area-inset-top, 0px)); left: calc(10px + env(safe-area-inset-left, 0px)); z-index: 20; width: 44px; height: 44px; border-radius: 50%; background: rgba(22,27,34,0.7); border: 1px solid rgba(212,160,23,0.5); color: #ffd970; font-size: 20px; align-items: center; justify-content: center; pointer-events: auto; user-select: none; -webkit-user-select: none; backdrop-filter: blur(8px); }
+  /* 资源加载指示器（顶部居中，避开右上暂停按钮和左上血条） */
+  #loadingIndicator { position: absolute; top: calc(8px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 30; padding: 4px 12px; border-radius: 12px; background: rgba(22,27,34,0.85); border: 1px solid rgba(212,160,23,0.5); color: #ffd970; font-size: 11px; backdrop-filter: blur(8px); pointer-events: none; display: none; }
+  /* 暂停按钮（右上角，避开左上血条/生命面板） */
+  #pauseBtn { display: none; position: absolute; top: calc(8px + env(safe-area-inset-top, 0px)); right: calc(10px + env(safe-area-inset-right, 0px)); z-index: 20; width: 40px; height: 40px; border-radius: 50%; background: rgba(22,27,34,0.7); border: 1px solid rgba(212,160,23,0.5); color: #ffd970; font-size: 18px; align-items: center; justify-content: center; pointer-events: auto; user-select: none; -webkit-user-select: none; backdrop-filter: blur(8px); }
   #pauseBtn:active { transform: scale(0.9); }
   /* 浮动摇杆：左/右半屏任意位置按下即出现，松手消失 */
   #joystickZone { position: absolute; top: 60px; bottom: 0; left: 0; width: 50%; pointer-events: auto; }
@@ -1357,7 +1357,7 @@
       <div class="timer-bar"><div class="timer-fill" id="timerBar" style="width:100%"></div></div>
       <div style="font-size:10px;color:#8b949e;margin-top:1px" id="timerText">30s</div>
     </div>
-    <div class="ui-panel" style="text-align:right">
+    <div class="ui-panel" style="text-align:right;padding-right:50px">
       <div class="ui-label">积分</div>
       <div class="ui-value" id="gameScore">0</div>
       <div id="petInfo" style="font-size:12px;margin-top:4px;color:#bc8cff"></div>

@@ -280,10 +280,10 @@ function updateUI(){
   // 生命值（仅变化时写DOM）
   const hpTxt=`${Math.ceil(player.health)}/${player.maxHealth}`;
   if(hpTxt!==_ui._lastHealth){_ui.healthText.textContent=hpTxt;_ui._lastHealth=hpTxt;}
-  // 性能优化：血条宽度仅在变化>1%时才写DOM，避免每帧触发 style 重算
+  // 血条宽度：阈值降到0.1%，让任何扣血都立即反映到血条（transition 0.05s 几乎瞬时）
   const hpRatio=player.health/player.maxHealth;
   const hpPct=Math.max(0,hpRatio*100);
-  if(Math.abs(hpPct-_ui._lastHpPct)>0.5){_ui.healthBar.style.width=hpPct+'%';_ui._lastHpPct=hpPct;}
+  if(Math.abs(hpPct-_ui._lastHpPct)>0.1){_ui.healthBar.style.width=hpPct+'%';_ui._lastHpPct=hpPct;}
   // 玩家低血裂纹：血量<30%时血条变暗+震动+脉冲红光（强化"濒死"危机感）
   const lowHpFlag=hpRatio<=0.30 && hpRatio>0;
   if(lowHpFlag!==_ui._lastLowHp){_ui.healthBar.classList.toggle('lowhp-crack',lowHpFlag);_ui._lastLowHp=lowHpFlag;}
