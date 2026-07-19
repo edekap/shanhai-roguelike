@@ -2068,28 +2068,28 @@ function gameOver(){
         </div>
       </div>`;
   }
-  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:8px;padding-top:8px;padding-bottom:calc(140px + env(safe-area-inset-bottom, 0px));min-height:100%;box-sizing:border-box">
+  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:8px;padding-top:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));min-height:100%;box-sizing:border-box">
   <h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:24px;margin:2px 0">游戏结束</h1>
   <div class="deco-line" style="margin:2px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>
   <div id="finalScore" class="card-enter" style="font-size:40px;line-height:1.1;margin:2px 0">${score}</div>
   <p class="subtitle" style="margin:1px 0 4px;font-size:11px">本局得分 · ${wasTrial?'Boss试炼':endlessMode?`无尽第${endlessWave}波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' 🏆新纪录':''}`:`第${currentLevel}关${currentWave}波`}</p>
-  ${tipHtml}
   <div style="display:flex;gap:6px;justify-content:center;margin:4px 0;flex-wrap:wrap">
     <div class="stat-pill" style="animation:none"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div>
     <div class="stat-pill" style="animation:none"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>
     ${newEggs>0?`<div class="stat-pill" style="animation:none;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}
   </div>
-  ${recapHtml}
-  ${achHtml}${firstBonusHtml}${chestNoticeHtml}
-  <div style="background:rgba(22,27,34,0.7);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:6px 10px;margin:4px auto;max-width:340px;text-align:center;font-size:11px"><span style="color:#ffd700">🎖️ Lv.${(saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1}</span> <span style="color:#8b949e">· 距下个天赋点 <b style="color:#ffd970">${1000-((saveData.totalXp||0)%1000)} XP</b></span></div>
-  <div style="position:sticky;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(13,10,5,0) 0%,rgba(13,10,5,0.95) 30%);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:10px 8px calc(10px + env(safe-area-inset-bottom, 0px));margin-top:6px;z-index:10;display:flex;flex-direction:column;gap:6px;align-items:center;width:100%;box-sizing:border-box">
+  <div style="background:rgba(22,27,34,0.85);border:1px solid rgba(255,215,0,0.4);border-radius:8px;padding:8px 10px;margin:6px auto;max-width:380px;display:flex;flex-direction:column;gap:6px;width:100%;box-sizing:border-box">
     <button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle};width:100%;max-width:380px">${replayBtnText}</button>
-    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;width:100%;max-width:380px">
+    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;width:100%">
       <button class="sec-btn" id="backToMenuBtn" style="font-size:13px;padding:10px 14px;min-height:44px;flex:1;min-width:110px">🏠 返回主菜单</button>
       <button class="sec-btn" id="shareScoreBtn" style="font-size:13px;padding:10px 14px;min-height:44px;border-color:#bc8cff;color:#bc8cff;flex:1;min-width:110px">📤 分享</button>
     </div>
-    <div class="subtitle" style="margin:0;font-size:10px">按 R 键快速重新开始</div>
   </div>
+  ${tipHtml}
+  ${recapHtml}
+  ${achHtml}${firstBonusHtml}${chestNoticeHtml}
+  <div style="background:rgba(22,27,34,0.7);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:6px 10px;margin:4px auto;max-width:340px;text-align:center;font-size:11px"><span style="color:#ffd700">🎖️ Lv.${(saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1}</span> <span style="color:#8b949e">· 距下个天赋点 <b style="color:#ffd970">${1000-((saveData.totalXp||0)%1000)} XP</b></span></div>
+  <div class="subtitle" style="margin:6px 0 4px;font-size:10px;text-align:center">按 R 键快速重新开始</div>
 </div>`;
   saveSave();
   // 死亡界面按钮统一用 _bindTap（带 _isSynthesizedClick 守卫，防止触屏笔记本双触发）
