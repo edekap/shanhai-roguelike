@@ -858,7 +858,8 @@
     .sj-col-bottom { padding-bottom: 70px !important; }
   }
   /* 手机端竖屏首页压缩布局：让作者署名、新手指南、全屏按钮在初始视口可见 */
-  @media (pointer: coarse) and (orientation: portrait) and (max-width: 600px) {
+  /* 不依赖 pointer:coarse（部分手机浏览器检测不准），纯靠尺寸判断 */
+  @media (orientation: portrait) and (max-width: 768px) {
     /* 隐藏 PC 控制说明（手机端用摇杆）和底部重复的难度行（右栏已有 diff-pills） */
     .sj-col-bottom > .controls,
     .sj-col-bottom > .home-diff-row { display: none !important; }

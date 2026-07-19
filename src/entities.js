@@ -1,6 +1,6 @@
 // ==================== Boss图片资源 ====================
 // v=10 全部切换为jpg格式，加载后用canvas去除白色背景实现透明效果
-const BOSS_IMG_VERSION = '10'; // 全局图片版本号（缓存破坏）
+const BOSS_IMG_VERSION = '11'; // 全局图片版本号（缓存破坏）
 // 常态帧路径（_wide.jpg / _mythic.jpg）
 const BOSS_IMG_PATHS = {
   0: 'assets/bosses/jiuweihu_v2_wide.jpg',  // 九尾狐
@@ -41,7 +41,10 @@ const BOSS_FRAME_CAPABILITY = {
 };
 // jpg背景透明化缓存（避免每次绘制重复处理像素）
 const _bossTransparentCache = new WeakMap();
-// 将jpg白底图处理成透明背景：高亮度+低饱和度像素判为背景，边缘渐变alpha
+// 将jpg图处理成透明背景：
+// 1. 采样图片四角+边缘中点共8个点作为背景色基准
+// 2. 若四角颜色一致（纯色背景），用色彩距离判断背景像素（兼容白底/灰底/彩色底）
+// 3. 若四角颜色差异大（非纯色背景），回退到"接近白色"检测
 // 处理结果用canvas缓存，WeakMap自动随原Image回收
 function _makeBossTransparent(img){
   if(!img || !img.complete || img.naturalWidth===0) return img;
@@ -56,18 +59,59 @@ function _makeBossTransparent(img){
     cx.drawImage(img, 0, 0);
     const data = cx.getImageData(0, 0, c.width, c.height);
     const px = data.data;
-    for(let i = 0; i < px.length; i += 4){
-      const r = px[i], g = px[i+1], b = px[i+2];
-      const max = Math.max(r,g,b), min = Math.min(r,g,b);
-      const sat = max === 0 ? 0 : (max - min) / max; // 饱和度 0-1
-      const lightness = (max + min) / 2; // 亮度 0-255
-      // 接近纯白（亮度>230+饱和度<0.08）→ 完全透明
-      if(lightness > 230 && sat < 0.08){
-        px[i+3] = 0;
-      }else if(lightness > 210 && sat < 0.12){
-        // 边缘渐变过渡（消除锯齿白边）
-        const t = (lightness - 210) / 20; // 0-1
-        px[i+3] = Math.floor(255 * (1 - t * 0.85));
+    const w = c.width, h = c.height;
+    // 采样四角+边缘中点共8个点作为背景色基准
+    const samplePts = [
+      [0, 0], [w-1, 0], [0, h-1], [w-1, h-1],
+      [Math.floor(w/2), 0], [Math.floor(w/2), h-1],
+      [0, Math.floor(h/2)], [w-1, Math.floor(h/2)]
+    ];
+    let bgR=0, bgG=0, bgB=0, cnt=0;
+    for(const [sx, sy] of samplePts){
+      const idx = (sy*w + sx)*4;
+      bgR += px[idx]; bgG += px[idx+1]; bgB += px[idx+2];
+      cnt++;
+    }
+    bgR = bgR/cnt; bgG = bgG/cnt; bgB = bgB/cnt;
+    // 计算四角颜色最大差异，判断是否为纯色背景
+    let maxCornerDiff = 0;
+    for(const [sx, sy] of samplePts){
+      const idx = (sy*w + sx)*4;
+      const dr = px[idx]-bgR, dg = px[idx+1]-bgG, db = px[idx+2]-bgB;
+      const diff = Math.sqrt(dr*dr + dg*dg + db*db);
+      if(diff > maxCornerDiff) maxCornerDiff = diff;
+    }
+    if(maxCornerDiff <= 30){
+      // 纯色背景：用色彩距离判断（兼容白底/灰底/彩色底）
+      // 阈值根据背景色亮度自适应：深色背景用较小阈值，浅色背景用较大阈值
+      const bgLightness = (bgR + bgG + bgB) / 3;
+      const threshold = bgLightness > 180 ? 50 : 35; // 浅色背景阈值大些
+      const edgeThreshold = threshold + 50; // 边缘渐变区间
+      for(let i = 0; i < px.length; i += 4){
+        const r = px[i], g = px[i+1], b = px[i+2];
+        const dr = r-bgR, dg = g-bgG, db = b-bgB;
+        const dist = Math.sqrt(dr*dr + dg*dg + db*db);
+        if(dist < threshold){
+          px[i+3] = 0;
+        }else if(dist < edgeThreshold){
+          // 边缘渐变过渡（消除锯齿边）
+          const t = (dist - threshold) / (edgeThreshold - threshold);
+          px[i+3] = Math.floor(255 * t);
+        }
+      }
+    }else{
+      // 非纯色背景：回退到"接近白色"检测
+      for(let i = 0; i < px.length; i += 4){
+        const r = px[i], g = px[i+1], b = px[i+2];
+        const max = Math.max(r,g,b), min = Math.min(r,g,b);
+        const sat = max === 0 ? 0 : (max - min) / max;
+        const lightness = (max + min) / 2;
+        if(lightness > 230 && sat < 0.08){
+          px[i+3] = 0;
+        }else if(lightness > 210 && sat < 0.12){
+          const t = (lightness - 210) / 20;
+          px[i+3] = Math.floor(255 * (1 - t * 0.85));
+        }
       }
     }
     cx.putImageData(data, 0, 0);

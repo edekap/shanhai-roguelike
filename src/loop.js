@@ -1023,13 +1023,79 @@ function vibrate(pattern){
 loadSave();
 showMainMenu();
 // 首次进入游戏显示开场故事,否则显示更新公告
-if(!saveData.storyViewed){
-  showOpeningStory();
-}else{
-  showUpdateNotice();
-}
 // 新手引导：首次进入或未看过教程时显示（与故事/公告串行，内部会等待它们关闭）
-if(!saveData.tutorialShown && typeof showTutorial === 'function'){
-  showTutorial();
+// 这些弹窗都是 position:fixed，会被浏览器地址栏/工具栏遮挡。
+// 因此在触摸设备 + 非全屏 + 非standalone + 非微信 环境下，先显示全屏引导遮罩，
+// 用户点击"全屏开始"后进入全屏，再继续显示故事/公告/教程。
+const _showWelcomeFlow = () => {
+  if(!saveData.storyViewed){
+    showOpeningStory();
+  }else{
+    showUpdateNotice();
+  }
+  if(!saveData.tutorialShown && typeof showTutorial === 'function'){
+    showTutorial();
+  }
+};
+const _isStandaloneMode = () => {
+  return window.navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+};
+// 触摸设备 + 非standalone + 非微信 + 当前未全屏 → 需要全屏引导
+const _needsInitialFullscreenGuide = () => {
+  if(!isTouchDevice) return false;
+  if(_isStandaloneMode()) return false;
+  if(isInWechat) return false; // 微信内无法全屏，另有提示
+  if(isFullscreenNow()) return false;
+  return true;
+};
+const _showInitialFullscreenGuide = (onContinue) => {
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let html = `<div id="initialFsGuide" style="position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)">`;
+  html += `<div style="max-width:440px;width:100%;text-align:center;padding:28px 24px;background:linear-gradient(180deg,#1a1408,#2a1f10);border:2px solid #ffd700;border-radius:16px;box-shadow:0 0 40px rgba(255,215,0,0.3);font-family:'STKaiti',KaiTi,serif">`;
+  html += `<div style="font-size:56px;margin-bottom:14px">⛶</div>`;
+  html += `<h2 style="color:#ffd700;letter-spacing:4px;margin:0 0 12px;font-size:20px;text-shadow:0 0 10px rgba(255,215,0,0.4)">横屏全屏体验更佳</h2>`;
+  if(isIOS){
+    // iOS Safari 不支持 requestFullscreen API，只能引导用户"添加到主屏幕"
+    html += `<div style="color:#e0d8c8;font-size:13px;line-height:1.9;margin-bottom:18px">请将设备<b style="color:#ffd970">横屏旋转</b>，<br>然后点击下方按钮开始游戏。<br><span style="color:#8b949e;font-size:11px">如需完全无遮挡：点底部分享 ↗ → 添加到主屏幕</span></div>`;
+    html += `<button id="initialFsStartBtn" style="width:100%;padding:14px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:10px;font-size:16px;font-weight:bold;letter-spacing:3px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;box-shadow:0 0 20px rgba(255,215,0,0.5)">✦ 横屏后点此开始 ✦</button>`;
+  }else{
+    // Android Chrome 支持自动全屏 + 锁横屏
+    html += `<div style="color:#e0d8c8;font-size:13px;line-height:1.9;margin-bottom:18px">请将设备<b style="color:#ffd970">横屏旋转</b>，<br>点击下方按钮进入全屏模式，<br>地址栏/工具栏将自动隐藏。</div>`;
+    html += `<button id="initialFsStartBtn" style="width:100%;padding:14px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:10px;font-size:16px;font-weight:bold;letter-spacing:3px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;box-shadow:0 0 20px rgba(255,215,0,0.5)">⛶ 全屏开始游戏</button>`;
+    html += `<button id="initialFsSkipBtn" style="margin-top:10px;padding:6px 16px;background:transparent;color:#8b949e;border:none;font-size:11px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">暂不全屏，直接开始 ⏭</button>`;
+  }
+  html += `</div></div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  const closeAndContinue = () => {
+    const el = document.getElementById('initialFsGuide');
+    if(el) el.remove();
+    if(onContinue) onContinue();
+  };
+  const startBtn = document.getElementById('initialFsStartBtn');
+  const skipBtn = document.getElementById('initialFsSkipBtn');
+  if(startBtn){
+    const onStart = (e) => {
+      if(e && e.preventDefault) e.preventDefault();
+      // Android Chrome 尝试进入全屏；iOS 静默失败
+      if(!isIOS){
+        try{ toggleFullscreen(); }catch(err){}
+      }
+      closeAndContinue();
+    };
+    startBtn.addEventListener('click', e=>{ if(typeof _isSynthesizedClick==='function'&&_isSynthesizedClick())return; onStart(e); });
+    startBtn.addEventListener('touchstart', onStart, {passive:false});
+  }
+  if(skipBtn){
+    const onSkip = (e) => { if(e && e.preventDefault) e.preventDefault(); closeAndContinue(); };
+    skipBtn.addEventListener('click', e=>{ if(typeof _isSynthesizedClick==='function'&&_isSynthesizedClick())return; onSkip(e); });
+    skipBtn.addEventListener('touchstart', onSkip, {passive:false});
+  }
+};
+if(_needsInitialFullscreenGuide()){
+  _showInitialFullscreenGuide(_showWelcomeFlow);
+}else{
+  _showWelcomeFlow();
 }
 requestAnimationFrame(gameLoop);
