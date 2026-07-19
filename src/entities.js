@@ -1597,17 +1597,23 @@ class EnemyBullet {
     if(this.x<-30||this.x>CONFIG.WIDTH+30||this.y<-30||this.y>CONFIG.HEIGHT+30)this.alive=false;
   }
   draw(){
-    // 拖尾统一红色系（透明度降低，避免遮挡视线）
-    for(let i=0;i<this.trail.length;i++){const t=this.trail[i],a=(i/this.trail.length)*0.22;ctx.fillStyle=`rgba(255,56,96,${a})`;ctx.beginPath();ctx.arc(t.x,t.y,this.size*(i/this.trail.length),0,Math.PI*2);ctx.fill();}
-    // 红色外环（区分玩家子弹）
-    ctx.strokeStyle='rgba(255,56,96,0.8)';ctx.lineWidth=2;ctx.shadowColor='#ff3860';ctx.shadowBlur=10;
+    // 拖尾统一红色系（透明度提高，让弹道更清晰可辨）
+    for(let i=0;i<this.trail.length;i++){const t=this.trail[i],a=(i/this.trail.length)*0.35;ctx.fillStyle=`rgba(255,56,96,${a})`;ctx.beginPath();ctx.arc(t.x,t.y,this.size*(i/this.trail.length),0,Math.PI*2);ctx.fill();}
+    // 黑色外描边（在任何背景上都可见，让玩家清晰识别敌方子弹轮廓）
+    ctx.strokeStyle='rgba(0,0,0,0.9)';ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(this.x,this.y,this.size+2.5,0,Math.PI*2);ctx.stroke();
+    // 红色外环（区分玩家子弹，加粗加深，密集场景下也清晰）
+    ctx.strokeStyle='rgba(255,30,60,0.95)';ctx.lineWidth=2.5;ctx.shadowColor='#ff3860';ctx.shadowBlur=12;
     ctx.beginPath();ctx.arc(this.x,this.y,this.size+1.5,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;
     // 主体
-    ctx.fillStyle=this.color;ctx.shadowColor=this.color;ctx.shadowBlur=8;
+    ctx.fillStyle=this.color;ctx.shadowColor=this.color;ctx.shadowBlur=10;
     ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
     // 深色内核（与玩家白色内核区分）
-    ctx.fillStyle='rgba(80,0,20,0.7)';
+    ctx.fillStyle='rgba(80,0,20,0.85)';
     ctx.beginPath();ctx.arc(this.x,this.y,Math.max(1,this.size*0.4),0,Math.PI*2);ctx.fill();
+    // 高光点（让子弹有立体感，密集场景下也易识别）
+    ctx.fillStyle='rgba(255,200,200,0.7)';
+    ctx.beginPath();ctx.arc(this.x-this.size*0.25,this.y-this.size*0.25,Math.max(1,this.size*0.2),0,Math.PI*2);ctx.fill();
   }
 }
 
@@ -2092,12 +2098,19 @@ class Enemy {
     // 自爆闪烁
     if(this.suicidal){ctx.fillStyle=`rgba(255,100,0,${0.3+Math.sin(_NOW/100)*0.3})`;ctx.beginPath();ctx.arc(0,0,this.size+3,0,Math.PI*2);ctx.fill();}
     ctx.restore();
-    // 血条
+    // 血条（带黑色描边+发光，让玩家在密集场景下也能定位怪物）
     if(this.health<this.maxHealth||this.secondBar){
       const bw=this.size*2, bh=4;
-      ctx.fillStyle='#1a1f2e'; ctx.fillRect(this.x-bw/2-1,this.y-this.size-11,bw+2,bh+2);
-      ctx.fillStyle=this.secondBar?'#b0a090':'#a52838';
+      // 黑色外描边（让血条在任何背景上都可见）
+      ctx.strokeStyle='rgba(0,0,0,0.9)';ctx.lineWidth=1.5;
+      ctx.strokeRect(this.x-bw/2-1.5,this.y-this.size-11.5,bw+3,bh+3);
+      // 深色底
+      ctx.fillStyle='#0a0e14'; ctx.fillRect(this.x-bw/2-1,this.y-this.size-11,bw+2,bh+2);
+      // 血量填充（带发光，更醒目）
+      const hpColor=this.secondBar?'#daa520':'#f85149';
+      ctx.fillStyle=hpColor;ctx.shadowColor=hpColor;ctx.shadowBlur=6;
       ctx.fillRect(this.x-bw/2,this.y-this.size-10,bw*(this.health/this.maxHealth),bh);
+      ctx.shadowBlur=0;
     }
   }
   drawShape(fc){
@@ -2108,7 +2121,7 @@ class Enemy {
         const sqz=1+Math.sin(this.walkPhase*2)*0.12;
         ctx.save();ctx.scale(1,sqz);
         ctx.fillStyle=fc;ctx.beginPath();ctx.ellipse(0,0,s,s*0.85,0,0,Math.PI*2);ctx.fill();
-        ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1.5;ctx.stroke();
+        ctx.strokeStyle='rgba(0,0,0,0.65)';ctx.lineWidth=1.8;ctx.stroke();
         // 高光
         ctx.fillStyle='rgba(255,255,255,0.35)';
         ctx.beginPath();ctx.ellipse(-s*0.3,-s*0.4,s*0.25,s*0.15,-0.5,0,Math.PI*2);ctx.fill();
@@ -2124,7 +2137,7 @@ class Enemy {
         const wob=Math.sin(this.walkPhase)*s*0.1;
         ctx.fillStyle=fc;ctx.beginPath();
         ctx.moveTo(0,-s-wob);ctx.lineTo(s*0.9,s*0.7);ctx.lineTo(-s*0.9,s*0.7);ctx.closePath();
-        ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1.5;ctx.stroke();
+        ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.65)';ctx.lineWidth=1.8;ctx.stroke();
         // 小角
         ctx.fillStyle=fc;
         ctx.beginPath();ctx.moveTo(-s*0.4,-s*0.5);ctx.lineTo(-s*0.55,-s*1.15);ctx.lineTo(-s*0.2,-s*0.6);ctx.closePath();ctx.fill();
@@ -2143,14 +2156,14 @@ class Enemy {
         ctx.beginPath();
         ctx.moveTo(-s*0.8,-s*0.6+wob);ctx.lineTo(-s*0.6,-s);ctx.lineTo(s*0.6,-s);ctx.lineTo(s*0.8,-s*0.6+wob);
         ctx.lineTo(s*0.7,s*0.8);ctx.lineTo(-s*0.7,s*0.8);ctx.closePath();
-        ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=2;ctx.stroke();
+        ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.7)';ctx.lineWidth=2.5;ctx.stroke();
         // 裂纹
-        ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=1.2;
+        ctx.strokeStyle='rgba(0,0,0,0.6)';ctx.lineWidth=1.5;
         ctx.beginPath();ctx.moveTo(-s*0.3,-s*0.5);ctx.lineTo(-s*0.1,-s*0.2);ctx.lineTo(-s*0.3,s*0.1);ctx.stroke();
         ctx.beginPath();ctx.moveTo(s*0.3,s*0.1);ctx.lineTo(s*0.1,s*0.4);ctx.stroke();
         // 短腿
         ctx.fillStyle=fc;ctx.fillRect(-s*0.55,s*0.7,s*0.35,s*0.25);ctx.fillRect(s*0.2,s*0.7,s*0.35,s*0.25);
-        ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.strokeRect(-s*0.55,s*0.7,s*0.35,s*0.25);ctx.strokeRect(s*0.2,s*0.7,s*0.35,s*0.25);
+        ctx.strokeStyle='rgba(0,0,0,0.7)';ctx.strokeRect(-s*0.55,s*0.7,s*0.35,s*0.25);ctx.strokeRect(s*0.2,s*0.7,s*0.35,s*0.25);
         // 眼
         drawCartoonEye(-s*0.3,-s*0.4,s*0.14,look);
         drawCartoonEye(s*0.3,-s*0.4,s*0.14,look);
@@ -2163,7 +2176,7 @@ class Enemy {
         ctx.fillStyle='#ffd970';ctx.beginPath();ctx.arc(s*0.25,-s*0.9,s*0.08,0,Math.PI*2);ctx.fill();
         // 菱形身体
         ctx.fillStyle=fc;ctx.beginPath();ctx.moveTo(0,-s*0.4);ctx.lineTo(s*0.85,0);ctx.lineTo(0,s*0.85);ctx.lineTo(-s*0.85,0);ctx.closePath();ctx.fill();
-        ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1.5;ctx.stroke();
+        ctx.strokeStyle='rgba(0,0,0,0.65)';ctx.lineWidth=1.8;ctx.stroke();
         // 法杖
         ctx.strokeStyle='#8b5a2b';ctx.lineWidth=2.5;ctx.lineCap='round';
         ctx.beginPath();ctx.moveTo(s*0.9,-s*0.1);ctx.lineTo(s*1.2,s*0.5);ctx.stroke();
@@ -2176,7 +2189,7 @@ class Enemy {
         const wob=Math.sin(this.walkPhase)*s*0.04;
         // 身体
         ctx.fillStyle=fc;ctx.beginPath();ctx.arc(0,0,s*0.95,0,Math.PI*2);ctx.fill();
-        ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=2.5;ctx.stroke();
+        ctx.strokeStyle='rgba(0,0,0,0.75)';ctx.lineWidth=3;ctx.stroke();
         // 独角
         ctx.fillStyle=fc;
         ctx.beginPath();ctx.moveTo(-s*0.35,-s*0.75);ctx.lineTo(-s*0.5,-s*1.25+wob);ctx.lineTo(-s*0.15,-s*0.8);ctx.closePath();ctx.fill();ctx.stroke();
@@ -2202,7 +2215,7 @@ class Enemy {
         }
         // 身体
         ctx.fillStyle=fc;ctx.beginPath();ctx.arc(0,0,s*0.7,0,Math.PI*2);ctx.fill();
-        ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1.5;ctx.stroke();
+        ctx.strokeStyle='rgba(0,0,0,0.65)';ctx.lineWidth=1.8;ctx.stroke();
         // 毒刺
         ctx.fillStyle=fc;ctx.beginPath();ctx.moveTo(0,-s*0.6);ctx.lineTo(-s*0.15,-s*1.1);ctx.lineTo(s*0.15,-s*1.1);ctx.closePath();ctx.fill();ctx.stroke();
         // 眼
@@ -2220,12 +2233,12 @@ class Enemy {
         ctx.beginPath();ctx.ellipse(-s*0.7,s*0.4,s*0.25,s*0.18-lp*0.1,0,0,Math.PI*2);ctx.fill();
         ctx.beginPath();ctx.ellipse(s*0.7,s*0.4,s*0.25,s*0.18+lp*0.1,0,0,Math.PI*2);ctx.fill();
         // 头
-        ctx.beginPath();ctx.arc(0,-s*0.95,s*0.35,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1.5;ctx.stroke();
+        ctx.beginPath();ctx.arc(0,-s*0.95,s*0.35,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.65)';ctx.lineWidth=1.8;ctx.stroke();
         // 龟壳
         ctx.fillStyle=fc;ctx.beginPath();ctx.ellipse(0,0,s*0.95,s*0.7,0,0,Math.PI*2);ctx.fill();
-        ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=2;ctx.stroke();
+        ctx.strokeStyle='rgba(0,0,0,0.75)';ctx.lineWidth=2.5;ctx.stroke();
         // 龟壳花纹
-        ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=1.2;
+        ctx.strokeStyle='rgba(0,0,0,0.7)';ctx.lineWidth=1.5;
         for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*s*0.8,Math.sin(a)*s*0.6);ctx.stroke();}
         ctx.beginPath();ctx.ellipse(0,0,s*0.5,s*0.38,0,0,Math.PI*2);ctx.stroke();
         // 头上眼
@@ -2235,7 +2248,7 @@ class Enemy {
         const wob=Math.sin(this.walkPhase)*s*0.04;
         // 身体
         ctx.fillStyle=fc;ctx.beginPath();ctx.ellipse(0,0,s*0.9,s*0.95,0,0,Math.PI*2);ctx.fill();
-        ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=2.5;ctx.stroke();
+        ctx.strokeStyle='rgba(0,0,0,0.7)';ctx.lineWidth=3;ctx.stroke();
         // 粗壮手臂
         ctx.fillStyle=fc;
         const ap=Math.sin(this.walkPhase)*s*0.12;
