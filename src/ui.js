@@ -955,6 +955,15 @@ function startGame(){
       pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2+30,'暴击+20% 暴伤+50% 穿透+2 吸血+3%','#ffd970',2.5);
     },1500);
   }
+  // 手机端首次进入游戏：提示摇杆自动锁定机制（仅在玩家未看过提示时显示）
+  if(isTouchDevice && touchConfirmed && !saveData._aimTipShown){
+    saveData._aimTipShown = true; saveSave();
+    gameTimeout(()=>{
+      pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2-60,'🎯 右摇杆不动=自动锁定最近敌人','#ffd970',4);
+      pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2-30,'推动右摇杆=手动瞄准射击','#bc8cff',4);
+      pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2,'金色准星+虚线=当前瞄准方向','#58a6ff',4);
+    },2000);
+  }
 }
 // 无尽模式：通关8关后进入无尽波次
 function startEndlessMode(){
@@ -3303,11 +3312,17 @@ function showCharMenu(){
 // ==================== 武器菜单 ====================
 function showWeaponMenu(){
   const ov=document.getElementById('weaponOverlay'); ov.classList.remove('hidden');
-  let html='<h2>🔫 武器商店</h2><p class="subtitle">按强度定价 · 积分购买与进阶 · 满阶段3★</p>';
-  html+=`<p style="font-size:18px;color:#f0883e">当前积分: ${saveData.totalScore}</p>`;
+  // 顶部 sticky 固定栏：标题 + 返回按钮（手机端也能随时看到返回键）
+  let html=`<div style="position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#0d1117 0%,#0d1117 90%,rgba(13,17,23,0) 100%);padding:8px 0 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div style="text-align:left;flex:1;min-width:0">
+      <h2 style="margin:0;font-size:18px">🔫 武器商店</h2>
+      <p style="margin:2px 0 0;font-size:11px;color:#f0883e">积分: ${saveData.totalScore}</p>
+    </div>
+    <button class="sec-btn" id="backFromWeapon" style="flex-shrink:0;font-size:14px;padding:8px 16px;min-height:44px">← 返回</button>
+  </div>`;
   // 按 tier 升序展示（price=0且未拥有的武器为专属武器，不显示在商店中）
   const sorted=Object.entries(WEAPONS).sort((a,b)=>(a[1].tier||1)-(b[1].tier||1));
-  html+='<div style="display:flex;flex-wrap:wrap;justify-content:center;margin-top:10px">';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-top:4px">';
   for(const[id,w]of sorted){
     const owned=saveData.ownedWeapons[id]||0;
     // 专属武器（price=0）未拥有时不显示在商店
@@ -3316,31 +3331,31 @@ function showWeaponMenu(){
     const stage=owned>0?getWeaponStage(id):0;
     const maxStage=WEAPON_STAGE_MULTI.length-1; // 2 -> 3阶段(0/1/2)
     const isMax=stage>=maxStage;
-    const stats=`伤害:${w.bulletDamage} 射速:${(1/w.fireCooldown).toFixed(1)}/s 子弹:${w.bulletCount||1} 穿透:${w.pierce||0}`;
+    const stats=`伤${w.bulletDamage} 速${(1/w.fireCooldown).toFixed(1)} 弹${w.bulletCount||1} 穿${w.pierce||0}`;
     const tierColor=['#8b949e','#3fb950','#58a6ff','#bc8cff','#ffd700'][Math.min(4,(w.tier||1)-1)];
     let actionHtml='';
     if(owned>0){
       if(isMax){
-        actionHtml=`<p style="color:#ffd700;font-weight:bold">满阶 ${'★'.repeat(stage+1)}</p>`;
+        actionHtml=`<p style="color:#ffd700;font-weight:bold;font-size:10px;margin:2px 0">满阶 ${'★'.repeat(stage+1)}</p>`;
       }else{
         const upPrice=w.upgradePrice*(stage+1);
-        actionHtml=`<p style="color:#ffd700">阶段${stage+1} ${'★'.repeat(stage+1)}</p><button class="sec-btn" data-buy-upgrade="${id}" style="margin-top:6px;font-size:12px;padding:4px 10px">进阶 (${upPrice}分)</button>`;
+        actionHtml=`<p style="color:#ffd700;font-size:10px;margin:2px 0">${stage+1}★</p><button class="sec-btn" data-buy-upgrade="${id}" style="margin-top:3px;font-size:10px;padding:3px 6px;min-height:30px">进阶 ${upPrice}分</button>`;
       }
     }else{
-      actionHtml=`<p style="color:#8b949e">未拥有</p><button class="main-btn" data-buy-weapon="${id}" style="margin-top:6px;font-size:12px;padding:4px 10px;${saveData.totalScore>=(w.price||0)?'':'opacity:0.5'}">购买 (${w.price||0}分)</button>`;
+      actionHtml=`<p style="color:#8b949e;font-size:10px;margin:2px 0">未拥有</p><button class="main-btn" data-buy-weapon="${id}" style="margin-top:3px;font-size:10px;padding:3px 6px;min-height:30px;${saveData.totalScore>=(w.price||0)?'':'opacity:0.5'}">购买 ${w.price||0}分</button>`;
     }
-    html+=`<div class="weapon-card ${sel?'selected':''} ${!owned?'locked':''}" data-weapon="${id}" style="position:relative">
-      <div style="position:absolute;top:6px;right:8px;font-size:10px;color:${tierColor};font-weight:bold">T${w.tier||1}</div>
-      <div style="font-size:36px">${w.icon}</div>
-      <h3>${w.name}</h3>
-      <p style="font-size:11px;color:#8b949e">${stats}</p>
-      <p style="font-size:11px;color:#6e7681;margin:4px 0">${w.desc||''}</p>
+    html+=`<div class="weapon-card ${sel?'selected':''} ${!owned?'locked':''}" data-weapon="${id}" style="position:relative;padding:8px;margin:0">
+      <div style="position:absolute;top:4px;right:6px;font-size:9px;color:${tierColor};font-weight:bold">T${w.tier||1}</div>
+      <div style="font-size:26px;line-height:1">${w.icon}</div>
+      <h3 style="font-size:13px;margin:2px 0">${w.name}</h3>
+      <p style="font-size:9px;color:#8b949e;margin:1px 0">${stats}</p>
+      <p style="font-size:9px;color:#6e7681;margin:2px 0;line-height:1.3">${w.desc||''}</p>
       ${actionHtml}
-      <div style="font-size:11px;color:#8b949e;margin-top:4px">${getCraftSummary(id)}</div>
-      ${owned>0?'<p style="font-size:10px;color:#4a9b8e;margin-top:4px">点击卡片装备</p>':''}
+      <div style="font-size:9px;color:#8b949e;margin-top:2px">${getCraftSummary(id)}</div>
+      ${owned>0?'<p style="font-size:9px;color:#4a9b8e;margin-top:2px">点击装备</p>':''}
     </div>`;
   }
-  html+='</div><div class="panel-actions"><button class="sec-btn" id="backFromWeapon">返回</button></div>';
+  html+='</div>';
   ov.innerHTML=html;
   ov.scrollTop=0;
   // 卡片点击：装备武器

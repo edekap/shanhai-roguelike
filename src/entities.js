@@ -73,6 +73,7 @@ function _makeBossTransparent(img){
       cnt++;
     }
     bgR = bgR/cnt; bgG = bgG/cnt; bgB = bgB/cnt;
+    const bgLightness = (bgR + bgG + bgB) / 3;
     // 计算四角颜色最大差异，判断是否为纯色背景
     let maxCornerDiff = 0;
     for(const [sx, sy] of samplePts){
@@ -82,11 +83,21 @@ function _makeBossTransparent(img){
       if(diff > maxCornerDiff) maxCornerDiff = diff;
     }
     if(maxCornerDiff <= 30){
-      // 纯色背景：用色彩距离判断（兼容白底/灰底/彩色底）
+      // 纯色背景：用色彩距离判断（兼容白底/灰底/彩色底/黑底）
       // 阈值根据背景色亮度自适应：深色背景用较小阈值，浅色背景用较大阈值
-      const bgLightness = (bgR + bgG + bgB) / 3;
-      const threshold = bgLightness > 180 ? 50 : 35; // 浅色背景阈值大些
-      const edgeThreshold = threshold + 50; // 边缘渐变区间
+      const isBlackBg = bgLightness < 50;     // 黑色背景（<50亮度）
+      const isWhiteBg = bgLightness > 180;    // 白色背景
+      let threshold, edgeThreshold;
+      if(isBlackBg){
+        // 黑色背景：阈值小，避免误删暗色Boss主体
+        threshold = 30; edgeThreshold = 75;
+      }else if(isWhiteBg){
+        // 白色背景：阈值大些
+        threshold = 50; edgeThreshold = 100;
+      }else{
+        // 灰色/彩色背景：中间值
+        threshold = 40; edgeThreshold = 90;
+      }
       for(let i = 0; i < px.length; i += 4){
         const r = px[i], g = px[i+1], b = px[i+2];
         const dr = r-bgR, dg = g-bgG, db = b-bgB;
@@ -100,16 +111,24 @@ function _makeBossTransparent(img){
         }
       }
     }else{
-      // 非纯色背景：回退到"接近白色"检测
+      // 非纯色背景：回退到"接近白色/接近黑色"双向检测
       for(let i = 0; i < px.length; i += 4){
         const r = px[i], g = px[i+1], b = px[i+2];
         const max = Math.max(r,g,b), min = Math.min(r,g,b);
         const sat = max === 0 ? 0 : (max - min) / max;
         const lightness = (max + min) / 2;
+        // 接近白色（lightness>210, sat<0.12）
         if(lightness > 230 && sat < 0.08){
           px[i+3] = 0;
         }else if(lightness > 210 && sat < 0.12){
           const t = (lightness - 210) / 20;
+          px[i+3] = Math.floor(255 * (1 - t * 0.85));
+        }
+        // 接近黑色（lightness<25, sat<0.15）— 新增，处理黑色背景图
+        else if(lightness < 15 && sat < 0.2){
+          px[i+3] = 0;
+        }else if(lightness < 30 && sat < 0.15){
+          const t = (30 - lightness) / 15;
           px[i+3] = Math.floor(255 * (1 - t * 0.85));
         }
       }

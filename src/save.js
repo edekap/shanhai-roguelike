@@ -535,7 +535,7 @@ const DIFFICULTIES = {
   // waveHpGrow: 线性成长系数；waveHpGrow2: 平方项系数（后期加速）
   // HP公式：base × (1 + waveBonus×grow + waveBonus²×grow2) × enemyHpMul
   // 普通模式第8关第5波(waveBonus=39): 1+3.9+6.08=10.98倍血量（原仅2.95倍）
-  normal:    { name:'普通', icon:'🌱', enemyHpMul:1, enemyDmgMul:1, enemyCountMul:1, enemySpdMul:1, bossHpMul:1.3, bossCount:1, bossAtkMul:1, bossTrialHpMul:1.5, color:'#3fb950', spawnIntervalMul:1, enemyArmor:0, waveHpGrow:0.10, waveHpGrow2:0.004, bossDmgCap:0 },
+  normal:    { name:'普通', icon:'🌱', enemyHpMul:1.6, enemyDmgMul:1, enemyCountMul:1, enemySpdMul:1, bossHpMul:3.5, bossCount:1, bossAtkMul:1, bossTrialHpMul:2.5, color:'#3fb950', spawnIntervalMul:1, enemyArmor:0, waveHpGrow:0.12, waveHpGrow2:0.005, bossDmgCap:0 },
   hard:      { name:'困难', icon:'🔥', enemyHpMul:3, enemyDmgMul:1.8, enemyCountMul:1.6, enemySpdMul:1.3, bossHpMul:7, bossCount:1, bossAtkMul:1.4, bossTrialHpMul:2.5, color:'#f0883e', spawnIntervalMul:0.85, enemyArmor:0.1, waveHpGrow:0.13, waveHpGrow2:0.006, bossDmgCap:0.04 },
   hell:      { name:'地狱', icon:'💀', enemyHpMul:5.5, enemyDmgMul:2.8, enemyCountMul:2.2, enemySpdMul:1.6, bossHpMul:16, bossCount:1, bossAtkMul:1.8, bossTrialHpMul:3.5, color:'#f85149', spawnIntervalMul:0.7, enemyArmor:0.2, waveHpGrow:0.16, waveHpGrow2:0.008, bossDmgCap:0.03 },
   godslayer: { name:'弑神', icon:'⚔️', enemyHpMul:18, enemyDmgMul:6, enemyCountMul:7, enemySpdMul:2.5, bossHpMul:40, bossCount:2, bossAtkMul:2.8, bossTrialHpMul:5, color:'#bc8cff', spawnIntervalMul:0.35, enemyArmor:0.35, waveHpGrow:0.22, waveHpGrow2:0.012, bossDmgCap:0.022 }
