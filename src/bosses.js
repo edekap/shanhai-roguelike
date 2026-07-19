@@ -19,6 +19,22 @@ function gameTimeout(fn, delay){
     // token 不匹配：静默丢弃（旧局回调，新局已开始）
   }, delay);
 }
+// 试炼/Boss 流程专用：等待 gameState 恢复 'boss' 后再触发 spawn 类回调
+// 解决 bug：Boss 死亡后掉落经验球，玩家在 1.5s 内拾取触发升级面板（gameState='upgrade'），
+// 此时 gameTimeout 守卫 `if(gameState!=='boss')return` 会丢弃回调，导致下一只 Boss 不刷新（卡关）
+// 本函数在升级面板/暂停期间推迟重试，等 applyUpgrade 把 gameState 改回 'boss' 后再触发
+// 其他状态（gameover/menu/wavePrepare 等）：丢弃，避免误触发
+function waitBossStateThenSpawn(fn, delay){
+  gameTimeout(()=>{
+    if(gameState==='boss'){
+      fn();
+    }else if(gameState==='upgrade' || (typeof isPaused!=='undefined' && isPaused)){
+      // 升级面板期间或暂停期间推迟 100ms 重试
+      waitBossStateThenSpawn(fn, 100);
+    }
+    // 其他状态：丢弃（玩家已退出/已死亡/已进入其他流程）
+  }, delay);
+}
 
 // ==================== Boss出场戏剧化系统 ====================
 // 出场序列（总时长约2.0秒）：
@@ -476,7 +492,7 @@ function showFinalBossPrompt(){
       // 之前这里递增会导致跳关（漏打一只试炼Boss）
       resumeTrialAfterFinalBoss=false;
       if(bossTrialIndex<trialBossOrder.length){
-        gameTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+        waitBossStateThenSpawn(spawnTrialBoss,1500);
       }else{
         bossTrialMode=false; gameOver();
       }
@@ -739,7 +755,7 @@ function onBossDefeated(defeatedBoss){
     // 注意：bossTrialIndex 不再递增 — 普通Boss击败时已递增过，超级复仇Boss和刑天都是额外的
     // 之前这里递增会导致跳关（漏打一只试炼Boss）
     if(bossTrialIndex<trialBossOrder.length){
-      gameTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},2000);
+      waitBossStateThenSpawn(spawnTrialBoss,2000);
     }else{
       bossTrialMode=false; gameOver();
     }
@@ -831,7 +847,7 @@ function onBossDefeated(defeatedBoss){
     if(defeatedBoss&&defeatedBoss.isSuper&&pendingSuperRevenge){
       pendingSuperRevenge=false;
       if(bossTrialIndex<trialBossOrder.length){
-        gameTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+        waitBossStateThenSpawn(spawnTrialBoss,1500);
       }else{
         bossTrialMode=false; gameOver();
       }
@@ -842,16 +858,10 @@ function onBossDefeated(defeatedBoss){
       // 30%几率超级Boss复仇（在试炼中）
       if(!defeatedBoss.isSuper&&Math.random()<0.3){
         pendingSuperRevenge=true;
-        gameTimeout(()=>{
-          if(gameState!=='boss')return;
-          spawnSuperBoss();
-        },1500);
+        waitBossStateThenSpawn(spawnSuperBoss,1500);
         return;
       }
-      gameTimeout(()=>{
-        if(gameState!=='boss')return;
-        spawnTrialBoss();
-      },1500);
+      waitBossStateThenSpawn(spawnTrialBoss,1500);
       return;
     }else{
       // 试炼结束，进入结算
@@ -919,7 +929,7 @@ function onBossDefeated(defeatedBoss){
     console.warn('[安全保护] onBossDefeated 正常流程拦截：试炼模式中不应进入下一关');
     bossTrialIndex++;
     if(bossTrialIndex<trialBossOrder.length){
-      gameTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+      waitBossStateThenSpawn(spawnTrialBoss,1500);
     }else{
       bossTrialMode=false; gameOver();
     }
@@ -947,7 +957,7 @@ function proceedToNextLevel(){
     console.warn('[安全保护] proceedToNextLevel 拦截：试炼模式中不应进入下一关');
     bossTrialIndex++;
     if(bossTrialIndex<trialBossOrder.length){
-      gameTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+      waitBossStateThenSpawn(spawnTrialBoss,1500);
     }else{
       bossTrialMode=false; gameOver();
     }
@@ -999,7 +1009,7 @@ function showUpgradeScreen(){
       // 试炼模式：进入下一只试炼 Boss 或结束试炼
       bossTrialIndex++;
       if(bossTrialIndex<trialBossOrder.length){
-        gameTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+        waitBossStateThenSpawn(spawnTrialBoss,1500);
       }else{
         bossTrialMode=false; gameOver();
       }
@@ -1008,7 +1018,7 @@ function showUpgradeScreen(){
     }else if(_pendTrial){
       bossTrialIndex++;
       if(bossTrialIndex<trialBossOrder.length){
-        gameTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+        waitBossStateThenSpawn(spawnTrialBoss,1500);
       }else{
         bossTrialMode=false; gameOver();
       }
@@ -1051,7 +1061,7 @@ function applyUpgrade(up){
       if(player&&player._lastTrialWasSuperRevenge){
         player._lastTrialWasSuperRevenge=false;
         if(bossTrialIndex<trialBossOrder.length){
-          gameTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+          waitBossStateThenSpawn(spawnTrialBoss,1500);
         }else{
           bossTrialMode=false; gameOver();
         }
@@ -1060,9 +1070,9 @@ function applyUpgrade(up){
         if(bossTrialIndex<trialBossOrder.length){
           if(Math.random()<0.3){
             pendingSuperRevenge=true;
-            gameTimeout(()=>{if(gameState!=='boss')return;spawnSuperBoss();},1500);
+            waitBossStateThenSpawn(spawnSuperBoss,1500);
           }else{
-            gameTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
+            waitBossStateThenSpawn(spawnTrialBoss,1500);
           }
         }else{
           bossTrialMode=false; gameOver();
