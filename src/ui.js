@@ -2053,7 +2053,6 @@ function gameOver(){
     </div>
   </div>
   ${tipHtml}
-  ${recapHtml}
   ${achHtml}${firstBonusHtml}${chestNoticeHtml}
 </div>`;
   saveSave();
