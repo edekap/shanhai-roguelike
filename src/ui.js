@@ -1152,7 +1152,7 @@ function tryRevive(p){
   spawnParticles(p.x,p.y,'#3fb950',40);
   pushFloatingText(p.x,p.y-30,'💀 复活!','#3fb950',1.8);
   flashScreen('#3fb950',0.3);
-  playSound('shield'); // 用护盾音效模拟复活
+  playSound('levelUp'); // 复活：用升级音效（shield case 不存在）
   // 取消死亡动画（兜底：复活优先于死亡动画）
   if(deathAnimation){
     deathAnimation=null;

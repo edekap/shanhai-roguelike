@@ -645,15 +645,15 @@ function handleJoystickStart(e){
   if(joystickActive || joystickTouchId !== null) return;
   const touch = e.changedTouches ? e.changedTouches[0] : e;
   joystickTouchId = touch.identifier;
-  // 浮动摇杆：起始点为手指按下位置（相对 touchControls 容器）
-  const tcRect = joystickZone.parentElement.getBoundingClientRect();
+  // 浮动摇杆：起始点为手指按下位置（base/thumb 是 joystickZone 的子元素，坐标相对 joystickZone）
+  const zoneRect = joystickZone.getBoundingClientRect();
   joystickStartX = touch.clientX;
   joystickStartY = touch.clientY;
   // 把 base/thumb 中心移到手指位置（用 left/top + transform:translate(-50%,-50%)）
-  joystickBase.style.left = (touch.clientX - tcRect.left) + 'px';
-  joystickBase.style.top = (touch.clientY - tcRect.top) + 'px';
-  joystickThumb.style.left = (touch.clientX - tcRect.left) + 'px';
-  joystickThumb.style.top = (touch.clientY - tcRect.top) + 'px';
+  joystickBase.style.left = (touch.clientX - zoneRect.left) + 'px';
+  joystickBase.style.top = (touch.clientY - zoneRect.top) + 'px';
+  joystickThumb.style.left = (touch.clientX - zoneRect.left) + 'px';
+  joystickThumb.style.top = (touch.clientY - zoneRect.top) + 'px';
   joystickBase.style.opacity = '1';
   joystickThumb.style.opacity = '1';
   joystickActive = true;
@@ -724,14 +724,14 @@ function handleAimJoystickStart(e){
   if(aimJoystickActive || aimJoystickTouchId !== null) return;
   const touch = e.changedTouches ? e.changedTouches[0] : e;
   aimJoystickTouchId = touch.identifier;
-  // 浮动摇杆：起始点为手指按下位置
-  const tcRect = aimJoystickZone.parentElement.getBoundingClientRect();
+  // 浮动摇杆：起始点为手指按下位置（base/thumb 是 aimJoystickZone 的子元素，坐标相对 aimJoystickZone）
+  const zoneRect = aimJoystickZone.getBoundingClientRect();
   aimJoystickStartX = touch.clientX;
   aimJoystickStartY = touch.clientY;
-  aimJoystickBase.style.left = (touch.clientX - tcRect.left) + 'px';
-  aimJoystickBase.style.top = (touch.clientY - tcRect.top) + 'px';
-  aimJoystickThumb.style.left = (touch.clientX - tcRect.left) + 'px';
-  aimJoystickThumb.style.top = (touch.clientY - tcRect.top) + 'px';
+  aimJoystickBase.style.left = (touch.clientX - zoneRect.left) + 'px';
+  aimJoystickBase.style.top = (touch.clientY - zoneRect.top) + 'px';
+  aimJoystickThumb.style.left = (touch.clientX - zoneRect.left) + 'px';
+  aimJoystickThumb.style.top = (touch.clientY - zoneRect.top) + 'px';
   aimJoystickBase.style.opacity = '1';
   aimJoystickThumb.style.opacity = '1';
   aimJoystickActive = true;
