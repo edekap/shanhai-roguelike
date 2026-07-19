@@ -3166,9 +3166,15 @@ function showTalentMenu(){
   if(_talentMenuLastId){
     const node=ov.querySelector(`.talent-node[data-talent="${_talentMenuLastId}"]`);
     if(node){
-      node.scrollIntoView({block:'center', behavior:'instant'});
-      node.classList.add('talent-flash');
-      setTimeout(()=>node.classList.remove('talent-flash'), 1500);
+      // 如果节点在折叠的 <details> 内，自动展开（重渲染后 details 默认折叠）
+      const parentDetails=node.closest('details');
+      if(parentDetails && !parentDetails.open) parentDetails.open=true;
+      // 等浏览器渲染展开后再滚动，否则 scrollIntoView 会按折叠状态算位置
+      requestAnimationFrame(()=>{
+        node.scrollIntoView({block:'center', behavior:'instant'});
+        node.classList.add('talent-flash');
+        setTimeout(()=>node.classList.remove('talent-flash'), 1500);
+      });
     }
     _talentMenuLastId=null;
   }
@@ -3193,7 +3199,13 @@ function showTalentMenu(){
   _bindTap(document.getElementById('resetTalentsBtn'),()=>{
     // 自定义确认弹窗（不用浏览器原生 confirm，避免破坏全屏）
     _confirmDialog('确定要重置所有天赋吗？将全额返还已消耗的天赋点。',
-      ()=>{ resetTalents(); showTalentMenu(); },
+      ()=>{
+        resetTalents();
+        // 重置后清空位置记忆：避免重渲染后视图跳到错误位置
+        _talentMenuLastId=null;
+        _talentMenuScrollTop=0;
+        showTalentMenu();
+      },
       null,
       { title:'重置天赋', yesText:'确认重置', yesColor:'#f0883e' }
     );
@@ -4212,7 +4224,9 @@ function showGearMenu(){
   html+=pagedNavHTML('gear', filteredGears.length, pageSize, gst.page);
   html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;max-width:680px;margin:0 auto 10px">`;
   if(filteredGears.length===0){
-    html+=`<div style="grid-column:1/-1;color:#8b949e;text-align:center;padding:20px">${saveData.gearBag.length===0?'背包空空如也，击败Boss获取装备！':'无符合条件的装备'}</div>`;
+    const _emptyMsg = saveData.gearBag.length===0 ? '背包空空如也，击败Boss获取装备！'
+      : (gearFilterSlot ? `该部位暂无更多装备，<button class="sec-btn" data-filter-slot="" style="font-size:10px;padding:1px 6px;margin-left:4px">查看全部</button>` : '无符合条件的装备');
+    html+=`<div style="grid-column:1/-1;color:#8b949e;text-align:center;padding:20px">${_emptyMsg}</div>`;
   }else{
     for(let i=start;i<end;i++){
       const g=filteredGears[i];
