@@ -40,6 +40,7 @@ const _bossImgLoadedSet = new Set(); // 已加载的Boss索引集合
 let _xingtianImgLoaded = false;
 // 按需加载单个Boss的帧图片（依据 BOSS_FRAME_CAPABILITY 只请求存在的帧，消除 404）
 function loadBossImagesForIdx(idx){
+  idx = Number(idx); // 归一化为数字，避免字符串/数字键混用导致 Set 去重失效
   if(_bossImgLoadedSet.has(idx)) return; // 已加载
   _bossImgLoadedSet.add(idx);
   if(!BOSS_IMG_PATHS[idx]){ BOSS_IMAGES[idx]=null; return; }
@@ -3221,13 +3222,19 @@ class Boss {
       pushFloatingText(this.x,this.y-this.size-5,'免疫','#ff69b4',0.6);
       return;
     }
-    // 朱厌石头护盾：吸收伤害
+    // 朱厌石头护盾：吸收伤害（溢出伤害传递到Boss血量，避免高伤单发被全吞）
     if(this.stoneShield&&this.stoneShieldHp>0){
       if(dmg>=this.stoneShieldHp){
+        const excess=dmg-this.stoneShieldHp; // 溢出伤害传递到Boss血量
         this.stoneShieldHp=0; this.stoneShield=false;
         spawnParticles(this.x,this.y,'#8b6c5c',40);
         pushFloatingText(this.x,this.y-this.size-10,'护盾破碎!','#daa520',1.5);
         showWaveAnnounce('破盾！','朱厌的石头护盾被击碎',true);
+        if(excess>0){
+          this.health-=excess;
+          pushFloatingText(this.x,this.y-this.size-20,`-${Math.ceil(excess)}`,'#ff6347',1.0);
+          if(this.health<=0){this.die();return;}
+        }
       }else{
         this.stoneShieldHp-=dmg;
         spawnParticles(this.x+rand(-this.size*0.5,this.size*0.5),this.y+rand(-this.size*0.5,this.size*0.5),'#8b6c5c',4);
@@ -4292,11 +4299,14 @@ function updateFireEffects(dt){
       // 熔岩池/危险区域对玩家造成持续伤害（仅限标记了playerHazard的效果，绕过无敌帧）
       if(f.burnDmg>0&&f.playerHazard&&player&&player.alive&&dist(f.x,f.y,player.x,player.y)<f.radius){
         // 直接扣血，绕过无敌帧（用playerHazardTick控制频率）
+        // 应用 dmgReduction（与 takeDamage/applyDirectDamage 保持一致，让装备减伤词条对熔岩池/毒雾生效）
         if(!player._hazardTick||player._hazardTick<=0){
-          player.health-=f.burnDmg;
+          let hd=f.burnDmg;
+          if(player.dmgReduction)hd=Math.max(1,Math.ceil(hd*(1-player.dmgReduction)));
+          player.health-=hd;
           player._hazardTick=0.5; // 每0.5秒一次伤害
           spawnParticles(player.x,player.y,'#ff4500',8);
-          pushFloatingText(player.x,player.y-30,`-${Math.ceil(f.burnDmg)}`,'#ff4500',0.8);
+          pushFloatingText(player.x,player.y-30,`-${hd}`,'#ff4500',0.8);
           if(player.health<=0){
             // 与applyDirectDamage/takeDamage两条伤害路径保持一致：先尝试复活，复活失败才触发死亡动画
             if(!tryRevive(player))triggerDeathAnimation();

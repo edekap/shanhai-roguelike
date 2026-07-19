@@ -163,13 +163,15 @@ function showFinalBossPrompt(){
   const declineFinalBossBtn=document.getElementById('declineFinalBoss');
   const declineFinalBossAction=()=>{
     pendingFinalBoss=false;
+    pendingSuperRevenge=false; // 清除超级复仇标记（与 startFinalBoss 保持一致，避免泄漏到下一只Boss）
     ov.classList.add('hidden');
     gameState='boss'; // 恢复游戏状态
     // 若从试炼触发，放弃刑天后继续试炼流程
     if(resumeTrialAfterFinalBoss||bossTrialMode){
       // 试炼模式：放弃刑天后继续试炼流程（不调用 onBossDefeated，避免误入正常关卡流程）
+      // 注意：bossTrialIndex 不再递增 — 普通Boss击败时已递增过，超级复仇Boss和刑天都是额外的
+      // 之前这里递增会导致跳关（漏打一只试炼Boss）
       resumeTrialAfterFinalBoss=false;
-      bossTrialIndex++;
       if(bossTrialIndex<trialBossOrder.length){
         gameTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},1500);
       }else{
@@ -188,6 +190,7 @@ function showFinalBossPrompt(){
 function startFinalBoss(){
   pendingFinalBoss=false;
   pendingSuperRevenge=false; // 清除超级复仇标记，避免刑天死亡后流程错乱
+  bossVariant=false; // 重置变异标记（与 startEndlessBoss 保持一致，避免上一只变异Boss的状态泄漏到刑天战）
   gameState='boss'; enemies=[]; enemyBullets=[]; bossWarnings=[];
   bullets=[]; resetParticles(); drops=[]; minions=minions.filter(m=>m.permanent&&m.alive); fireEffects=[];
   lightningStrikes=[]; tornadoes=[]; // 补清：前一Boss（如计蒙/穷奇）残留的闪电/龙卷不能带入刑天战
@@ -409,7 +412,8 @@ function onBossDefeated(defeatedBoss){
       }
     }
     // 没触发升级：直接继续试炼流程
-    bossTrialIndex++;
+    // 注意：bossTrialIndex 不再递增 — 普通Boss击败时已递增过，超级复仇Boss和刑天都是额外的
+    // 之前这里递增会导致跳关（漏打一只试炼Boss）
     if(bossTrialIndex<trialBossOrder.length){
       gameTimeout(()=>{if(gameState!=='boss')return;spawnTrialBoss();},2000);
     }else{
@@ -741,6 +745,15 @@ function applyUpgrade(up){
   if(endlessMode&&pendingEndlessNext){
     pendingEndlessNext=false;
     enterEndlessWave();
+    return;
+  }
+  // 1.5) 超级复仇挂起：普通Boss击败后30%触发超级复仇，1.5秒延迟内若玩家拾取经验触发升级，
+  // 必须优先处理超级复仇，否则会被下面的"防御性跳关"跳过，导致超级Boss复仇被吞掉
+  // 且 pendingSuperRevenge 残留为 true 污染下一只Boss
+  if(pendingSuperRevenge){
+    pendingSuperRevenge=false;
+    gameState='boss';
+    gameTimeout(()=>{if(gameState!=='boss')return;spawnSuperBoss();},100);
     return;
   }
   // 2) 普通Boss击败后触发的升级：进入下一关

@@ -103,7 +103,7 @@ function gameLoop(timestamp){
       for(const eb of enemyBullets)eb.draw();
       drawLightningStrikes();
       drawTornadoes();
-      if(player)player.draw();
+      if(player&&player.alive)player.draw(); // 死亡后不绘制玩家本体（与 boss 分支保持一致，避免尸体+死亡动画叠加）
       updateParticles(dt); drawParticles();
       drawBossIndicator();
       updateFloatingTexts(dt); drawFloatingTexts();
@@ -564,6 +564,11 @@ document.addEventListener('touchstart', e=>{
   _lastTouchAt = Date.now();
 }, {passive:true});
 
+// 阻止 iOS Safari 双指缩放（user-scalable=no 在 iOS 10+ 被忽略，需用 gesturestart 事件阻止）
+// 避免玩家误操作双指缩放整个页面导致游戏布局错乱
+document.addEventListener('gesturestart', e=>{ e.preventDefault(); }, {passive:false});
+document.addEventListener('gesturechange', e=>{ e.preventDefault(); }, {passive:false});
+
 // 双触发守卫：click 事件中若距上次 touchstart 不足 500ms，认为是 touch 合成的 click，跳过
 // 用于 pauseBtn/pauseResumeBtn/pauseHomeBtn 等同时绑 click+touchstart 的按钮
 function _isSynthesizedClick(){
@@ -576,7 +581,8 @@ function updateTouchControlsVisibility(){
   if(!tc) return;
   const pb = document.getElementById('pauseBtn');
   const inBattle = (gameState === 'fighting' || gameState === 'boss');
-  if(isTouchDevice && touchConfirmed && inBattle){
+  // 暂停时隐藏摇杆（避免透过半透明暂停遮罩看到摇杆残影，UX不干净）
+  if(isTouchDevice && touchConfirmed && inBattle && !isPaused){
     tc.style.display = 'block';
   }else{
     tc.style.display = 'none';
@@ -599,7 +605,9 @@ const joystickRadius = 42; // 摇杆活动半径（缩小后）
 function handleJoystickStart(e){
   e.preventDefault();
   // 守卫：已激活时忽略新手指，防止第二指触摸同区域劫持摇杆
-  if(joystickActive && joystickTouchId !== null) return;
+  // 注意：必须同时检查 active 和 touchId — resetTouchState 会清空 touchId 但旧手指可能仍在屏幕上
+  // 若仅检查 active，旧手指抬起时 touchend 找不到匹配 id 会跳过清理，但若新手指已接管则会误清新手指
+  if(joystickActive || joystickTouchId !== null) return;
   const touch = e.changedTouches ? e.changedTouches[0] : e;
   joystickTouchId = touch.identifier;
   const rect = joystickZone.getBoundingClientRect();
@@ -664,7 +672,8 @@ const aimJoystickRadius = 38;
 function handleAimJoystickStart(e){
   e.preventDefault();
   // 守卫：已激活时忽略新手指，防止第二指触摸同区域劫持摇杆
-  if(aimJoystickActive && aimJoystickTouchId !== null) return;
+  // 注意：必须同时检查 active 和 touchId — resetTouchState 会清空 touchId 但旧手指可能仍在屏幕上
+  if(aimJoystickActive || aimJoystickTouchId !== null) return;
   const touch = e.changedTouches ? e.changedTouches[0] : e;
   aimJoystickTouchId = touch.identifier;
   const rect = aimJoystickZone.getBoundingClientRect();

@@ -470,7 +470,8 @@ const DIFFICULTY_ORDER = ['normal','hard','hell','godslayer'];
 function isDifficultyUnlocked(key){
   if(key==='normal')return true;
   const idx=DIFFICULTY_ORDER.indexOf(key);
-  if(idx<=0)return true;
+  if(idx<0)return false; // 未知 key 拒绝（避免 indexOf 返回 -1 时误判为已解锁）
+  if(idx===0)return true;
   const prevKey=DIFFICULTY_ORDER[idx-1];
   return !!(saveData.difficultyCleared && saveData.difficultyCleared[prevKey]);
 }
@@ -1031,25 +1032,27 @@ const BOSS_GEAR_TABLE = {
   }
 };
 // 判定玩家是否装备4件不同Boss的神话装备（激活圆弧护盾）
+// 必须检查 bossAffix===true，避免升阶后的普通神话（保留 bossIdx 但 bossAffix 不为 true）误激活
 function hasFourBossMythics(){
   const bossSet=new Set();
   for(const slot of GEAR_SLOTS){
     const g=saveData.equippedGear[slot];
-    if(g && g.rarity==='mythic' && g.bossIdx!==undefined && g.bossIdx!==null){
+    if(g && g.rarity==='mythic' && g.specialAffix && g.specialAffix.bossAffix===true){
       bossSet.add(g.bossIdx);
     }
   }
   return bossSet.size>=4;
 }
 // 统计已收集的Boss神话装备种类（用于图鉴）
+// 必须检查 bossAffix===true，避免升阶后的普通神话被误计入Boss神话收集
 function countBossMythicsCollected(){
   const set=new Set();
   for(const slot of GEAR_SLOTS){
     const g=saveData.equippedGear[slot];
-    if(g && g.rarity==='mythic' && g.bossIdx!==undefined && g.bossIdx!==null)set.add(g.bossIdx);
+    if(g && g.rarity==='mythic' && g.specialAffix && g.specialAffix.bossAffix===true)set.add(g.bossIdx);
   }
   for(const g of saveData.gearBag){
-    if(g && g.rarity==='mythic' && g.bossIdx!==undefined && g.bossIdx!==null)set.add(g.bossIdx);
+    if(g && g.rarity==='mythic' && g.specialAffix && g.specialAffix.bossAffix===true)set.add(g.bossIdx);
   }
   return set.size;
 }
@@ -1222,11 +1225,8 @@ function synthesizeGears(uids){
   const rarity=gears[0].rarity;
   if(!gears.every(g=>g.rarity===rarity))return{success:false,msg:'需要相同品质'};
   if(rarity==='mythic')return{success:false,msg:'神话装备已是最高品质'};
-  // Boss专属神话装备不可作为合成材料（避免丢失Boss标记）
-  const isBossMythic=(g)=>g && g.rarity==='mythic' && g.bossIdx!==undefined && g.bossIdx!==null;
-  // 注意：合成规则要求3件同品质，已含 mythic 拦截，但传说→神话的合成可能产出神话装备
-  // 这里检查：若合成目标是神话（即材料为传说），且材料中有Boss传说装备（bossIdx存在但rarity=legendary），允许合成但结果不带Boss标记（已是普通神话）
-  // 不做额外拦截，保留玩家选择权
+  // 注意：神话品质已在上方拦截，传说品质的Boss专属装备（带 bossIdx）可参与合成，
+  // 合成产物通过 generateGear 重新生成，不带 bossIdx/bossAffix（变为普通神话），这是预期行为
   const curIdx=GEAR_RARITY_ORDER.indexOf(rarity);
   if(curIdx<0||curIdx>=GEAR_RARITY_ORDER.length-1)return{success:false,msg:'无法合成'};
   const newRarity=GEAR_RARITY_ORDER[curIdx+1];

@@ -14,12 +14,15 @@ function _bindTapAll(selector, handler){
 }
 // 装备菜单专用模态弹窗：z-index 100 高于 gearOverlay(30)/adventureOverlay(35)/bossCaptureOverlay(40)，
 // 避免 #gearOverlay 内的二次确认弹窗被自身遮挡（旧代码用 #overlay z-index:20 会被 gearOverlay 盖住）
+// 注意：align-items 用 flex-start 而非 center — center 在内容超高时会让顶部溢出无法滚动到达
 function _showGearModal(html){
   let modal=document.getElementById('gearModal');
   if(!modal){
     modal=document.createElement('div');
     modal.id='gearModal';
-    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow-y:auto;-webkit-overflow-scrolling:touch';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:16px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow-y:auto;-webkit-overflow-scrolling:touch';
+    // 点击背景关闭（点在 modal 自身而非子元素时）
+    modal.addEventListener('click',(e)=>{ if(e.target===modal)_hideGearModal(); });
     document.body.appendChild(modal);
   }
   modal.innerHTML=html;
@@ -1080,12 +1083,11 @@ function showCheatRevealModal(){
   document.body.insertAdjacentHTML('beforeend', html);
   const closeBtn=document.getElementById('cheatRevealCloseBtn');
   const closeFn=(e)=>{
-    if(e)e.preventDefault();
+    if(e&&e.preventDefault)e.preventDefault();
     const el=document.getElementById('cheatRevealOverlay');
     if(el)el.remove();
   };
-  closeBtn.addEventListener('click',closeFn);
-  closeBtn.addEventListener('touchstart',closeFn,{passive:false});
+  _bindTap(closeBtn, closeFn);
 }
 
 // ==================== 牧场系统 ====================
@@ -1641,7 +1643,7 @@ function showMainMenu(){
           <div style="color:#bc8cff">📊 <b>4大难度</b>：普通→困难→地狱→弑神，需通关前一难度Boss试炼解锁。</div>
         </div>
       </details>
-      <button class="home-guide-mobile" id="homeGuideMobileBtn" style="margin:4px auto 6px;padding:4px 16px;border:1px solid rgba(212,160,23,0.4);border-radius:6px;background:rgba(22,27,34,0.8);color:#ffd970;font-size:11px;letter-spacing:1px;cursor:pointer;display:block;">📖 新手指南</button>
+      <button class="home-guide-mobile" id="homeGuideMobileBtn" style="margin:4px auto 6px;padding:4px 16px;border:1px solid rgba(212,160,23,0.4);border-radius:6px;background:rgba(22,27,34,0.8);color:#ffd970;font-size:11px;letter-spacing:1px;cursor:pointer;">📖 新手指南</button>
      </div>
     </div>
   `;
@@ -1655,9 +1657,7 @@ function showMainMenu(){
   // 手机端新手指南按钮：跳转到图鉴的新手指南tab
   const _guideMobileBtn = document.getElementById('homeGuideMobileBtn');
   if(_guideMobileBtn){
-    const _openGuide = (e)=>{ if(e&&e.preventDefault){e.preventDefault();e.stopPropagation();} showPediaMenu('guide'); };
-    _guideMobileBtn.addEventListener('click', _openGuide);
-    _guideMobileBtn.addEventListener('touchstart', _openGuide, {passive:false});
+    _bindTap(_guideMobileBtn, (e)=>{ if(e&&e.stopPropagation)e.stopPropagation(); showPediaMenu('guide'); });
   }
   // 图鉴按钮：连续点击5次触发内置作弊（10万积分+50天赋点）
   const _pediaCheat=()=>{
@@ -3410,13 +3410,11 @@ function showPediaMenu(initialTab){
   ov.querySelectorAll('[data-boss-card]').forEach(card=>{
     const idx=parseInt(card.dataset.bossCard);
     if(!saveData.bossPedia[idx]) return; // 未解锁的不可点击
-    const toggleExpand=(e)=>{
-      e.preventDefault(); e.stopPropagation();
+    _bindTap(card, (e)=>{
+      if(e&&e.stopPropagation)e.stopPropagation();
       st._expandIdx = (st._expandIdx === idx) ? -1 : idx;
       showPediaMenu(st.tab);
-    };
-    card.addEventListener('click', toggleExpand);
-    card.addEventListener('touchstart', toggleExpand, {passive:false});
+    });
   });
   _bindTap(document.getElementById('backFromPedia'),()=>{ov.classList.add('hidden');showMainMenu();});
 }
