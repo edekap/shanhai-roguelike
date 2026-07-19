@@ -58,7 +58,7 @@ function playSound(type){
   const t=audioCtx.currentTime;
   const master=audioCtx.createGain();
   master.connect(audioCtx.destination);
-  master.gain.value=0.6; // 主音量(原0.3调低导致听不到,现调高到0.6)
+  master.gain.value=0.9; // 主音量(再次提升,确保移动端能清楚听到)
   switch(type){
     case 'dragonRoar': { // 烛龙龙吼：低频咆哮+谐波
       const o1=audioCtx.createOscillator(),o2=audioCtx.createOscillator();
@@ -66,7 +66,7 @@ function playSound(type){
       o1.type='sawtooth'; o2.type='square';
       o1.frequency.setValueAtTime(80,t); o1.frequency.exponentialRampToValueAtTime(40,t+0.8);
       o2.frequency.setValueAtTime(120,t); o2.frequency.exponentialRampToValueAtTime(60,t+0.8);
-      g.gain.setValueAtTime(0.6,t); g.gain.exponentialRampToValueAtTime(0.01,t+1.2);
+      g.gain.setValueAtTime(0.8,t); g.gain.exponentialRampToValueAtTime(0.01,t+1.2);
       o1.connect(g); o2.connect(g); g.connect(master);
       o1.start(t); o2.start(t); o1.stop(t+1.2); o2.stop(t+1.2);
       // 噪声层
@@ -75,14 +75,14 @@ function playSound(type){
       const data=buf.getChannelData(0); for(let i=0;i<4410;i++)data[i]=(Math.random()*2-1)*0.5;
       noise.buffer=buf; const ng=audioCtx.createGain(); const filter=audioCtx.createBiquadFilter();
       filter.type='lowpass'; filter.frequency.value=200;
-      ng.gain.setValueAtTime(0.3,t); ng.gain.exponentialRampToValueAtTime(0.01,t+1);
+      ng.gain.setValueAtTime(0.45,t); ng.gain.exponentialRampToValueAtTime(0.01,t+1);
       noise.connect(filter); filter.connect(ng); ng.connect(master); noise.start(t);
       break;
     }
     case 'tigerRoar': { // 穷奇虎啸：中频吼叫
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='sawtooth'; o.frequency.setValueAtTime(200,t); o.frequency.exponentialRampToValueAtTime(100,t+0.6);
-      g.gain.setValueAtTime(0.5,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.8);
+      g.gain.setValueAtTime(0.65,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.8);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.8);
       break;
     }
@@ -90,21 +90,21 @@ function playSound(type){
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); const lfo=audioCtx.createOscillator(); const lfoG=audioCtx.createGain();
       o.type='sine'; o.frequency.setValueAtTime(60,t); o.frequency.linearRampToValueAtTime(120,t+1);
       lfo.frequency.value=8; lfoG.gain.value=20; lfo.connect(lfoG); lfoG.connect(o.frequency);
-      g.gain.setValueAtTime(0.4,t); g.gain.exponentialRampToValueAtTime(0.01,t+1.5);
+      g.gain.setValueAtTime(0.55,t); g.gain.exponentialRampToValueAtTime(0.01,t+1.5);
       o.connect(g); g.connect(master); o.start(t); lfo.start(t); o.stop(t+1.5); lfo.stop(t+1.5);
       break;
     }
     case 'foxHowl': { // 九尾狐啸叫：高频
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='sine'; o.frequency.setValueAtTime(800,t); o.frequency.exponentialRampToValueAtTime(400,t+0.4);
-      g.gain.setValueAtTime(0.3,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.6);
+      g.gain.setValueAtTime(0.42,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.6);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.6);
       break;
     }
     case 'birdScreech': { // 毕方鸟鸣
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='square'; o.frequency.setValueAtTime(1200,t); o.frequency.linearRampToValueAtTime(600,t+0.2); o.frequency.linearRampToValueAtTime(1000,t+0.4);
-      g.gain.setValueAtTime(0.2,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.5);
+      g.gain.setValueAtTime(0.32,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.5);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.5);
       break;
     }
@@ -114,14 +114,14 @@ function playSound(type){
       const data=buf.getChannelData(0); for(let i=0;i<8820;i++)data[i]=(Math.random()*2-1);
       noise.buffer=buf; const g=audioCtx.createGain(); const filter=audioCtx.createBiquadFilter();
       filter.type='highpass'; filter.frequency.value=3000;
-      g.gain.setValueAtTime(0.3,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.8);
+      g.gain.setValueAtTime(0.42,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.8);
       noise.connect(filter); filter.connect(g); g.connect(master); noise.start(t);
       break;
     }
     case 'apeGrowl': { // 朱厌猿吼
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='sawtooth'; o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(300,t+0.3); o.frequency.exponentialRampToValueAtTime(80,t+0.7);
-      g.gain.setValueAtTime(0.4,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.8);
+      g.gain.setValueAtTime(0.55,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.8);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.8);
       break;
     }
@@ -131,7 +131,7 @@ function playSound(type){
       const data=buf.getChannelData(0); for(let i=0;i<22050;i++)data[i]=(Math.random()*2-1)*0.5;
       noise.buffer=buf; const g=audioCtx.createGain(); const filter=audioCtx.createBiquadFilter();
       filter.type='bandpass'; filter.frequency.setValueAtTime(800,t); filter.frequency.linearRampToValueAtTime(400,t+1.5); filter.Q.value=5;
-      g.gain.setValueAtTime(0.3,t); g.gain.linearRampToValueAtTime(0.4,t+0.5); g.gain.exponentialRampToValueAtTime(0.01,t+1.5);
+      g.gain.setValueAtTime(0.42,t); g.gain.linearRampToValueAtTime(0.55,t+0.5); g.gain.exponentialRampToValueAtTime(0.01,t+1.5);
       noise.connect(filter); filter.connect(g); g.connect(master); noise.start(t);
       break;
     }
@@ -141,21 +141,21 @@ function playSound(type){
       const data=buf.getChannelData(0); for(let i=0;i<8820;i++)data[i]=(Math.random()*2-1)*0.6;
       noise.buffer=buf; const g=audioCtx.createGain(); const filter=audioCtx.createBiquadFilter();
       filter.type='lowpass'; filter.frequency.setValueAtTime(2000,t); filter.frequency.exponentialRampToValueAtTime(500,t+0.5);
-      g.gain.setValueAtTime(0.4,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.6);
+      g.gain.setValueAtTime(0.55,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.6);
       noise.connect(filter); filter.connect(g); g.connect(master); noise.start(t);
       break;
     }
     case 'bossSkill': { // Boss通用大招
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='sawtooth'; o.frequency.setValueAtTime(100,t); o.frequency.exponentialRampToValueAtTime(300,t+0.3); o.frequency.exponentialRampToValueAtTime(50,t+0.8);
-      g.gain.setValueAtTime(0.4,t); g.gain.exponentialRampToValueAtTime(0.01,t+1);
+      g.gain.setValueAtTime(0.55,t); g.gain.exponentialRampToValueAtTime(0.01,t+1);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+1);
       break;
     }
     case 'hurt': { // 玩家受伤
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='square'; o.frequency.setValueAtTime(400,t); o.frequency.exponentialRampToValueAtTime(100,t+0.15);
-      g.gain.setValueAtTime(0.4,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.2);
+      g.gain.setValueAtTime(0.55,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.2);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.2);
       break;
     }
@@ -163,10 +163,10 @@ function playSound(type){
       const o1=audioCtx.createOscillator(),o2=audioCtx.createOscillator();
       const g1=audioCtx.createGain(),g2=audioCtx.createGain();
       o1.type='sine'; o1.frequency.setValueAtTime(60,t);
-      g1.gain.setValueAtTime(0.3,t); g1.gain.exponentialRampToValueAtTime(0.01,t+0.15);
+      g1.gain.setValueAtTime(0.45,t); g1.gain.exponentialRampToValueAtTime(0.01,t+0.15);
       o1.connect(g1); g1.connect(master); o1.start(t); o1.stop(t+0.15);
       o2.type='sine'; o2.frequency.setValueAtTime(55,t+0.18);
-      g2.gain.setValueAtTime(0.25,t+0.18); g2.gain.exponentialRampToValueAtTime(0.01,t+0.33);
+      g2.gain.setValueAtTime(0.38,t+0.18); g2.gain.exponentialRampToValueAtTime(0.01,t+0.33);
       o2.connect(g2); g2.connect(master); o2.start(t+0.18); o2.stop(t+0.33);
       break;
     }
@@ -176,25 +176,25 @@ function playSound(type){
       const data=buf.getChannelData(0); for(let i=0;i<13230;i++)data[i]=(Math.random()*2-1)*(1-i/13230);
       noise.buffer=buf; const g=audioCtx.createGain(); const filter=audioCtx.createBiquadFilter();
       filter.type='lowpass'; filter.frequency.setValueAtTime(3000,t); filter.frequency.exponentialRampToValueAtTime(100,t+0.5);
-      g.gain.setValueAtTime(0.6,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.5);
+      g.gain.setValueAtTime(0.8,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.5);
       noise.connect(filter); filter.connect(g); g.connect(master); noise.start(t);
       const o=audioCtx.createOscillator(); const og=audioCtx.createGain();
       o.type='sine'; o.frequency.setValueAtTime(200,t); o.frequency.exponentialRampToValueAtTime(30,t+0.5);
-      og.gain.setValueAtTime(0.5,t); og.gain.exponentialRampToValueAtTime(0.01,t+0.5);
+      og.gain.setValueAtTime(0.65,t); og.gain.exponentialRampToValueAtTime(0.01,t+0.5);
       o.connect(og); og.connect(master); o.start(t); o.stop(t+0.5);
       break;
     }
     case 'shoot': { // 射击
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='square'; o.frequency.setValueAtTime(800,t); o.frequency.exponentialRampToValueAtTime(200,t+0.05);
-      g.gain.setValueAtTime(0.15,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.06);
+      g.gain.setValueAtTime(0.22,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.06);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.06);
       break;
     }
     case 'pickup': { // 拾取
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='sine'; o.frequency.setValueAtTime(600,t); o.frequency.exponentialRampToValueAtTime(1200,t+0.1);
-      g.gain.setValueAtTime(0.15,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+      g.gain.setValueAtTime(0.22,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.15);
       break;
     }
@@ -202,7 +202,7 @@ function playSound(type){
       [523,659,784,1047].forEach((f,i)=>{
         const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
         o.type='sine'; o.frequency.value=f;
-        g.gain.setValueAtTime(0,t+i*0.1); g.gain.linearRampToValueAtTime(0.2,t+i*0.1+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+i*0.1+0.3);
+        g.gain.setValueAtTime(0,t+i*0.1); g.gain.linearRampToValueAtTime(0.3,t+i*0.1+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+i*0.1+0.3);
         o.connect(g); g.connect(master); o.start(t+i*0.1); o.stop(t+i*0.1+0.3);
       });
       break;
@@ -210,14 +210,14 @@ function playSound(type){
     case 'warning': { // Boss范围预警
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='sine'; o.frequency.value=440;
-      g.gain.setValueAtTime(0.2,t); g.gain.linearRampToValueAtTime(0.01,t+0.5);
+      g.gain.setValueAtTime(0.3,t); g.gain.linearRampToValueAtTime(0.01,t+0.5);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.5);
       break;
     }
     case 'hit': { // 击中敌人：短促柔和的"啪"声
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='sine'; o.frequency.setValueAtTime(180,t); o.frequency.exponentialRampToValueAtTime(80,t+0.08);
-      g.gain.setValueAtTime(0.18,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.08);
+      g.gain.setValueAtTime(0.28,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.08);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.08);
       // 加一点低通噪声增加质感
       const noise=audioCtx.createBufferSource();
@@ -225,14 +225,14 @@ function playSound(type){
       const data=buf.getChannelData(0); for(let i=0;i<882;i++)data[i]=(Math.random()*2-1)*0.3;
       noise.buffer=buf; const ng=audioCtx.createGain(); const filter=audioCtx.createBiquadFilter();
       filter.type='lowpass'; filter.frequency.value=400;
-      ng.gain.setValueAtTime(0.08,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.06);
+      ng.gain.setValueAtTime(0.12,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.06);
       noise.connect(filter); filter.connect(ng); ng.connect(master); noise.start(t);
       break;
     }
     case 'kill': { // 击杀敌人：清脆"啵"声
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='sine'; o.frequency.setValueAtTime(440,t); o.frequency.exponentialRampToValueAtTime(220,t+0.12);
-      g.gain.setValueAtTime(0.22,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+      g.gain.setValueAtTime(0.32,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.15);
       break;
     }
@@ -242,7 +242,7 @@ function playSound(type){
       o1.type='sawtooth'; o2.type='triangle';
       o1.frequency.setValueAtTime(110,t); o1.frequency.linearRampToValueAtTime(55,t+1.5);
       o2.frequency.setValueAtTime(165,t); o2.frequency.linearRampToValueAtTime(82,t+1.5);
-      g.gain.setValueAtTime(0.001,t); g.gain.linearRampToValueAtTime(0.35,t+0.1); g.gain.setValueAtTime(0.35,t+1.0); g.gain.exponentialRampToValueAtTime(0.001,t+1.8);
+      g.gain.setValueAtTime(0.001,t); g.gain.linearRampToValueAtTime(0.5,t+0.1); g.gain.setValueAtTime(0.5,t+1.0); g.gain.exponentialRampToValueAtTime(0.001,t+1.8);
       o1.connect(g); o2.connect(g); g.connect(master);
       o1.start(t); o2.start(t); o1.stop(t+1.8); o2.stop(t+1.8);
       // 低频鼓点（200ms后播放）：存储 timer ID，stopBGM 时清理，避免死亡界面漏出鼓点
@@ -253,7 +253,7 @@ function playSound(type){
         const t2=audioCtx.currentTime;
         const o=audioCtx.createOscillator(); const og=audioCtx.createGain();
         o.type='sine'; o.frequency.setValueAtTime(60,t2); o.frequency.exponentialRampToValueAtTime(30,t2+0.3);
-        og.gain.setValueAtTime(0.5,t2); og.gain.exponentialRampToValueAtTime(0.001,t2+0.4);
+        og.gain.setValueAtTime(0.7,t2); og.gain.exponentialRampToValueAtTime(0.001,t2+0.4);
         o.connect(og); og.connect(master); o.start(t2); o.stop(t2+0.4);
       },200);
       break;
@@ -261,17 +261,17 @@ function playSound(type){
     case 'bossHit': { // 击中Boss：低沉有力的"咚"声（比击中怪更厚实）
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='sine'; o.frequency.setValueAtTime(180,t); o.frequency.exponentialRampToValueAtTime(70,t+0.12);
-      g.gain.setValueAtTime(0.4,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+      g.gain.setValueAtTime(0.55,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.12);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.12);
       // 加中频增加打击感
       const o2=audioCtx.createOscillator(); const g2=audioCtx.createGain();
       o2.type='triangle'; o2.frequency.setValueAtTime(420,t); o2.frequency.exponentialRampToValueAtTime(180,t+0.08);
-      g2.gain.setValueAtTime(0.2,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.08);
+      g2.gain.setValueAtTime(0.3,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.08);
       o2.connect(g2); g2.connect(master); o2.start(t); o2.stop(t+0.08);
       // 高频"啪"增加锐度
       const o3=audioCtx.createOscillator(); const g3=audioCtx.createGain();
       o3.type='square'; o3.frequency.setValueAtTime(880,t);
-      g3.gain.setValueAtTime(0.08,t); g3.gain.exponentialRampToValueAtTime(0.001,t+0.04);
+      g3.gain.setValueAtTime(0.15,t); g3.gain.exponentialRampToValueAtTime(0.001,t+0.04);
       o3.connect(g3); g3.connect(master); o3.start(t); o3.stop(t+0.04);
       break;
     }
@@ -279,12 +279,12 @@ function playSound(type){
       // 低频轰鸣
       const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
       o.type='sine'; o.frequency.setValueAtTime(80,t); o.frequency.exponentialRampToValueAtTime(30,t+0.2);
-      g.gain.setValueAtTime(0.2,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+      g.gain.setValueAtTime(0.35,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.2);
       o.connect(g); g.connect(master); o.start(t); o.stop(t+0.2);
       // 高频嘶嘶（噪音模拟）
       const o2=audioCtx.createOscillator(); const g2=audioCtx.createGain();
       o2.type='sawtooth'; o2.frequency.setValueAtTime(1200,t); o2.frequency.exponentialRampToValueAtTime(200,t+0.12);
-      g2.gain.setValueAtTime(0.08,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+      g2.gain.setValueAtTime(0.15,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.12);
       o2.connect(g2); g2.connect(master); o2.start(t); o2.stop(t+0.12);
       break;
     }
@@ -312,7 +312,7 @@ function startBGM(mode){
   bgmPlaying=true;
   bgmMode=mode||'normal';
   bgmGain=audioCtx.createGain();
-  bgmGain.gain.value=bgmMode==='trial'?0.14:0.12; // 试炼BGM略大声(原0.07/0.06翻倍)
+  bgmGain.gain.value=bgmMode==='trial'?0.22:0.20; // BGM音量(从0.14/0.12再次提升,确保移动端能听到)
   bgmGain.connect(audioCtx.destination);
   scheduleBGM();
 }
