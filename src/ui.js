@@ -295,11 +295,11 @@ function updateUI(){
   }
   if(player.shield>0){
     const shPct=player.maxShield>0?player.shield/player.maxShield*100:0;
-    if(Math.abs(shPct-_ui._lastShieldPct)>1){_ui.shieldBar.style.width=shPct+'%';_ui._lastShieldPct=shPct;}
+    if(Math.abs(shPct-_ui._lastShieldPct)>0.1){_ui.shieldBar.style.width=shPct+'%';_ui._lastShieldPct=shPct;}
   }
   // 技能CD
   const skPct=(player.maxSkillCooldown>0?(1-player.skillCooldown/player.maxSkillCooldown)*100:0);
-  if(Math.abs(skPct-_ui._lastSkill)>1){_ui.skillBar.style.width=skPct+'%';_ui._lastSkill=skPct;}
+  if(Math.abs(skPct-_ui._lastSkill)>0.1){_ui.skillBar.style.width=skPct+'%';_ui._lastSkill=skPct;}
   // 分数
   if(score!==_ui._lastScore){
     _ui.scoreText.textContent=score;
