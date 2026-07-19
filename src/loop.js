@@ -125,6 +125,7 @@ function gameLoop(timestamp){
       drawTornadoes();
       if(player&&player.alive)player.draw(); // 死亡后不绘制玩家本体（与 boss 分支保持一致，避免尸体+死亡动画叠加）
       updateParticles(dt); drawParticles();
+      drawAimReticle(); // 瞄准准星（在玩家、粒子之上，让玩家始终能看见自己在瞄哪里）
       drawBossIndicator();
       updateFloatingTexts(dt); drawFloatingTexts();
       // 连击数显示
@@ -215,6 +216,7 @@ function gameLoop(timestamp){
       if(player&&player.alive)player.draw();
       drawDeathAnimation();
       updateParticles(dt); drawParticles();
+      drawAimReticle(); // 瞄准准星（Boss 战中也需要瞄准反馈）
       updateFloatingTexts(dt); drawFloatingTexts();
       // 连击计时器递减（Boss战中也保持）
       if(comboTimer>0){comboTimer-=dt; if(comboTimer<=0)comboCount=0;}
@@ -699,7 +701,7 @@ let aimJoystickActive = false;
 let aimJoystickStartX = 0, aimJoystickStartY = 0;
 let aimJoystickX = 0, aimJoystickY = 0; // 射击方向 (-1 to 1)
 let aimJoystickTouchId = null; // 跟踪触摸点 identifier，防止两摇杆互相抢
-const aimJoystickRadius = 38;
+const aimJoystickRadius = 60; // 加大右摇杆半径(原38)，给手指更大操作空间，减少瞄准困难
 
 function handleAimJoystickStart(e){
   e.preventDefault();

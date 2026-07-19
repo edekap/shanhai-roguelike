@@ -550,6 +550,96 @@ function drawFloatingTexts(){
   ctx.globalAlpha=1;
 }
 
+// ==================== 瞄准准星 ====================
+// 在玩家朝向方向（mouse 位置）绘制醒目的金色十字准星 + 从玩家到准星的虚线射线
+// 解决玩家反馈"瞄准困难"：当前游戏没有准星视觉反馈，玩家朝向仅靠武器剪影体现
+// 优化点：1) 准星尺寸放大 2) 加金色光晕 3) 加虚线瞄准射线 4) 加方向箭头
+function drawAimReticle(){
+  if(!player || !player.alive) return;
+  if(gameState !== 'fighting' && gameState !== 'boss') return;
+  // 准星位置 = mouse 坐标（PC 端跟随鼠标，手机端跟随右摇杆方向或自动瞄准的敌人）
+  const mx = mouse.x, my = mouse.y;
+  const dx = mx - player.x, dy = my - player.y;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  if(dist < 20) return; // 距离太近不画准星（避免遮挡玩家）
+  const ang = Math.atan2(dy, dx);
+  ctx.save();
+  // ===== 1. 半透明虚线瞄准射线（从玩家延伸到准星位置）=====
+  // 让玩家直观看到自己在瞄哪个方向，密集场景下也能识别
+  ctx.strokeStyle = 'rgba(255,215,0,0.35)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6, 8]);
+  ctx.lineDashOffset = -_NOW / 50; // 流动效果
+  ctx.beginPath();
+  ctx.moveTo(player.x + Math.cos(ang) * (player.size + 8), player.y + Math.sin(ang) * (player.size + 8));
+  ctx.lineTo(mx, my);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // ===== 2. 金色光晕底盘（让准星在任何背景上都可见）=====
+  ctx.translate(mx, my);
+  ctx.rotate(ang);
+  // 外圈光晕
+  const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, 22);
+  grad.addColorStop(0, 'rgba(255,215,0,0.5)');
+  grad.addColorStop(0.6, 'rgba(255,215,0,0.18)');
+  grad.addColorStop(1, 'rgba(255,215,0,0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(0, 0, 22, 0, Math.PI * 2);
+  ctx.fill();
+  // ===== 3. 十字准星（粗金色 + 黑色描边，密集场景下也清晰）=====
+  ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  // 水平线（带中心空隙，避免遮挡目标点）
+  ctx.beginPath();
+  ctx.moveTo(-14, 0); ctx.lineTo(-5, 0);
+  ctx.moveTo(5, 0); ctx.lineTo(14, 0);
+  ctx.stroke();
+  // 垂直线
+  ctx.beginPath();
+  ctx.moveTo(0, -14); ctx.lineTo(0, -5);
+  ctx.moveTo(0, 5); ctx.lineTo(0, 14);
+  ctx.stroke();
+  // 金色十字（叠加在黑色描边上，让准星更醒目）
+  ctx.strokeStyle = '#ffd970';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-14, 0); ctx.lineTo(-5, 0);
+  ctx.moveTo(5, 0); ctx.lineTo(14, 0);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, -14); ctx.lineTo(0, -5);
+  ctx.moveTo(0, 5); ctx.lineTo(0, 14);
+  ctx.stroke();
+  // ===== 4. 中心点（醒目红点，标识瞄准焦点）=====
+  ctx.fillStyle = '#ff3860';
+  ctx.shadowColor = '#ff3860';
+  ctx.shadowBlur = 6;
+  ctx.beginPath();
+  ctx.arc(0, 0, 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  // ===== 5. 外圈圆环（让准星有"瞄准镜"感）=====
+  ctx.strokeStyle = 'rgba(255,215,0,0.7)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(0, 0, 18, 0, Math.PI * 2);
+  ctx.stroke();
+  // ===== 6. 方向箭头（朝向瞄准方向，强化"我在瞄这里"的视觉反馈）=====
+  ctx.fillStyle = 'rgba(255,215,0,0.85)';
+  ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(24, 0);
+  ctx.lineTo(18, -4);
+  ctx.lineTo(18, 4);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
 // Boss方向指示器（手机端：Boss在屏幕边缘或被遮挡时显示方向箭头）
 function drawBossIndicator(){
   if(!isTouchDevice || !touchConfirmed) return;
