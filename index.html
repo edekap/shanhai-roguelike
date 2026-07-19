@@ -616,44 +616,129 @@
     .action-btn { padding: 10px 24px; font-size: 13px; }
     .stat-pill { padding: 4px 8px; gap: 4px; }
   }
-  /* 横屏手机/低高度设备：左右分栏布局 */
-  @media (orientation: landscape) and (max-height: 520px) {
-    .sj-main { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 6px 14px; max-width: 940px; margin: 0 auto; align-items: start; text-align: left; }
-    .sj-col-left { grid-column: 1; grid-row: 1; text-align: center; }
-    .sj-col-right { grid-column: 2; grid-row: 1; }
-    .sj-col-bottom { grid-column: 1 / -1; grid-row: 2; }
-    /* 横屏缩小元素 */
-    h1 { font-size: 26px; letter-spacing: 3px; margin-bottom: 2px; }
-    .sj-title-seal { font-size: 9px; padding: 1px 8px; }
-    .sj-boss-showcase { width: 84px; height: 84px; margin: 2px auto 6px; }
-    .sj-boss-label { font-size: 10px; padding: 1px 10px; }
-    .subtitle { font-size: 10px; margin-bottom: 4px; line-height: 1.4; }
-    .deco-line span { font-size: 9px; }
-    .sj-scroll-frame { padding: 5px 8px; }
-    .stat-pill { padding: 3px 7px; }
-    .stat-pill .pill-value { font-size: 12px; }
-    .stat-pill .pill-icon { font-size: 12px; }
-    .stat-pill .pill-label { font-size: 7px; }
-    .menu-section { margin: 3px 0; }
-    .menu-section-title { font-size: 9px; margin-bottom: 3px; }
-    .action-btn { padding: 7px 16px; font-size: 11px; letter-spacing: 1px; margin: 2px; }
-    .btn-grid { grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 4px; }
-    .feature-btn { padding: 6px 3px; gap: 2px; }
-    .feature-btn .fb-icon { font-size: 17px; }
-    .feature-btn .fb-name { font-size: 9px; }
-    .feature-btn .fb-tag { font-size: 6px; }
-    .diff-pill { padding: 4px 10px; font-size: 10px; }
-    .diff-pills { gap: 4px; }
-    /* 横屏时折叠操作指南、新手指南（空间有限） */
-    .sj-col-bottom > .deco-line,
+  /* 横屏手机/低高度设备：左右分栏 + 底部信息悬浮（翻页式核心：sj-col-bottom 高度0） */
+  @media (orientation: landscape) and (max-height: 600px) {
+    /* sj-main 改为单行 grid：sj-col-left/right 占满整个视口高度，sj-col-bottom 不占空间 */
+    .sj-main {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      grid-template-rows: 1fr; /* 只有一行，sj-col-bottom 用 display:none 移出 grid */
+      gap: 2px 10px;
+      max-width: 940px;
+      margin: 0 auto;
+      align-items: stretch;
+      text-align: left;
+      height: 100%;
+      padding: 2px 0 !important;
+    }
+    .sj-col-left { grid-column: 1; grid-row: 1; text-align: center; overflow-y: auto; max-height: 100%; padding: 2px 4px; }
+    .sj-col-right { grid-column: 2; grid-row: 1; overflow-y: auto; max-height: 100%; padding: 2px 4px; }
+    /* 关键：sj-col-bottom 完全脱离 grid 不占空间，但 fixed 子元素仍可见 */
+    /* 注意：不能用 display:none（会强制隐藏所有子元素，包括 fixed 定位的） */
+    .sj-col-bottom {
+      position: absolute !important;
+      width: 0 !important;
+      height: 0 !important;
+      overflow: visible !important;
+      pointer-events: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    /* sj-col-bottom 内 fixed 元素重新启用 pointer-events */
+    .sj-col-bottom > .home-author,
+    .sj-col-bottom > .home-guide,
+    .sj-col-bottom > #homeFullscreenBigBtn { pointer-events: auto !important; }
+    /* sj-col-bottom 内非 fixed 元素全部隐藏（避免堆叠在 0,0 位置） */
     .sj-col-bottom > .controls,
-    .sj-col-bottom > .subtitle { display: none; }
-    .sj-col-bottom details { margin: 4px auto; font-size: 10px; }
-    .sj-col-bottom details summary { font-size: 11px; }
-    .sj-cloud-deco { font-size: 36px; }
-    .bg-rune { font-size: 14px; }
+    .sj-col-bottom > .home-diff-row,
+    .sj-col-bottom > #homeFullscreenTip,
+    .sj-col-bottom > .home-guide-mobile,
+    .sj-col-bottom > .deco-line,
+    .sj-col-bottom > .subtitle { display: none !important; }
+    /* 横屏激进压缩元素 */
+    h1 { font-size: 20px; letter-spacing: 2px; margin-bottom: 1px; }
+    .sj-title-wrap { padding: 2px 12px; }
+    .sj-title-wrap::before, .sj-title-wrap::after { width: 18px; height: 18px; }
+    .sj-title-seal { font-size: 8px; padding: 1px 6px; letter-spacing: 2px; }
+    .sj-boss-showcase { width: 64px; height: 64px; margin: 1px auto 3px; }
+    .sj-boss-showcase .sj-avatar-inner { border-width: 2px; }
+    .sj-boss-showcase .sj-boss-orbit { inset: -5px; }
+    .sj-boss-showcase .sj-boss-orbit2 { inset: -10px; }
+    .sj-boss-label { font-size: 9px; padding: 1px 8px; }
+    .subtitle { font-size: 9px; margin-bottom: 2px; line-height: 1.3; }
+    .deco-line { margin: 2px 0; }
+    .deco-line span { font-size: 8px; letter-spacing: 1px; }
+    .sj-scroll-frame { padding: 3px 6px; margin: 2px auto; }
+    .stat-pill { padding: 2px 6px; gap: 2px; }
+    .stat-pill .pill-value { font-size: 11px; }
+    .stat-pill .pill-icon { font-size: 11px; }
+    .stat-pill .pill-label { font-size: 7px; }
+    .menu-section { margin: 2px 0; }
+    .menu-section-title { font-size: 8px; margin-bottom: 2px; }
+    .action-btn { padding: 5px 12px; font-size: 10px; letter-spacing: 1px; margin: 1px; min-height: 36px; }
+    .btn-grid { grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 3px; }
+    .feature-btn { padding: 3px 2px; gap: 1px; min-height: 36px; }
+    .feature-btn .fb-icon { font-size: 15px; }
+    .feature-btn .fb-name { font-size: 8px; }
+    .feature-btn .fb-tag { font-size: 6px; }
+    .diff-pill { padding: 3px 8px; font-size: 9px; }
+    .diff-pills { gap: 3px; }
+    .sj-cloud-deco { font-size: 28px; }
+    .bg-rune { font-size: 12px; }
     /* 副标题在横屏隐藏省空间 */
     .sj-col-left > .subtitle { display: none; }
+    /* overlay padding 收紧 + 禁止外层滚动（避免页面整体往下滑） */
+    #overlay {
+      padding: 4px !important;
+      overflow: hidden !important;
+      justify-content: stretch !important;
+    }
+    /* bigBtn 横屏时变小，仍 fixed 在底部中央 */
+    #homeFullscreenBigBtn { padding: 5px 14px !important; font-size: 10px !important; min-height: 30px !important; bottom: 2px !important; left: 50% !important; transform: translateX(-50%) !important; }
+    /* 作者署名：直接 fixed 定位在 body 层（不依赖 sj-col-bottom），永远可见 */
+    .home-author {
+      position: fixed !important;
+      bottom: 2px !important;
+      left: 4px !important;
+      margin: 0 !important;
+      font-size: 9px !important;
+      padding: 2px 6px !important;
+      background: rgba(13,10,5,0.7) !important;
+      border-radius: 4px !important;
+      z-index: 1001 !important;
+      pointer-events: none;
+      display: block !important;
+    }
+    /* 新手指南：直接 fixed 定位在 body 层，永远可见，点击展开为居中模态 */
+    .home-guide {
+      position: fixed !important;
+      bottom: 2px !important;
+      right: 4px !important;
+      margin: 0 !important;
+      padding: 2px 8px !important;
+      font-size: 9px !important;
+      background: rgba(22,27,34,0.85) !important;
+      border: 1px solid rgba(212,160,23,0.4) !important;
+      border-radius: 4px !important;
+      z-index: 1001 !important;
+      max-width: 90px !important;
+      display: block !important;
+    }
+    .home-guide summary { font-size: 9px !important; list-style: none; }
+    .home-guide summary::-webkit-details-marker { display: none; }
+    .home-guide[open] {
+      max-width: min(320px, 90vw) !important;
+      max-height: 70vh !important;
+      overflow-y: auto !important;
+      bottom: auto !important;
+      top: 50% !important;
+      right: 50% !important;
+      transform: translate(50%, -50%) !important;
+      padding: 10px 14px !important;
+      font-size: 11px !important;
+      background: rgba(22,27,34,0.95) !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+    }
   }
 
   /* 竖屏旋转提示遮罩 - 仅手机端显示 */
@@ -915,12 +1000,197 @@
     #homeFullscreenBigBtn { padding: 10px 24px !important; font-size: 14px !important; min-height: 40px !important; bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important; }
   }
   .home-guide-mobile { display: none; }
+  /* 作者署名 + 新手指南：手机端 fixed 定位在底部角落，永远可见且不占布局空间 */
+  /* 触摸设备 或 窄屏（手机/小平板） */
+  @media (pointer: coarse), (max-width: 768px) {
+    .sj-col-bottom > .home-author,
+    .sj-col-bottom > .home-guide,
+    .sj-col-bottom > .home-guide-mobile {
+      position: fixed !important;
+      margin: 0 !important;
+      z-index: 1001 !important;
+      pointer-events: auto;
+    }
+    /* 作者署名：左下角小字 */
+    .sj-col-bottom > .home-author {
+      bottom: calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+      left: 4px !important;
+      font-size: 9px !important;
+      padding: 2px 8px !important;
+      background: rgba(13,10,5,0.75) !important;
+      border-radius: 4px !important;
+      pointer-events: none;
+      max-width: 140px;
+    }
+    /* 新手指南：右下角小按钮，点击展开 */
+    .sj-col-bottom > .home-guide {
+      bottom: calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+      right: 4px !important;
+      padding: 3px 10px !important;
+      font-size: 10px !important;
+      background: rgba(22,27,34,0.85) !important;
+      border: 1px solid rgba(212,160,23,0.4) !important;
+      border-radius: 6px !important;
+      max-width: 90px !important;
+    }
+    .sj-col-bottom > .home-guide summary {
+      font-size: 10px !important;
+      letter-spacing: 1px !important;
+    }
+    /* 新手指南展开时变大可滚动 */
+    .sj-col-bottom > .home-guide[open] {
+      max-width: min(320px, 90vw) !important;
+      max-height: 60vh !important;
+      overflow-y: auto !important;
+      bottom: auto !important;
+      top: 50% !important;
+      right: 50% !important;
+      transform: translate(50%, -50%) !important;
+    }
+    /* sj-col-bottom 内只剩 home-diff-row 和 bigBtn，padding 收紧 */
+    .sj-col-bottom { padding-bottom: 8px !important; }
+  }
   /* 手机端按钮触摸目标统一规范：主按钮 min-height:48px，次按钮 min-height:44px（iOS HIG/Material Design 标准） */
   @media (pointer: coarse), (max-width: 900px) {
     .main-btn, .capture-btn, .paged-nav .pg-btn { min-height: 48px; }
     .sec-btn, .feature-btn, .action-btn, .talent-node, .char-card, .weapon-card, .pet-card, .adventure-event, .upgrade-card { min-height: 44px; }
     .paged-tabs { gap: 8px; } /* 按钮间距至少 8px 防误触 */
     .paged-nav { gap: 10px; }
+  }
+  /* ==================== 横屏最终覆盖规则（必须放在所有竖屏规则之后） ==================== */
+  /* 确保横屏手机下竖屏规则的 padding-bottom、display 等不会破坏翻页式布局 */
+  @media (orientation: landscape) and (max-height: 600px) {
+    /* 强制覆盖竖屏规则的 sj-col-bottom padding-bottom，让 sj-col-bottom 完全不占空间 */
+    .sj-col-bottom {
+      position: absolute !important;
+      width: 0 !important;
+      height: 0 !important;
+      padding: 0 !important;
+      padding-bottom: 0 !important;
+      margin: 0 !important;
+      overflow: visible !important;
+      pointer-events: none !important;
+    }
+    /* sj-col-bottom 内 fixed 元素强制显示并启用 pointer-events */
+    .sj-col-bottom > .home-author,
+    .sj-col-bottom > .home-guide,
+    .sj-col-bottom > #homeFullscreenBigBtn {
+      position: fixed !important;
+      display: block !important;
+      pointer-events: auto !important;
+      z-index: 1001 !important;
+    }
+    /* sj-col-bottom 内非 fixed 元素全部隐藏 */
+    .sj-col-bottom > .controls,
+    .sj-col-bottom > .home-diff-row,
+    .sj-col-bottom > #homeFullscreenTip,
+    .sj-col-bottom > .home-guide-mobile,
+    .sj-col-bottom > .deco-line,
+    .sj-col-bottom > .subtitle { display: none !important; }
+    /* overlay 强制不滚动，让 sj-col-left/right 内部滚动 */
+    #overlay {
+      overflow: hidden !important;
+      padding: 4px !important;
+      justify-content: stretch !important;
+    }
+    /* sj-col-left/right 占满整个视口高度，内部允许滚动 */
+    .sj-main {
+      display: grid !important;
+      grid-template-columns: 0.85fr 1.15fr !important;
+      grid-template-rows: 1fr !important;
+      gap: 2px 10px !important;
+      max-width: 940px !important;
+      margin: 0 auto !important;
+      align-items: stretch !important;
+      height: 100% !important;
+      padding: 2px 0 !important;
+    }
+    .sj-col-left {
+      grid-column: 1 !important;
+      grid-row: 1 !important;
+      overflow-y: auto !important;
+      max-height: 100% !important;
+      padding: 2px 4px !important;
+      text-align: center !important;
+    }
+    .sj-col-right {
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+      overflow-y: auto !important;
+      max-height: 100% !important;
+      padding: 2px 4px !important;
+    }
+    /* 作者署名 fixed 左下角 */
+    .sj-col-bottom > .home-author {
+      bottom: 2px !important;
+      left: 4px !important;
+      margin: 0 !important;
+      font-size: 9px !important;
+      padding: 2px 6px !important;
+      background: rgba(13,10,5,0.7) !important;
+      border-radius: 4px !important;
+      pointer-events: none !important;
+      max-width: 140px !important;
+    }
+    /* 新手指南 fixed 右下角 */
+    .sj-col-bottom > .home-guide {
+      bottom: 2px !important;
+      right: 4px !important;
+      margin: 0 !important;
+      padding: 2px 8px !important;
+      font-size: 9px !important;
+      background: rgba(22,27,34,0.85) !important;
+      border: 1px solid rgba(212,160,23,0.4) !important;
+      border-radius: 4px !important;
+      max-width: 90px !important;
+    }
+    .sj-col-bottom > .home-guide summary {
+      font-size: 9px !important;
+      list-style: none !important;
+    }
+    .sj-col-bottom > .home-guide summary::-webkit-details-marker { display: none; }
+    .sj-col-bottom > .home-guide[open] {
+      max-width: min(320px, 90vw) !important;
+      max-height: 70vh !important;
+      overflow-y: auto !important;
+      bottom: auto !important;
+      top: 50% !important;
+      right: 50% !important;
+      transform: translate(50%, -50%) !important;
+      padding: 10px 14px !important;
+      font-size: 11px !important;
+      background: rgba(22,27,34,0.95) !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+    }
+    /* bigBtn 横屏时变小 fixed 底部中央 */
+    #homeFullscreenBigBtn {
+      padding: 5px 14px !important;
+      font-size: 10px !important;
+      min-height: 30px !important;
+      bottom: 2px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+    }
+    /* 横屏压缩字号 */
+    h1 { font-size: 20px !important; letter-spacing: 2px !important; margin-bottom: 1px !important; }
+    .sj-boss-showcase { width: 64px !important; height: 64px !important; margin: 1px auto 3px !important; }
+    .subtitle { font-size: 9px !important; margin-bottom: 2px !important; }
+    .sj-col-left > .subtitle { display: none !important; }
+    .stat-pill { padding: 2px 6px !important; gap: 2px !important; }
+    .stat-pill .pill-value { font-size: 11px !important; }
+    .stat-pill .pill-icon { font-size: 11px !important; }
+    .stat-pill .pill-label { font-size: 7px !important; }
+    .menu-section { margin: 2px 0 !important; }
+    .action-btn { padding: 5px 12px !important; font-size: 10px !important; letter-spacing: 1px !important; margin: 1px !important; min-height: 36px !important; }
+    .btn-grid { grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)) !important; gap: 3px !important; }
+    .feature-btn { padding: 3px 2px !important; gap: 1px !important; min-height: 36px !important; }
+    .feature-btn .fb-icon { font-size: 15px !important; }
+    .feature-btn .fb-name { font-size: 8px !important; }
+    .feature-btn .fb-tag { font-size: 6px !important; }
+    .diff-pill { padding: 3px 8px !important; font-size: 9px !important; }
+    .diff-pills { gap: 3px !important; }
+    .sj-scroll-frame { padding: 3px 6px !important; margin: 2px auto !important; }
+    .deco-line span { font-size: 8px !important; letter-spacing: 1px !important; }
   }
 </style>
 </head>
