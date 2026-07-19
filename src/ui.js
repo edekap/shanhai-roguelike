@@ -1934,8 +1934,8 @@ function gameOver(){
       ? rs.upgradesTaken.map(u=>`<span style="display:inline-block;background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.3);border-radius:3px;padding:1px 5px;margin:1px;font-size:10px;color:#58a6ff">${u}</span>`).join('')
       : '<span style="color:#8b949e;font-size:11px">无强化</span>';
     recapHtml=`
-      <details style="max-width:520px;margin:6px auto;padding:6px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(136,144,150,0.3);border-radius:8px">
-        <summary style="cursor:pointer;color:#bc8cff;font-size:13px;letter-spacing:1px">📊 死亡复盘（点击展开）</summary>
+      <details open style="max-width:520px;margin:6px auto;padding:6px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(136,144,150,0.3);border-radius:8px">
+        <summary style="cursor:pointer;color:#bc8cff;font-size:13px;letter-spacing:1px">📊 死亡复盘（点击收起）</summary>
         <div style="margin-top:8px;font-size:11px">
           <div style="color:#f85149;margin-bottom:6px;font-size:12px;font-weight:bold">💀 死因：${rs.deathCause}</div>
           <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px">
@@ -1998,7 +1998,15 @@ function gameOver(){
         </div>
       </div>`;
   }
-  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:10px;padding-top:24px"><h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:28px;margin:4px 0">游戏结束</h1><div class="deco-line" style="margin:4px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>${wasTrial?'<p style="color:#bc8cff;font-size:13px;margin:4px 0">Boss试炼结束</p>':endlessMode?`<p style="color:#daa520;font-size:13px;margin:4px 0">♾️ 无尽模式 - 第 ${endlessWave} 波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' <span style="color:#ffd700">🏆 新纪录!</span>':''}</p>`:`<p style="font-size:13px;margin:4px 0">你到达了第 ${currentLevel} 关 第 ${currentWave} 波</p>`}<div id="finalScore" class="card-enter" style="font-size:48px">${score}</div><p class="subtitle" style="margin:2px 0">本局得分</p>${achHtml}${firstBonusHtml}${chestNoticeHtml}${tipHtml}${recapHtml}<div style="display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap"><div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div><div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>${newEggs>0?`<div class="stat-pill" style="animation-delay:1s;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}</div><div style="background:rgba(22,27,34,0.7);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:8px 12px;margin:4px auto;max-width:340px;text-align:center;font-size:12px"><span style="color:#ffd700">🎖️ 训练等级 Lv.${(saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1}</span><br><span style="color:#8b949e">距下个天赋点：还差 <b style="color:#ffd970">${1000-((saveData.totalXp||0)%1000)} XP</b></span></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:6px;padding:12px 10px calc(12px + env(safe-area-inset-bottom, 0px));position:sticky;bottom:0;background:linear-gradient(180deg,transparent 0%,rgba(13,10,5,0.92) 25%);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:5"><button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle}">${replayBtnText}</button><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="sec-btn" id="backToMenuBtn" style="font-size:14px;padding:12px 24px;min-height:44px">🏠 返回主菜单</button><button class="sec-btn" id="shareScoreBtn" style="font-size:14px;padding:12px 24px;min-height:44px;border-color:#bc8cff;color:#bc8cff">📤 分享战绩</button></div><div class="subtitle" style="margin-top:2px;font-size:11px">按 R 键快速重新开始</div></div></div>`;
+  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:10px;padding-top:10px">
+  <div style="position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(13,10,5,0.96) 0%,rgba(13,10,5,0.92) 70%,rgba(13,10,5,0) 100%);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:8px 10px 12px;margin:-10px -10px 6px;width:calc(100% + 20px);box-sizing:border-box;display:flex;flex-direction:column;gap:6px;align-items:center;border-bottom:1px solid rgba(255,215,0,0.15)">
+    <button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle};width:100%;max-width:380px">${replayBtnText}</button>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;width:100%;max-width:380px">
+      <button class="sec-btn" id="backToMenuBtn" style="font-size:14px;padding:12px 18px;min-height:44px;flex:1;min-width:120px">🏠 返回主菜单</button>
+      <button class="sec-btn" id="shareScoreBtn" style="font-size:14px;padding:12px 18px;min-height:44px;border-color:#bc8cff;color:#bc8cff;flex:1;min-width:120px">📤 分享</button>
+    </div>
+  </div>
+  <h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:28px;margin:4px 0">游戏结束</h1><div class="deco-line" style="margin:4px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>${wasTrial?'<p style="color:#bc8cff;font-size:13px;margin:4px 0">Boss试炼结束</p>':endlessMode?`<p style="color:#daa520;font-size:13px;margin:4px 0">♾️ 无尽模式 - 第 ${endlessWave} 波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' <span style="color:#ffd700">🏆 新纪录!</span>':''}</p>`:`<p style="font-size:13px;margin:4px 0">你到达了第 ${currentLevel} 关 第 ${currentWave} 波</p>`}<div id="finalScore" class="card-enter" style="font-size:48px">${score}</div><p class="subtitle" style="margin:2px 0">本局得分</p>${achHtml}${firstBonusHtml}${chestNoticeHtml}${tipHtml}${recapHtml}<div style="display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap"><div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div><div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>${newEggs>0?`<div class="stat-pill" style="animation-delay:1s;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}</div><div style="background:rgba(22,27,34,0.7);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:8px 12px;margin:4px auto;max-width:340px;text-align:center;font-size:12px"><span style="color:#ffd700">🎖️ 训练等级 Lv.${(saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1}</span><br><span style="color:#8b949e">距下个天赋点：还差 <b style="color:#ffd970">${1000-((saveData.totalXp||0)%1000)} XP</b></span></div><div class="subtitle" style="margin-top:6px;font-size:11px;padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px))">按 R 键快速重新开始</div></div>`;
   saveSave();
   // 死亡界面按钮统一用 _bindTap（带 _isSynthesizedClick 守卫，防止触屏笔记本双触发）
   const startBtnEl=document.getElementById(replayBtnId);
@@ -3312,7 +3320,22 @@ function showCharMenu(){
 // ==================== 武器菜单 ====================
 function showWeaponMenu(){
   const ov=document.getElementById('weaponOverlay'); ov.classList.remove('hidden');
-  // 顶部 sticky 固定栏：标题 + 返回按钮（手机端也能随时看到返回键）
+  // 按 tier 升序展示（price=0且未拥有的武器为专属武器，不显示在商店中）
+  const sorted=Object.entries(WEAPONS).sort((a,b)=>(a[1].tier||1)-(b[1].tier||1));
+  const visibleList=sorted.filter(([id,w])=>{
+    const owned=saveData.ownedWeapons[id]||0;
+    return !(owned===0&&(w.price||0)===0&&id!=='pistol');
+  });
+  // 翻页：每页6把武器，避免手机端滑动才能看到返回键
+  const PAGE_SIZE=6;
+  const pst=getPagedState('weapon',{page:1,pageSize:PAGE_SIZE});
+  pagedSetTotal('weapon', visibleList.length);
+  if(pst.page>Math.max(1,Math.ceil(visibleList.length/PAGE_SIZE)))pst.page=1;
+  const start=(pst.page-1)*PAGE_SIZE;
+  const end=Math.min(start+PAGE_SIZE, visibleList.length);
+  const pageItems=visibleList.slice(start,end);
+
+  // 顶部固定栏：标题 + 积分 + 返回按钮（始终可见，无需滑动）
   let html=`<div style="position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#0d1117 0%,#0d1117 90%,rgba(13,17,23,0) 100%);padding:8px 0 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:12px">
     <div style="text-align:left;flex:1;min-width:0">
       <h2 style="margin:0;font-size:18px">🔫 武器商店</h2>
@@ -3320,13 +3343,11 @@ function showWeaponMenu(){
     </div>
     <button class="sec-btn" id="backFromWeapon" style="flex-shrink:0;font-size:14px;padding:8px 16px;min-height:44px">← 返回</button>
   </div>`;
-  // 按 tier 升序展示（price=0且未拥有的武器为专属武器，不显示在商店中）
-  const sorted=Object.entries(WEAPONS).sort((a,b)=>(a[1].tier||1)-(b[1].tier||1));
+
+  // 当前页武器卡片 grid（每页最多6个，紧凑布局，一屏可见）
   html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-top:4px">';
-  for(const[id,w]of sorted){
+  for(const[id,w]of pageItems){
     const owned=saveData.ownedWeapons[id]||0;
-    // 专属武器（price=0）未拥有时不显示在商店
-    if(owned===0&&(w.price||0)===0&&id!=='pistol')continue;
     const sel=saveData.currentWeapon===id;
     const stage=owned>0?getWeaponStage(id):0;
     const maxStage=WEAPON_STAGE_MULTI.length-1; // 2 -> 3阶段(0/1/2)
@@ -3356,6 +3377,12 @@ function showWeaponMenu(){
     </div>`;
   }
   html+='</div>';
+
+  // 底部分页导航 + 返回键（sticky 固定，玩家无需滑动即可看到）
+  html+=`<div class="panel-actions" style="position:sticky;bottom:0;background:linear-gradient(180deg,rgba(13,10,8,0) 0%,rgba(13,10,8,0.92) 30%,rgba(13,10,8,0.98) 100%);padding:10px 0 6px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:6px">
+    ${pagedNavHTML('weapon', visibleList.length, PAGE_SIZE, pst.page)}
+  </div>`;
+
   ov.innerHTML=html;
   ov.scrollTop=0;
   // 卡片点击：装备武器
@@ -3398,6 +3425,8 @@ function showWeaponMenu(){
     });
   });
   _bindTap(document.getElementById('backFromWeapon'),()=>{ov.classList.add('hidden');showBagMenu();});
+  // 翻页按钮绑定
+  bindPagedNav(ov, ()=>showWeaponMenu());
 }
 function getCraftSummary(id){
   const crafts=saveData.weaponCrafts[id]||[]; if(crafts.length===0)return '无词条';

@@ -42,14 +42,12 @@ const BOSS_FRAME_CAPABILITY = {
 // jpg背景透明化缓存（避免每次绘制重复处理像素）
 const _bossTransparentCache = new WeakMap();
 // 将jpg图处理成透明背景：
-// 1. 采样图片四角+边缘中点共8个点作为背景色基准
-// 2. 若四角颜色一致（纯色背景），用色彩距离判断背景像素（兼容白底/灰底/彩色底）
-// 3. 若四角颜色差异大（非纯色背景），回退到"接近白色"检测
-// 处理结果用canvas缓存，WeakMap自动随原Image回收
+// 核心算法：BFS floodfill 从图片四角向内扩散，只把"与背景色连续相似"的像素设为透明
+// 这样可以避免把Boss主体内部的黑色毛发（朱厌）误判为背景
+// 同时采样改为只采四角5x5窗口，避免采到主体
 function _makeBossTransparent(img){
   if(!img || !img.complete || img.naturalWidth===0) return img;
   if(_bossTransparentCache.has(img)) return _bossTransparentCache.get(img);
-  // 跨域图无法getImageData时直接返回原图，drawImage仍可用
   let result = img;
   try{
     const c = document.createElement('canvas');
@@ -60,79 +58,111 @@ function _makeBossTransparent(img){
     const data = cx.getImageData(0, 0, c.width, c.height);
     const px = data.data;
     const w = c.width, h = c.height;
-    // 采样四角+边缘中点共8个点作为背景色基准
-    const samplePts = [
-      [0, 0], [w-1, 0], [0, h-1], [w-1, h-1],
-      [Math.floor(w/2), 0], [Math.floor(w/2), h-1],
-      [0, Math.floor(h/2)], [w-1, Math.floor(h/2)]
-    ];
+    const total = w*h;
+
+    // 1. 采样四个真正的角点（5x5 窗口平均），避免采到主体边缘
+    const cornerPts = [[0,0],[w-1,0],[0,h-1],[w-1,h-1]];
     let bgR=0, bgG=0, bgB=0, cnt=0;
-    for(const [sx, sy] of samplePts){
-      const idx = (sy*w + sx)*4;
-      bgR += px[idx]; bgG += px[idx+1]; bgB += px[idx+2];
-      cnt++;
+    for(const [cx0, cy0] of cornerPts){
+      for(let dy=-2; dy<=2; dy++){
+        for(let dx=-2; dx<=2; dx++){
+          const sx = Math.min(w-1, Math.max(0, cx0+dx));
+          const sy = Math.min(h-1, Math.max(0, cy0+dy));
+          const idx = (sy*w + sx)*4;
+          bgR += px[idx]; bgG += px[idx+1]; bgB += px[idx+2]; cnt++;
+        }
+      }
     }
     bgR = bgR/cnt; bgG = bgG/cnt; bgB = bgB/cnt;
     const bgLightness = (bgR + bgG + bgB) / 3;
-    // 计算四角颜色最大差异，判断是否为纯色背景
-    let maxCornerDiff = 0;
-    for(const [sx, sy] of samplePts){
-      const idx = (sy*w + sx)*4;
-      const dr = px[idx]-bgR, dg = px[idx+1]-bgG, db = px[idx+2]-bgB;
-      const diff = Math.sqrt(dr*dr + dg*dg + db*db);
-      if(diff > maxCornerDiff) maxCornerDiff = diff;
+
+    // 2. 自适应阈值：根据背景亮度选择
+    // 黑底用小阈值（避免误删暗色主体），白底用大阈值，灰底/彩色底中间值
+    const isBlackBg = bgLightness < 60;
+    const isWhiteBg = bgLightness > 180;
+    let threshold, edgeThreshold;
+    if(isBlackBg){
+      threshold = 35; edgeThreshold = 75;
+    }else if(isWhiteBg){
+      threshold = 55; edgeThreshold = 110;
+    }else{
+      threshold = 45; edgeThreshold = 95;
     }
-    if(maxCornerDiff <= 30){
-      // 纯色背景：用色彩距离判断（兼容白底/灰底/彩色底/黑底）
-      // 阈值根据背景色亮度自适应：深色背景用较小阈值，浅色背景用较大阈值
-      const isBlackBg = bgLightness < 50;     // 黑色背景（<50亮度）
-      const isWhiteBg = bgLightness > 180;    // 白色背景
-      let threshold, edgeThreshold;
-      if(isBlackBg){
-        // 黑色背景：阈值小，避免误删暗色Boss主体
-        threshold = 30; edgeThreshold = 75;
-      }else if(isWhiteBg){
-        // 白色背景：阈值大些
-        threshold = 50; edgeThreshold = 100;
-      }else{
-        // 灰色/彩色背景：中间值
-        threshold = 40; edgeThreshold = 90;
+
+    // 3. 预计算每个像素与背景色的距离
+    const distArr = new Float32Array(total);
+    for(let i=0; i<total; i++){
+      const idx = i*4;
+      const r = px[idx], g = px[idx+1], b = px[idx+2];
+      const dr = r-bgR, dg = g-bgG, db = b-bgB;
+      distArr[i] = Math.sqrt(dr*dr + dg*dg + db*db);
+    }
+
+    // 4. BFS floodfill 从四角扩散：只标记"与背景连续连通"的像素
+    // 用 Int32Array 队列（O(1) 入队/出队），避免数组 shift 的 O(n) 开销
+    const reachable = new Uint8Array(total); // 1=连通背景
+    const queue = new Int32Array(total);
+    let qHead = 0, qTail = 0;
+    // 四角入队
+    for(const [cx0, cy0] of cornerPts){
+      const i = cy0*w + cx0;
+      if(distArr[i] < edgeThreshold && !reachable[i]){
+        reachable[i] = 1;
+        queue[qTail++] = i;
       }
-      for(let i = 0; i < px.length; i += 4){
-        const r = px[i], g = px[i+1], b = px[i+2];
-        const dr = r-bgR, dg = g-bgG, db = b-bgB;
-        const dist = Math.sqrt(dr*dr + dg*dg + db*db);
+    }
+    // BFS 4 邻居扩散
+    while(qHead < qTail){
+      const i = queue[qHead++];
+      const x = i % w;
+      const y = (i - x) / w;
+      // 4 邻居
+      // 左
+      if(x > 0){
+        const ni = i - 1;
+        if(!reachable[ni] && distArr[ni] < edgeThreshold){
+          reachable[ni] = 1; queue[qTail++] = ni;
+        }
+      }
+      // 右
+      if(x < w-1){
+        const ni = i + 1;
+        if(!reachable[ni] && distArr[ni] < edgeThreshold){
+          reachable[ni] = 1; queue[qTail++] = ni;
+        }
+      }
+      // 上
+      if(y > 0){
+        const ni = i - w;
+        if(!reachable[ni] && distArr[ni] < edgeThreshold){
+          reachable[ni] = 1; queue[qTail++] = ni;
+        }
+      }
+      // 下
+      if(y < h-1){
+        const ni = i + w;
+        if(!reachable[ni] && distArr[ni] < edgeThreshold){
+          reachable[ni] = 1; queue[qTail++] = ni;
+        }
+      }
+    }
+
+    // 5. 应用透明化：只对"连通背景"像素透明化，主体内部的背景色像素保留
+    // 这样朱厌黑色毛发（在主体内部，不与背景连通）不会被误删
+    for(let i=0; i<total; i++){
+      if(reachable[i]){
+        const idx = i*4;
+        const dist = distArr[i];
         if(dist < threshold){
-          px[i+3] = 0;
+          px[idx+3] = 0;
         }else if(dist < edgeThreshold){
           // 边缘渐变过渡（消除锯齿边）
-          const t = (dist - threshold) / (edgeThreshold - threshold);
-          px[i+3] = Math.floor(255 * t);
-        }
-      }
-    }else{
-      // 非纯色背景：回退到"接近白色/接近黑色"双向检测
-      for(let i = 0; i < px.length; i += 4){
-        const r = px[i], g = px[i+1], b = px[i+2];
-        const max = Math.max(r,g,b), min = Math.min(r,g,b);
-        const sat = max === 0 ? 0 : (max - min) / max;
-        const lightness = (max + min) / 2;
-        // 接近白色（lightness>210, sat<0.12）
-        if(lightness > 230 && sat < 0.08){
-          px[i+3] = 0;
-        }else if(lightness > 210 && sat < 0.12){
-          const t = (lightness - 210) / 20;
-          px[i+3] = Math.floor(255 * (1 - t * 0.85));
-        }
-        // 接近黑色（lightness<25, sat<0.15）— 新增，处理黑色背景图
-        else if(lightness < 15 && sat < 0.2){
-          px[i+3] = 0;
-        }else if(lightness < 30 && sat < 0.15){
-          const t = (30 - lightness) / 15;
-          px[i+3] = Math.floor(255 * (1 - t * 0.85));
+          const t = (edgeThreshold - dist) / (edgeThreshold - threshold);
+          px[idx+3] = Math.floor(255 * (1 - t * 0.9));
         }
       }
     }
+
     cx.putImageData(data, 0, 0);
     result = c;
   }catch(e){
@@ -3967,9 +3997,10 @@ class Boss {
       }
       // jpg透明化处理（首次调用处理，后续从缓存读取）
       const tImg=_makeBossTransparent(drawImg);
-      // 跨域 fallback 时 tImg 仍是原图(带黑底)，用圆形 clip 兜底避免显示方形黑底
-      const _isFallback = (tImg === drawImg);
-      if(_isFallback){ ctx.save(); ctx.beginPath(); ctx.arc(0,0,imgS*0.95,0,Math.PI*2); ctx.clip(); }
+      // 强制圆形 clip 兜底：无论透明化是否完美，都不会显示方形黑底/白底
+      // 圆形半径 imgS*0.97 接近正方形边长，Boss 主体（在中心）几乎完整显示
+      ctx.save();
+      ctx.beginPath(); ctx.arc(0,0,imgS*0.97,0,Math.PI*2); ctx.clip();
       ctx.drawImage(tImg,-imgS,-imgS,imgS*2,imgS*2);
       // 受击白色闪光叠加
       if(this.hitFlash>0){
@@ -3979,7 +4010,7 @@ class Boss {
         ctx.drawImage(tImg,-imgS,-imgS,imgS*2,imgS*2);
         ctx.restore();
       }
-      if(_isFallback) ctx.restore();
+      ctx.restore();
       // 攻击蓄力：粒子汇聚效果（不画圈）
       if(this.attackAnim>0){
         const ap=this.attackAnim/(this.attackAnimMax||0.8);
@@ -4028,11 +4059,12 @@ class Boss {
         const cImg=BOSS_IMAGES[this.bossIndex];
         if(cImg&&cImg.complete&&cImg.naturalWidth>0){
           const cS=c.size*2.2;
-          // 分身也使用透明化处理后的图片
+          // 分身也使用透明化处理后的图片 + 强制圆形 clip 兜底
           const tCImg=_makeBossTransparent(cImg);
-          const _isFallbackC = (tCImg === cImg);
-          if(_isFallbackC){ ctx.beginPath(); ctx.arc(0,0,cS*0.95,0,Math.PI*2); ctx.clip(); }
+          ctx.save();
+          ctx.beginPath(); ctx.arc(0,0,cS*0.97,0,Math.PI*2); ctx.clip();
           ctx.drawImage(tCImg,-cS,-cS,cS*2,cS*2);
+          ctx.restore();
         }else{
           ctx.fillStyle=c.color;
           ctx.beginPath();ctx.arc(0,0,c.size,0,Math.PI*2);ctx.fill();
@@ -4156,9 +4188,8 @@ class Boss {
       ctx.save();
       ctx.scale(breath,breath);
       const imgS=s*2.2;
-      // 跨域 fallback 时 tXt 仍是原图(带黑底)，用圆形 clip 兜底
-      const _isFallbackX = (tXt === xtImg);
-      if(_isFallbackX){ ctx.beginPath(); ctx.arc(0,0,imgS*0.95,0,Math.PI*2); ctx.clip(); }
+      // 强制圆形 clip 兜底：刑天图片也统一应用，避免方形背景
+      ctx.beginPath(); ctx.arc(0,0,imgS*0.97,0,Math.PI*2); ctx.clip();
       ctx.drawImage(tXt,-imgS,-imgS,imgS*2,imgS*2);
       // 受击白色闪光叠加
       if(this.hitFlash>0){
