@@ -1,6 +1,6 @@
 // ==================== Boss图片资源 ====================
 // v=10 全部切换为jpg格式，加载后用canvas去除白色背景实现透明效果
-const BOSS_IMG_VERSION = '11'; // 全局图片版本号（缓存破坏）
+const BOSS_IMG_VERSION = '16'; // 全局图片版本号（缓存破坏）
 // 常态帧路径（_wide.jpg / _mythic.jpg）
 const BOSS_IMG_PATHS = {
   0: 'assets/bosses/jiuweihu_v2_wide.jpg',  // 九尾狐
@@ -77,16 +77,28 @@ function _makeBossTransparent(img){
     const bgLightness = (bgR + bgG + bgB) / 3;
 
     // 2. 自适应阈值：根据背景亮度选择
-    // 黑底用小阈值（避免误删暗色主体），白底用大阈值，灰底/彩色底中间值
+    // 黑底用极小阈值（避免扩散到朱厌黑色毛发），白底用大阈值（处理灰色渐变背景）
+    // 关键：edgeThreshold 要足够大，让主体周围的灰色渐变区域也能被扩散和透明化
+    // 但不能太大，否则会误删主体
+    // 实测数据：朱厌攻击姿态背景纯白 L=255，主体周围灰色渐变 L=210-223
+    //   灰色与白色距离 dist≈78，所以白底 edgeThreshold 必须 >78，设为 120
+    //   朱厌主体中心 L=82（暗红），dist≈307 >> 120，不会被误删
+    //   朱厌黑色毛发 L=2，dist≈437 >> 120，不会被误删
     const isBlackBg = bgLightness < 60;
     const isWhiteBg = bgLightness > 180;
     let threshold, edgeThreshold;
     if(isBlackBg){
-      threshold = 35; edgeThreshold = 75;
+      // 黑底：阈值极小，只透明化与背景几乎完全相同的像素
+      // 这样朱厌黑色毛发（虽然暗，但与纯黑背景有差异）不会被扩散渗透
+      threshold = 18; edgeThreshold = 40;
     }else if(isWhiteBg){
-      threshold = 55; edgeThreshold = 110;
+      // 白底：阈值大，处理主体周围的灰色渐变背景（L=210-223）
+      // threshold=70 让 dist<70 的纯白/接近纯白像素完全透明
+      // edgeThreshold=120 让 dist<120 的灰色渐变像素扩散并渐变透明
+      threshold = 70; edgeThreshold = 120;
     }else{
-      threshold = 45; edgeThreshold = 95;
+      // 灰底/彩色底：中间值
+      threshold = 35; edgeThreshold = 70;
     }
 
     // 3. 预计算每个像素与背景色的距离
@@ -162,6 +174,57 @@ function _makeBossTransparent(img){
         }
       }
     }
+    // 6. 补充清理：对未连通但与背景色"几乎完全相同"的像素也透明化
+    // 解决问题：朱厌攻击姿态白灰背景、九尾狐中心白框，被Boss主体遮挡，BFS 从四角扩散不进去
+    // 改用"邻域投票"判断：与背景色几乎相同 + 周围8邻居中至少5个也是背景/已透明 → 透明化
+    // 这样孤立的白色像素（主体内部高光）不会被误删，但大面积连通的白色背景会被清理
+    // 用极小阈值（threshold/2.5），避免误删主体内部接近背景色的区域
+    const strictThreshold = threshold / 2.5;
+    for(let y=1; y<h-1; y++){
+      for(let x=1; x<w-1; x++){
+        const i = y*w + x;
+        if(reachable[i]) continue; // 已处理
+        const dist = distArr[i];
+        if(dist >= strictThreshold) continue;
+        // 统计 8 邻居中"背景色或已透明"的数量
+        let bgNeighbors = 0;
+        // 8 邻居偏移
+        const nIdx = [i-w-1, i-w, i-w+1, i-1, i+1, i+w-1, i+w, i+w+1];
+        for(const ni of nIdx){
+          if(ni<0 || ni>=total) continue;
+          if(reachable[ni]) { bgNeighbors++; continue; } // BFS 标记的背景
+          if(distArr[ni] < strictThreshold) bgNeighbors++; // 接近背景色
+        }
+        // 至少 5 个邻居是背景 → 大面积连通背景，透明化
+        if(bgNeighbors >= 5){
+          const idx = i*4;
+          px[idx+3] = 0;
+          // 标记为已处理，让后续邻居投票时能识别
+          reachable[i] = 1;
+        }
+      }
+    }
+    // 第二轮：基于第一轮新标记的 reachable，再投票一次，扩大清理范围
+    for(let y=1; y<h-1; y++){
+      for(let x=1; x<w-1; x++){
+        const i = y*w + x;
+        if(reachable[i]) continue;
+        const dist = distArr[i];
+        if(dist >= strictThreshold) continue;
+        let bgNeighbors = 0;
+        const nIdx = [i-w-1, i-w, i-w+1, i-1, i+1, i+w-1, i+w, i+w+1];
+        for(const ni of nIdx){
+          if(ni<0 || ni>=total) continue;
+          if(reachable[ni]) bgNeighbors++;
+          else if(distArr[ni] < strictThreshold) bgNeighbors++;
+        }
+        if(bgNeighbors >= 5){
+          const idx = i*4;
+          px[idx+3] = 0;
+          reachable[i] = 1;
+        }
+      }
+    }
 
     cx.putImageData(data, 0, 0);
     result = c;
@@ -198,16 +261,22 @@ function loadBossImagesForIdx(idx){
   const framesToLoad = 1 + ((cap.attack&&atkPath)?1:0) + (cap.attack2?1:0) + (cap.move?1:0);
   bossImagesTotal += framesToLoad;
   const onDone = ()=>{ bossImagesLoaded++; updateLoadingIndicator(); };
+  // 预处理透明化：图片下载完立即做 BFS floodfill，缓存结果
+  // 避免 Boss 出现时 drawImage 首次调用才执行透明化导致卡顿 100-300ms
+  const onImgLoad = (imgEl)=>{
+    // 异步下一帧处理，不阻塞 onload 回调链
+    setTimeout(()=>{ try{ _makeBossTransparent(imgEl); }catch(e){} }, 0);
+  };
   // idle帧
   const img = new Image();
-  img.onload = onDone;
+  img.onload = ()=>{ onImgLoad(img); onDone(); };
   img.onerror = ()=>{ console.warn('Boss图片加载失败:', idlePath); onDone(); };
   img.src = idlePath + versionSuffix;
   BOSS_IMAGES[idx] = img;
   // 主攻击帧 -attack_wide.jpg（仅 capability 标记的Boss加载，否则回退到 idle）
   if(cap.attack && atkPath){
     const imgA = new Image();
-    imgA.onload = onDone;
+    imgA.onload = ()=>{ onImgLoad(imgA); onDone(); };
     imgA.onerror = ()=>{ BOSS_IMAGES_ATTACK[idx]=img; onDone(); };
     imgA.src = atkPath + versionSuffix;
     BOSS_IMAGES_ATTACK[idx] = imgA;
@@ -217,7 +286,7 @@ function loadBossImagesForIdx(idx){
   // 副攻击帧 _a2（保留兼容性，当前所有Boss均未提供）
   if(cap.attack2){
     const imgA2 = new Image();
-    imgA2.onload = onDone;
+    imgA2.onload = ()=>{ onImgLoad(imgA2); onDone(); };
     imgA2.onerror = ()=>{ BOSS_IMAGES_ATTACK2[idx]=img; onDone(); };
     imgA2.src = idlePath.replace(/_wide\.jpg$|_mythic\.jpg$/, '_a2.jpg') + versionSuffix;
     BOSS_IMAGES_ATTACK2[idx] = imgA2;
@@ -227,7 +296,7 @@ function loadBossImagesForIdx(idx){
   // 移动帧 _m（保留兼容性，当前所有Boss均未提供）
   if(cap.move){
     const imgM = new Image();
-    imgM.onload = onDone;
+    imgM.onload = ()=>{ onImgLoad(imgM); onDone(); };
     imgM.onerror = ()=>{ BOSS_IMAGES_MOVE[idx]=img; onDone(); };
     imgM.src = idlePath.replace(/_wide\.jpg$|_mythic\.jpg$/, '_m.jpg') + versionSuffix;
     BOSS_IMAGES_MOVE[idx] = imgM;
@@ -241,13 +310,14 @@ function loadXingtianImages(){
   _xingtianImgLoaded = true;
   bossImagesTotal += 2;
   const versionSuffix = '?v=' + BOSS_IMG_VERSION;
+  const _preProc = (imgEl)=>{ setTimeout(()=>{ try{ _makeBossTransparent(imgEl); }catch(e){} }, 0); };
   const xtIdle = new Image();
-  xtIdle.onload = ()=>{ bossImagesLoaded++; updateLoadingIndicator(); };
+  xtIdle.onload = ()=>{ _preProc(xtIdle); bossImagesLoaded++; updateLoadingIndicator(); };
   xtIdle.onerror = ()=>{ console.warn('刑天常态图加载失败'); bossImagesLoaded++; updateLoadingIndicator(); };
   xtIdle.src = 'assets/bosses/xingtian_v2_wide(1).jpg' + versionSuffix;
   XINGTIAN_IMG_IDLE = xtIdle;
   const xtAtk = new Image();
-  xtAtk.onload = ()=>{ bossImagesLoaded++; updateLoadingIndicator(); };
+  xtAtk.onload = ()=>{ _preProc(xtAtk); bossImagesLoaded++; updateLoadingIndicator(); };
   xtAtk.onerror = ()=>{ console.warn('刑天攻击形态图加载失败'); bossImagesLoaded++; updateLoadingIndicator(); };
   xtAtk.src = 'assets/bosses/xingtian_v2-attack_wide(1).jpg' + versionSuffix;
   XINGTIAN_IMG_ATTACK = xtAtk;
@@ -3801,7 +3871,7 @@ class Boss {
     // 检查成就
     const newlyUnlocked=checkAchievements();
     if(newlyUnlocked.length>0){showAchievementNotifications(newlyUnlocked);saveSave();}
-    bossHealthBar.classList.add('hidden'); boss=null; bossWarnings=[];
+    bossHealthBar.classList.add('hidden'); document.body.classList.remove('boss-active'); boss=null; bossWarnings=[];
     // ===== 刑天最终Boss：掉落山海故事书 + 专属武器，显示胜利结算 =====
     if(this.isFinalBoss){
       // 掉落山海故事书
@@ -3997,10 +4067,11 @@ class Boss {
       }
       // jpg透明化处理（首次调用处理，后续从缓存读取）
       const tImg=_makeBossTransparent(drawImg);
-      // 强制圆形 clip 兜底：无论透明化是否完美，都不会显示方形黑底/白底
-      // 圆形半径 imgS*0.97 接近正方形边长，Boss 主体（在中心）几乎完整显示
+      // 绘制图片：透明化算法已处理背景，不需要圆形 clip（避免Boss变圆球形）
+      // 仅在跨域 fallback（tImg===drawImg）时用圆形 clip 兜底避免方形黑底
+      const _isFallback = (tImg === drawImg);
       ctx.save();
-      ctx.beginPath(); ctx.arc(0,0,imgS*0.97,0,Math.PI*2); ctx.clip();
+      if(_isFallback){ ctx.beginPath(); ctx.arc(0,0,imgS*0.95,0,Math.PI*2); ctx.clip(); }
       ctx.drawImage(tImg,-imgS,-imgS,imgS*2,imgS*2);
       // 受击白色闪光叠加
       if(this.hitFlash>0){
@@ -4059,10 +4130,11 @@ class Boss {
         const cImg=BOSS_IMAGES[this.bossIndex];
         if(cImg&&cImg.complete&&cImg.naturalWidth>0){
           const cS=c.size*2.2;
-          // 分身也使用透明化处理后的图片 + 强制圆形 clip 兜底
+          // 分身也使用透明化处理后的图片（仅在 fallback 时圆形 clip）
           const tCImg=_makeBossTransparent(cImg);
+          const _isFallbackC = (tCImg === cImg);
           ctx.save();
-          ctx.beginPath(); ctx.arc(0,0,cS*0.97,0,Math.PI*2); ctx.clip();
+          if(_isFallbackC){ ctx.beginPath(); ctx.arc(0,0,cS*0.95,0,Math.PI*2); ctx.clip(); }
           ctx.drawImage(tCImg,-cS,-cS,cS*2,cS*2);
           ctx.restore();
         }else{
@@ -4188,8 +4260,9 @@ class Boss {
       ctx.save();
       ctx.scale(breath,breath);
       const imgS=s*2.2;
-      // 强制圆形 clip 兜底：刑天图片也统一应用，避免方形背景
-      ctx.beginPath(); ctx.arc(0,0,imgS*0.97,0,Math.PI*2); ctx.clip();
+      // 刑天图片：透明化处理 + fallback 时圆形 clip
+      const _isFallbackX = (tXt === xtImg);
+      if(_isFallbackX){ ctx.beginPath(); ctx.arc(0,0,imgS*0.95,0,Math.PI*2); ctx.clip(); }
       ctx.drawImage(tXt,-imgS,-imgS,imgS*2,imgS*2);
       // 受击白色闪光叠加
       if(this.hitFlash>0){

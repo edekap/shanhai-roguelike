@@ -269,7 +269,7 @@ function gameLoop(timestamp){
 window.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   keys[k]=true;
-  if(k==='r'&&gameState==='gameover'){ if(_lastRunWasTrial)startBossTrial(); else startGame(); }
+  if(k==='r'&&gameState==='gameover'){ if(_lastRunWasTrial)startBossTrial(); else if(typeof endlessMode!=='undefined'&&endlessMode)startEndlessMode(); else startGame(); }
   if(k===' ')e.preventDefault();
   // PC 端暂停快捷键：ESC 或 P 切换暂停（仅战斗中）
   if((k==='escape'||k==='p') && (gameState==='fighting'||gameState==='boss')){

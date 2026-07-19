@@ -33,6 +33,41 @@ function _hideGearModal(){
   const modal=document.getElementById('gearModal');
   if(modal)modal.style.display='none';
 }
+// 自定义确认弹窗（不调用浏览器原生 confirm，避免破坏全屏）
+// 用法：_confirmDialog('提示文案', onYes, onNo?)
+function _confirmDialog(message, onYes, onNo, opts){
+  opts = opts || {};
+  const yesText = opts.yesText || '确定';
+  const noText = opts.noText || '取消';
+  const yesColor = opts.yesColor || '#f85149';
+  const title = opts.title || '请确认';
+  const html = `<div style="max-width:380px;width:100%;margin:auto;padding:18px 16px;background:linear-gradient(180deg,#1a1f2e,#0d1117);border:1px solid ${yesColor};border-radius:10px;box-shadow:0 0 24px rgba(0,0,0,0.6);text-align:center">
+    <div style="color:${yesColor};font-size:15px;font-weight:bold;margin-bottom:8px;letter-spacing:1px">${title}</div>
+    <div style="color:#c9d1d9;font-size:13px;line-height:1.6;margin-bottom:14px;word-break:break-word">${message}</div>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="sec-btn" id="_confirmNo" style="flex:1;min-width:100px;padding:10px 14px;min-height:44px">${noText}</button>
+      <button class="sec-btn" id="_confirmYes" style="flex:1;min-width:100px;padding:10px 14px;min-height:44px;background:linear-gradient(135deg,${yesColor},#a52838);color:#fff8e0;border-color:${yesColor}">${yesText}</button>
+    </div>
+  </div>`;
+  const modal = _showGearModal(html);
+  const yesBtn = document.getElementById('_confirmYes');
+  const noBtn = document.getElementById('_confirmNo');
+  const cleanup = ()=>{
+    _hideGearModal();
+    yesBtn.removeEventListener('click', yesHandler);
+    noBtn.removeEventListener('click', noHandler);
+  };
+  const yesHandler = ()=>{ cleanup(); if(onYes)onYes(); };
+  const noHandler = ()=>{ cleanup(); if(onNo)onNo(); };
+  yesBtn.addEventListener('click', yesHandler);
+  noBtn.addEventListener('click', noHandler);
+  // 触屏防双触发
+  if(typeof _bindTap==='function'){
+    _bindTap(yesBtn, ()=>{});
+    _bindTap(noBtn, ()=>{});
+  }
+  return modal;
+}
 // ==================== 战斗中Boss图鉴快捷按钮 ====================
 // 战斗中点击血条旁的📖按钮，弹出当前Boss的背景故事/弱点/技能
 // 自动暂停游戏，关闭后恢复（仅当未被玩家手动暂停时才恢复）
@@ -208,11 +243,11 @@ const _ui = {
   skillBar:null, scoreText:null, gameScore:null,
   xpLevel:null, xpText:null, xpBar:null,
   waveLabel:null, weaponText:null, petInfo:null, abilityInfo:null, relicInfo:null,
-  bossBarFill:null, timerBar:null,
+  bossBarFill:null, timerBar:null, trialProgress:null,
   // 脏标记缓存值，只在变化时写DOM
   _lastHealth:'', _lastShield:'', _lastSkill:-1, _lastScore:-1,
   _lastXp:'', _lastWave:'', _lastWeapon:'', _lastPet:'', _lastAbil:'', _lastRelics:'',
-  _lastBossHp:-1, _lastTimerPct:-1, _lastTimerTxt:'', _initDone:false
+  _lastBossHp:-1, _lastTimerPct:-1, _lastTimerTxt:'', _lastProgress:'', _initDone:false
 };
 function _initUICache(){
   if(_ui._initDone)return;
@@ -233,6 +268,7 @@ function _initUICache(){
   _ui.relicInfo=document.getElementById('relicInfo');
   _ui.bossBarFill=document.getElementById('bossBarFill');
   _ui.timerBar=document.getElementById('timerBar');
+  _ui.trialProgress=document.getElementById('trialProgress');
   _ui._initDone=true;
 }
 function updateUI(){
@@ -277,9 +313,32 @@ function updateUI(){
   // 性能优化：经验条宽度仅在变化>1%时才写DOM
   const xpPct=Math.min(100,player.xp/player.xpToNext*100);
   if(Math.abs(xpPct-_ui._lastXpPct)>1){_ui.xpBar.style.width=xpPct+'%';_ui._lastXpPct=xpPct;}
-  // 波次（冒险模式显示 第X/5关，强调5关制）
-  const wTxt=endlessMode?`♾️无尽${endlessWave}波 ${gameState==='boss'?'BOSS':'波次'+currentWave}`:`第${currentLevel}/5关 ${gameState==='boss'?'BOSS':'波次'+currentWave}`;
+  // 波次显示：冒险/无尽模式正常显示；试炼模式进度通过 #trialProgress 单独展示（Boss血条已含Boss名）
+  let wTxt;
+  let progressTxt=''; // 顶部 #trialProgress 内容（仅Boss战时显示，避免与waveLabel重复）
+  const isBossFight = (gameState==='boss') || document.body.classList.contains('boss-active');
+  if(bossTrialMode){
+    // 试炼模式：waveLabel 显示"试炼 X/N"，Boss战时通过 #trialProgress 同步显示（waveLabel会被CSS隐藏）
+    const total = (typeof trialBossOrder!=='undefined' && trialBossOrder.length) ? trialBossOrder.length : 9;
+    const idx = (typeof bossTrialIndex!=='undefined') ? Math.min(bossTrialIndex+1, total) : 1;
+    wTxt = `⚔️ 试炼 ${idx}/${total}`;
+    if(isBossFight) progressTxt = wTxt; // Boss战时waveLabel被隐藏，用#trialProgress补显示
+  }else if(endlessMode){
+    wTxt = `♾️无尽${endlessWave}波 ${gameState==='boss'?'BOSS':'波次'+currentWave}`;
+    if(isBossFight) progressTxt = `♾️ 无尽 ${endlessWave}波 · BOSS`;
+  }else{
+    wTxt = `第${currentLevel}/5关 ${gameState==='boss'?'BOSS':'波次'+currentWave}`;
+    if(isBossFight) progressTxt = `📜 第${currentLevel}/5关 · BOSS`;
+  }
   if(wTxt!==_ui._lastWave){_ui.waveLabel.textContent=wTxt;_ui._lastWave=wTxt;}
+  // 更新顶部进度指示器（仅Boss战时显示，避免与waveLabel重复）
+  if(progressTxt!==_ui._lastProgress){
+    if(_ui.trialProgress){
+      _ui.trialProgress.textContent=progressTxt;
+      _ui.trialProgress.style.display=progressTxt?'block':'none';
+    }
+    _ui._lastProgress=progressTxt;
+  }
   // 武器
   const ws=getWeaponStats(saveData.currentWeapon);
   let wt=ws.name; if(ws.stage>0)wt+='+'+'★'.repeat(ws.stage);
@@ -1288,11 +1347,11 @@ function generateDeathTip(){
     tips.push('💪 多打Boss试炼，凑齐4件神话装备激活圆弧护盾是质变');
     tips.push('📚 主菜单「图鉴」可查看Boss弱点与故事，了解机制才能更轻松');
   }
-  // 取前3条展示
-  const showTips=tips.slice(0,3);
-  return `<div style="max-width:100%;width:100%;box-sizing:border-box;margin:6px auto;padding:10px 12px;background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(188,140,255,0.10));border:1px solid rgba(255,215,0,0.5);border-radius:8px;overflow-x:hidden;word-break:break-word">
-    <div style="color:#ffd700;font-size:13px;font-weight:bold;margin-bottom:6px;letter-spacing:1px">💡 提战力小贴士</div>
-    ${showTips.map(t=>`<div style="color:#d4c5a0;font-size:12px;line-height:1.7;margin:3px 0;word-break:break-word">▸ ${t}</div>`).join('')}
+  // 取前2条展示（紧凑布局，避免手机端溢出）
+  const showTips=tips.slice(0,2);
+  return `<div style="max-width:100%;width:100%;box-sizing:border-box;margin:4px auto;padding:6px 10px;background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(188,140,255,0.10));border:1px solid rgba(255,215,0,0.5);border-radius:6px;overflow-x:hidden;word-break:break-word">
+    <div style="color:#ffd700;font-size:12px;font-weight:bold;margin-bottom:3px;letter-spacing:1px">💡 提战力小贴士</div>
+    ${showTips.map(t=>`<div style="color:#d4c5a0;font-size:11px;line-height:1.5;margin:2px 0;word-break:break-word">▸ ${t}</div>`).join('')}
   </div>`;
 }
 
@@ -1802,6 +1861,11 @@ function _bindDailyGoalButtons(){
 function gameOver(){
   // 防重入：Boss 死亡触发的 onBossDefeated 与玩家死亡的 deathTimeout 可能同时调用 gameOver
   if(gameState==='gameover')return;
+  document.body.classList.remove('boss-active'); // 恢复中间 panel（Boss 战时被精简）
+  // 清理 #trialProgress：updateUI 在 player=null 时会提前return，需在此显式隐藏，避免残留在死亡界面
+  const _tp=document.getElementById('trialProgress');
+  if(_tp){_tp.style.display='none';_tp.textContent='';}
+  if(_ui && _ui._lastProgress!==undefined)_ui._lastProgress='';
   _runToken++; // 跨局竞态防护：丢弃本局残留的 gameTimeout 回调，防止死亡界面被旧回调覆盖
   // 清理可能残留的死亡动画定时器（兜底：Boss 死亡触发的 gameOver 可能与 deathTimeout 重叠）
   if(deathTimeout){clearTimeout(deathTimeout); deathTimeout=null;}
@@ -1934,8 +1998,8 @@ function gameOver(){
       ? rs.upgradesTaken.map(u=>`<span style="display:inline-block;background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.3);border-radius:3px;padding:1px 5px;margin:1px;font-size:10px;color:#58a6ff">${u}</span>`).join('')
       : '<span style="color:#8b949e;font-size:11px">无强化</span>';
     recapHtml=`
-      <details open style="max-width:520px;margin:6px auto;padding:6px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(136,144,150,0.3);border-radius:8px">
-        <summary style="cursor:pointer;color:#bc8cff;font-size:13px;letter-spacing:1px">📊 死亡复盘（点击收起）</summary>
+      <details style="max-width:520px;margin:6px auto;padding:6px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(136,144,150,0.3);border-radius:8px">
+        <summary style="cursor:pointer;color:#bc8cff;font-size:13px;letter-spacing:1px">📊 死亡复盘（点击展开详细数据）</summary>
         <div style="margin-top:8px;font-size:11px">
           <div style="color:#f85149;margin-bottom:6px;font-size:12px;font-weight:bold">💀 死因：${rs.deathCause}</div>
           <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px">
@@ -1969,11 +2033,12 @@ function gameOver(){
         </div>
       </details>`;
   }
-  // 根据本局类型决定"再打一次"按钮的行为：试炼→再打一次试炼，其他→再来一局冒险
-  const replayBtnId = wasTrial ? 'replayTrialBtn' : 'startBtn';
-  const replayBtnText = wasTrial ? '🐉 再打一次试炼' : '⚔️ 再来一局';
-  const replayBtnHandler = wasTrial ? 'startBossTrial' : 'startGame';
-  const replayBtnStyle = wasTrial ? 'background:linear-gradient(135deg,#bc8cff,#8b5cf6);font-size:16px;padding:14px 28px;min-height:48px' : 'font-size:16px;padding:14px 28px;min-height:48px';
+  // 根据本局类型决定"再打一次"按钮的行为：试炼→再打一次试炼，无尽→再战无尽，冒险→再来一局冒险
+  const wasEndless = !wasTrial && endlessMode; // gameOver 不重置 endlessMode，可据此判断
+  const replayBtnId = wasTrial ? 'replayTrialBtn' : (wasEndless ? 'replayEndlessBtn' : 'startBtn');
+  const replayBtnText = wasTrial ? '🐉 再打一次试炼' : (wasEndless ? '♾️ 再战无尽' : '⚔️ 再来一局');
+  const replayBtnHandler = wasTrial ? 'startBossTrial' : (wasEndless ? 'startEndlessMode' : 'startGame');
+  const replayBtnStyle = wasTrial ? 'background:linear-gradient(135deg,#bc8cff,#8b5cf6);font-size:16px;padding:14px 28px;min-height:48px' : (wasEndless ? 'background:linear-gradient(135deg,#3fb950,#2a9d8f);font-size:16px;padding:14px 28px;min-height:48px' : 'font-size:16px;padding:14px 28px;min-height:48px');
   const tipHtml=generateDeathTip();
   // 首局保底奖励提示
   const firstBonusHtml = firstRunBonus ? `
@@ -1998,20 +2063,33 @@ function gameOver(){
         </div>
       </div>`;
   }
-  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:10px;padding-top:10px">
-  <div style="position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(13,10,5,0.96) 0%,rgba(13,10,5,0.92) 70%,rgba(13,10,5,0) 100%);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:8px 10px 12px;margin:-10px -10px 6px;width:calc(100% + 20px);box-sizing:border-box;display:flex;flex-direction:column;gap:6px;align-items:center;border-bottom:1px solid rgba(255,215,0,0.15)">
-    <button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle};width:100%;max-width:380px">${replayBtnText}</button>
-    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;width:100%;max-width:380px">
-      <button class="sec-btn" id="backToMenuBtn" style="font-size:14px;padding:12px 18px;min-height:44px;flex:1;min-width:120px">🏠 返回主菜单</button>
-      <button class="sec-btn" id="shareScoreBtn" style="font-size:14px;padding:12px 18px;min-height:44px;border-color:#bc8cff;color:#bc8cff;flex:1;min-width:120px">📤 分享</button>
-    </div>
+  ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:8px;padding-top:8px;min-height:100%;box-sizing:border-box">
+  <h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:24px;margin:2px 0">游戏结束</h1>
+  <div class="deco-line" style="margin:2px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>
+  <div id="finalScore" class="card-enter" style="font-size:40px;line-height:1.1;margin:2px 0">${score}</div>
+  <p class="subtitle" style="margin:1px 0 4px;font-size:11px">本局得分 · ${wasTrial?'Boss试炼':endlessMode?`无尽第${endlessWave}波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' 🏆新纪录':''}`:`第${currentLevel}关${currentWave}波`}</p>
+  ${tipHtml}
+  <div style="display:flex;gap:6px;justify-content:center;margin:4px 0;flex-wrap:wrap">
+    <div class="stat-pill" style="animation:none"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div>
+    <div class="stat-pill" style="animation:none"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>
+    ${newEggs>0?`<div class="stat-pill" style="animation:none;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}
   </div>
-  <h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:28px;margin:4px 0">游戏结束</h1><div class="deco-line" style="margin:4px 0"><span>${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</span></div>${wasTrial?'<p style="color:#bc8cff;font-size:13px;margin:4px 0">Boss试炼结束</p>':endlessMode?`<p style="color:#daa520;font-size:13px;margin:4px 0">♾️ 无尽模式 - 第 ${endlessWave} 波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?' <span style="color:#ffd700">🏆 新纪录!</span>':''}</p>`:`<p style="font-size:13px;margin:4px 0">你到达了第 ${currentLevel} 关 第 ${currentWave} 波</p>`}<div id="finalScore" class="card-enter" style="font-size:48px">${score}</div><p class="subtitle" style="margin:2px 0">本局得分</p>${achHtml}${firstBonusHtml}${chestNoticeHtml}${tipHtml}${recapHtml}<div style="display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap"><div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">+${score}</span><span class="pill-label">积分</span></div><div class="stat-pill" style="animation-delay:0.5s"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints||0}</span><span class="pill-label">天赋点</span></div>${newEggs>0?`<div class="stat-pill" style="animation-delay:1s;border-color:#3fb950"><span class="pill-icon">🥚</span><span class="pill-value">x${newEggs}</span><span class="pill-label">产蛋</span></div>`:''}</div><div style="background:rgba(22,27,34,0.7);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:8px 12px;margin:4px auto;max-width:340px;text-align:center;font-size:12px"><span style="color:#ffd700">🎖️ 训练等级 Lv.${(saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1}</span><br><span style="color:#8b949e">距下个天赋点：还差 <b style="color:#ffd970">${1000-((saveData.totalXp||0)%1000)} XP</b></span></div><div class="subtitle" style="margin-top:6px;font-size:11px;padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px))">按 R 键快速重新开始</div></div>`;
+  ${achHtml}${firstBonusHtml}${chestNoticeHtml}${recapHtml}
+  <div style="background:rgba(22,27,34,0.7);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:6px 10px;margin:4px auto;max-width:340px;text-align:center;font-size:11px"><span style="color:#ffd700">🎖️ Lv.${(saveData.totalXp||0)?Math.floor((saveData.totalXp||0)/500)+1:1}</span> <span style="color:#8b949e">· 距下个天赋点 <b style="color:#ffd970">${1000-((saveData.totalXp||0)%1000)} XP</b></span></div>
+  <div style="position:sticky;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(13,10,5,0) 0%,rgba(13,10,5,0.95) 30%);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:10px 8px calc(10px + env(safe-area-inset-bottom, 0px));margin-top:6px;z-index:10;display:flex;flex-direction:column;gap:6px;align-items:center;width:100%;box-sizing:border-box">
+    <button class="action-btn" id="${replayBtnId}" style="${replayBtnStyle};width:100%;max-width:380px">${replayBtnText}</button>
+    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;width:100%;max-width:380px">
+      <button class="sec-btn" id="backToMenuBtn" style="font-size:13px;padding:10px 14px;min-height:44px;flex:1;min-width:110px">🏠 返回主菜单</button>
+      <button class="sec-btn" id="shareScoreBtn" style="font-size:13px;padding:10px 14px;min-height:44px;border-color:#bc8cff;color:#bc8cff;flex:1;min-width:110px">📤 分享</button>
+    </div>
+    <div class="subtitle" style="margin:0;font-size:10px">按 R 键快速重新开始</div>
+  </div>
+</div>`;
   saveSave();
   // 死亡界面按钮统一用 _bindTap（带 _isSynthesizedClick 守卫，防止触屏笔记本双触发）
   const startBtnEl=document.getElementById(replayBtnId);
   const backToMenuBtnEl=document.getElementById('backToMenuBtn');
-  const replayHandler=wasTrial?startBossTrial:startGame;
+  const replayHandler=wasTrial?startBossTrial:(wasEndless?startEndlessMode:startGame);
   _bindTap(startBtnEl, replayHandler);
   _bindTap(backToMenuBtnEl, showMainMenu);
   const shareBtnEl=document.getElementById('shareScoreBtn');
@@ -2767,6 +2845,10 @@ function showMainMenu(){
   if(typeof deathAnimation!=='undefined')deathAnimation=null;
   // 清空摇杆/触摸状态（防御性：showMainMenu 可从多路径调用，确保不留残留）
   if(typeof resetTouchState==='function')resetTouchState();
+  // 清理 #trialProgress（防止从 Boss 战暂停→返回主菜单时残留）
+  const _tp=document.getElementById('trialProgress');
+  if(_tp){_tp.style.display='none';_tp.textContent='';}
+  if(_ui && _ui._lastProgress!==undefined)_ui._lastProgress='';
   gameState='menu';
   stopBGM(); // 返回主菜单时停止背景音乐
   // 计算各模块进度（用于功能按钮上的X/Y徽章）
@@ -3018,31 +3100,64 @@ function showTalentMenu(){
   // 局外经验进度
   const xpProgress=Math.floor((saveData.totalXp||0)%1000);
   const xpMilestones=Math.floor((saveData.totalXp||0)/1000);
-  let html=`<h2>🌟 天赋系统</h2><p class="subtitle">当前天赋点: <span style="color:#f0883e;font-size:20px">${saveData.talentPoints}</span> | 每升一级+1天赋点（局内拾取经验球升级）</p>`;
-  html+=`<div style="max-width:600px;margin:0 auto 20px;padding:12px 16px;border:1px solid rgba(188,140,255,0.3);border-radius:10px;background:rgba(22,27,34,0.7)">
-    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span style="color:#bc8cff">🏆 局外经验里程碑</span><span style="color:#8b949e">已达成 ${xpMilestones} 个里程碑 (+${xpMilestones}天赋点)</span></div>
-    <div style="height:10px;background:#1a1f2e;border-radius:5px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.6)"><div style="height:100%;width:${xpProgress/10}%;background:linear-gradient(90deg,#bc8cff,#ffd970);transition:width 0.3s;border-radius:5px;box-shadow:0 0 8px rgba(188,140,255,0.5)"></div></div>
-    <div style="text-align:center;font-size:11px;color:#8b949e;margin-top:4px">${xpProgress}/1000 到下一里程碑（每1000经验+1天赋点）</div>
+  // 顶部固定栏：标题 + 积分 + 返回按钮（始终可见，无需滑动）
+  let html=`<div style="position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#0d1117 0%,#0d1117 90%,rgba(13,17,23,0) 100%);padding:8px 0 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+    <div style="text-align:left;flex:1;min-width:0">
+      <h2 style="margin:0;font-size:18px">🌟 天赋系统</h2>
+      <p style="margin:2px 0 0;font-size:11px;color:#f0883e">天赋点: <b style="font-size:14px">${saveData.talentPoints}</b> · 已达成 ${xpMilestones} 里程碑</p>
+    </div>
+    <button class="sec-btn" id="backFromTalent" style="flex-shrink:0;font-size:14px;padding:8px 16px;min-height:44px">← 返回</button>
   </div>`;
-  html+=`<div class="talent-grid">`;
-  for(const t of TALENTS){
+  // 局外经验进度条（紧凑）
+  html+=`<div style="max-width:600px;margin:0 auto 8px;padding:6px 10px;border:1px solid rgba(188,140,255,0.3);border-radius:6px;background:rgba(22,27,34,0.7)">
+    <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px"><span style="color:#bc8cff">🏆 局外经验</span><span style="color:#8b949e">+${xpMilestones} 天赋点</span></div>
+    <div style="height:6px;background:#1a1f2e;border-radius:3px;overflow:hidden"><div style="height:100%;width:${xpProgress/10}%;background:linear-gradient(90deg,#bc8cff,#ffd970);border-radius:3px"></div></div>
+    <div style="text-align:center;font-size:10px;color:#8b949e;margin-top:2px">${xpProgress}/1000</div>
+  </div>`;
+  // 天赋分类：基础/辅助/高级（默认只展开基础，避免一屏塞不下）
+  const groups = [
+    { id:'basic', name:'⚔️ 基础天赋', talents: TALENTS.filter(t=>!t.branch) },
+    { id:'support', name:'🔄 辅助天赋（二选一）', talents: TALENTS.filter(t=>t.branch==='辅助') },
+    { id:'advanced', name:'💢 高级天赋（二选一）', talents: TALENTS.filter(t=>t.branch==='高级') },
+  ];
+  html+=`<div class="talent-grid" style="margin-bottom:6px">`;
+  for(const t of groups[0].talents){
     const lv=getTalentLevel(t.id); const maxed=lv>=t.maxLevel; const afford=saveData.talentPoints>=t.costPerLevel;
-    // 互斥检查：如果已升级对方天赋,则禁用本天赋
-    let lockedByMutual=false; let lockHint='';
-    if(t.exclusiveWith && getTalentLevel(t.exclusiveWith)>0){
-      lockedByMutual=true;
-      const other=TALENTS.find(x=>x.id===t.exclusiveWith);
-      lockHint=`已选「${other?other.name:t.exclusiveWith}」`;
-    }
-    // 高级天赋标记
-    const advTag=t.advanced?'<span style="position:absolute;top:4px;right:6px;font-size:8px;color:#ff4444;background:rgba(255,68,68,0.15);padding:1px 4px;border-radius:3px">高级</span>':'';
-    const branchTag=t.branch?`<div style="font-size:8px;color:#bc8cff;margin-top:2px;letter-spacing:1px">「${t.branch}」${t.exclusiveWith?'二选一':''}</div>`:'';
-    const stateClass=maxed?'maxed':(!afford||lockedByMutual?'unaffordable':'');
-    const lockDisplay=maxed?'已满级':(lockedByMutual?lockHint:t.costPerLevel+'点');
-    html+=`<div class="talent-node ${stateClass}" data-talent="${t.id}" style="position:relative;${lockedByMutual?'opacity:0.45;cursor:not-allowed':''}">${advTag}<div class="talent-icon">${t.icon}</div><div class="talent-name">${t.name}</div><div class="talent-desc">${t.desc}</div>${branchTag}<div class="talent-level">Lv.${lv}/${t.maxLevel}</div><div class="talent-cost">${lockDisplay}</div></div>`;
+    const stateClass=maxed?'maxed':(!afford?'unaffordable':'');
+    const lockDisplay=maxed?'已满级':(t.costPerLevel+'点');
+    html+=`<div class="talent-node ${stateClass}" data-talent="${t.id}" style="position:relative;padding:8px 6px;min-height:auto"><div class="talent-icon" style="font-size:22px;margin-bottom:2px">${t.icon}</div><div class="talent-name" style="font-size:11px;margin-bottom:2px">${t.name}</div><div class="talent-desc" style="font-size:9px;margin-bottom:3px;line-height:1.2">${t.desc}</div><div class="talent-level" style="font-size:10px">Lv.${lv}/${t.maxLevel}</div><div class="talent-cost" style="font-size:10px">${lockDisplay}</div></div>`;
   }
-  html+=`</div><div class="panel-actions"><button class="sec-btn" id="resetTalentsBtn">🔄 重置天赋（全额返还）</button><button class="sec-btn" id="backFromTalent">返回</button></div>`;
+  html+=`</div>`;
+  // 辅助/高级天赋：折叠（默认收起，玩家点击展开）
+  for(let gi=1; gi<groups.length; gi++){
+    const g = groups[gi];
+    if(g.talents.length===0) continue;
+    html+=`<details style="max-width:600px;margin:4px auto;padding:4px 10px;background:rgba(22,27,34,0.6);border:1px solid rgba(188,140,255,0.25);border-radius:6px">
+      <summary style="cursor:pointer;color:#bc8cff;font-size:12px;letter-spacing:1px;padding:4px 0">${g.name}（点击展开）</summary>
+      <div class="talent-grid" style="margin:6px 0">`;
+    for(const t of g.talents){
+      const lv=getTalentLevel(t.id); const maxed=lv>=t.maxLevel; const afford=saveData.talentPoints>=t.costPerLevel;
+      let lockedByMutual=false; let lockHint='';
+      if(t.exclusiveWith && getTalentLevel(t.exclusiveWith)>0){
+        lockedByMutual=true;
+        const other=TALENTS.find(x=>x.id===t.exclusiveWith);
+        lockHint=`已选${other?other.name:t.exclusiveWith}`;
+      }
+      const advTag=t.advanced?'<span style="position:absolute;top:2px;right:4px;font-size:8px;color:#ff4444;background:rgba(255,68,68,0.15);padding:1px 3px;border-radius:2px">高级</span>':'';
+      const stateClass=maxed?'maxed':(!afford||lockedByMutual?'unaffordable':'');
+      const lockDisplay=maxed?'已满级':(lockedByMutual?lockHint:(t.costPerLevel+'点'));
+      html+=`<div class="talent-node ${stateClass}" data-talent="${t.id}" style="position:relative;padding:8px 6px;min-height:auto;${lockedByMutual?'opacity:0.45;cursor:not-allowed':''}">${advTag}<div class="talent-icon" style="font-size:22px;margin-bottom:2px">${t.icon}</div><div class="talent-name" style="font-size:11px;margin-bottom:2px">${t.name}</div><div class="talent-desc" style="font-size:9px;margin-bottom:3px;line-height:1.2">${t.desc}</div><div class="talent-level" style="font-size:10px">Lv.${lv}/${t.maxLevel}</div><div class="talent-cost" style="font-size:10px">${lockDisplay}</div></div>`;
+    }
+    html+=`</div></details>`;
+  }
+  // 底部 sticky：重置 + 返回（始终可见）
+  html+=`<div class="panel-actions" style="position:sticky;bottom:0;background:linear-gradient(180deg,rgba(13,10,8,0) 0%,rgba(13,10,8,0.92) 30%,rgba(13,10,8,0.98) 100%);padding:8px 0 6px;z-index:5;display:flex;gap:8px;justify-content:center;margin-top:6px">
+    <button class="sec-btn" id="resetTalentsBtn" style="font-size:13px;padding:10px 16px;min-height:44px;border-color:#f0883e;color:#f0883e">🔄 重置天赋</button>
+    <button class="sec-btn" id="backFromTalent2" style="font-size:13px;padding:10px 16px;min-height:44px">← 返回</button>
+  </div>`;
   ov.innerHTML=html;
+  // 滚动到顶（避免上一次位置残留）
+  ov.scrollTop=0;
   ov.querySelectorAll('.talent-node').forEach(el=>{
     _bindTap(el,()=>{
       const id=el.dataset.talent;
@@ -3058,10 +3173,15 @@ function showTalentMenu(){
     });
   });
   _bindTap(document.getElementById('resetTalentsBtn'),()=>{
-    // 二次确认（避免误点）
-    if(confirm('确定要重置所有天赋吗？将全额返还已消耗的天赋点。')){resetTalents();showTalentMenu();}
+    // 自定义确认弹窗（不用浏览器原生 confirm，避免破坏全屏）
+    _confirmDialog('确定要重置所有天赋吗？将全额返还已消耗的天赋点。',
+      ()=>{ resetTalents(); showTalentMenu(); },
+      null,
+      { title:'重置天赋', yesText:'确认重置', yesColor:'#f0883e' }
+    );
   });
   _bindTap(document.getElementById('backFromTalent'),()=>{ov.classList.add('hidden');showMainMenu();});
+  _bindTap(document.getElementById('backFromTalent2'),()=>{ov.classList.add('hidden');showMainMenu();});
 }
 
 // ==================== 背包系统（统一入口）====================
@@ -3326,9 +3446,10 @@ function showWeaponMenu(){
     const owned=saveData.ownedWeapons[id]||0;
     return !(owned===0&&(w.price||0)===0&&id!=='pistol');
   });
-  // 翻页：每页6把武器，避免手机端滑动才能看到返回键
-  const PAGE_SIZE=6;
+  // 翻页：每页3把武器，横排显示（手机端友好，一行可见，无需滑动）
+  const PAGE_SIZE=3;
   const pst=getPagedState('weapon',{page:1,pageSize:PAGE_SIZE});
+  pst.pageSize=PAGE_SIZE; // 同步 pageSize（防止旧存档残留的 pageSize=4 导致翻页计算错误）
   pagedSetTotal('weapon', visibleList.length);
   if(pst.page>Math.max(1,Math.ceil(visibleList.length/PAGE_SIZE)))pst.page=1;
   const start=(pst.page-1)*PAGE_SIZE;
@@ -3344,8 +3465,8 @@ function showWeaponMenu(){
     <button class="sec-btn" id="backFromWeapon" style="flex-shrink:0;font-size:14px;padding:8px 16px;min-height:44px">← 返回</button>
   </div>`;
 
-  // 当前页武器卡片 grid（每页最多6个，紧凑布局，一屏可见）
-  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-top:4px">';
+  // 当前页武器卡片：横排 flex 布局，每页3把，手机窄屏自动换行成2排
+  html+='<div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:stretch;gap:8px;margin-top:4px">';
   for(const[id,w]of pageItems){
     const owned=saveData.ownedWeapons[id]||0;
     const sel=saveData.currentWeapon===id;
@@ -3365,15 +3486,15 @@ function showWeaponMenu(){
     }else{
       actionHtml=`<p style="color:#8b949e;font-size:10px;margin:2px 0">未拥有</p><button class="main-btn" data-buy-weapon="${id}" style="margin-top:3px;font-size:10px;padding:3px 6px;min-height:30px;${saveData.totalScore>=(w.price||0)?'':'opacity:0.5'}">购买 ${w.price||0}分</button>`;
     }
-    html+=`<div class="weapon-card ${sel?'selected':''} ${!owned?'locked':''}" data-weapon="${id}" style="position:relative;padding:8px;margin:0">
-      <div style="position:absolute;top:4px;right:6px;font-size:9px;color:${tierColor};font-weight:bold">T${w.tier||1}</div>
+    html+=`<div class="weapon-card ${sel?'selected':''} ${!owned?'locked':''}" data-weapon="${id}" style="position:relative;padding:8px 10px;margin:0;min-height:auto;flex:1 1 130px;max-width:180px;min-width:120px;box-sizing:border-box">
+      <div style="position:absolute;top:3px;right:5px;font-size:9px;color:${tierColor};font-weight:bold">T${w.tier||1}</div>
       <div style="font-size:26px;line-height:1">${w.icon}</div>
       <h3 style="font-size:13px;margin:2px 0">${w.name}</h3>
       <p style="font-size:9px;color:#8b949e;margin:1px 0">${stats}</p>
-      <p style="font-size:9px;color:#6e7681;margin:2px 0;line-height:1.3">${w.desc||''}</p>
+      <p style="font-size:9px;color:#6e7681;margin:1px 0;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${w.desc||''}</p>
       ${actionHtml}
-      <div style="font-size:9px;color:#8b949e;margin-top:2px">${getCraftSummary(id)}</div>
-      ${owned>0?'<p style="font-size:9px;color:#4a9b8e;margin-top:2px">点击装备</p>':''}
+      <div style="font-size:8px;color:#8b949e;margin-top:1px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden">${getCraftSummary(id)}</div>
+      ${owned>0?'<p style="font-size:8px;color:#4a9b8e;margin-top:1px">点击装备</p>':''}
     </div>`;
   }
   html+='</div>';
@@ -3587,14 +3708,18 @@ function showPetMenu(){
     _bindTap(el,e=>{
       e.stopPropagation(); const idx=parseInt(el.dataset.recycle);
       const p=saveData.ownedPets[idx]; const def=getPetDef(p.def);
-      if(confirm(`确定回收 ${def.name} ★${p.stage+1}？获得${500+p.stage*250}积分`)){
-        const reward=500+p.stage*250; // 高阶宠物回收给更多
-        saveData.totalScore+=reward;
-        saveData.ownedPets.splice(idx,1);
-        if(saveData.selectedPet===idx)saveData.selectedPet=null;
-        else if(saveData.selectedPet!==null&&idx<saveData.selectedPet)saveData.selectedPet--;
-        saveSave(); showPetMenu();
-      }
+      const reward=500+p.stage*250; // 高阶宠物回收给更多
+      _confirmDialog(`确定回收 ${def.name} ★${p.stage+1}？获得 ${reward} 积分`,
+        ()=>{
+          saveData.totalScore+=reward;
+          saveData.ownedPets.splice(idx,1);
+          if(saveData.selectedPet===idx)saveData.selectedPet=null;
+          else if(saveData.selectedPet!==null&&idx<saveData.selectedPet)saveData.selectedPet--;
+          saveSave(); showPetMenu();
+        },
+        null,
+        { title:'回收宠物', yesText:'确认回收', yesColor:'#f0883e' }
+      );
     });
   });
   // 批量回收：按Boss类型，保留最高阶，回收其余
@@ -3611,18 +3736,22 @@ function showPetMenu(){
       const toRecycle=petsList.filter(p=>p.stage<maxStage);
       if(toRecycle.length===0){showToast('没有可回收的宠物（所有同类都已满阶）','#8b949e',2000);return;}
       const reward=toRecycle.reduce((s,p)=>s+500+p.stage*250,0);
-      if(confirm(`确定回收 ${toRecycle.length}只 ${def.name}（保留最高阶）？获得${reward}积分`)){
-        // 从后往前删除，避免索引错位
-        const indicesToDelete=toRecycle.map(p=>p.idx).sort((a,b)=>b-a);
-        for(const idx of indicesToDelete){
-          saveData.ownedPets.splice(idx,1);
-          if(saveData.selectedPet===idx)saveData.selectedPet=null;
-          else if(saveData.selectedPet!==null&&idx<saveData.selectedPet)saveData.selectedPet--;
-        }
-        saveData.totalScore+=reward;
-        saveSave(); showPetMenu();
-        showToast(`回收${toRecycle.length}只 ${def.name}，获得${reward}积分`,'#3fb950',2500);
-      }
+      _confirmDialog(`确定回收 ${toRecycle.length} 只 ${def.name}（保留最高阶）？获得 ${reward} 积分`,
+        ()=>{
+          // 从后往前删除，避免索引错位
+          const indicesToDelete=toRecycle.map(p=>p.idx).sort((a,b)=>b-a);
+          for(const idx of indicesToDelete){
+            saveData.ownedPets.splice(idx,1);
+            if(saveData.selectedPet===idx)saveData.selectedPet=null;
+            else if(saveData.selectedPet!==null&&idx<saveData.selectedPet)saveData.selectedPet--;
+          }
+          saveData.totalScore+=reward;
+          saveSave(); showPetMenu();
+          showToast(`回收${toRecycle.length}只 ${def.name}，获得${reward}积分`,'#3fb950',2500);
+        },
+        null,
+        { title:'批量回收', yesText:'确认回收', yesColor:'#f0883e' }
+      );
     });
   });
   const us=document.getElementById('unselectPet'); if(us)_bindTap(us,()=>{saveData.selectedPet=null;saveSave();showPetMenu();});

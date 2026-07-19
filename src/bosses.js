@@ -376,6 +376,7 @@ function startBoss(){
   const diff=getDifficulty();
   godslayerBossesLeft=diff.bossCount-1;
   bossHealthBar.classList.remove('hidden');
+  document.body.classList.add('boss-active'); // 通知 CSS 精简中间 panel，避免与 Boss 血条重叠
   bossName.style.color=''; // 重置颜色（刑天用红色，需清空）
   bossName.textContent=bossVariant?`变异BOSS - ${boss.name}`:`BOSS - ${boss.name}`;
   playBossSound(boss.bossIdx); // Boss专属音效
@@ -424,7 +425,8 @@ function spawnSuperBoss(){
   bullets=[]; drops=[]; fireEffects=[]; lightningStrikes=[]; tornadoes=[];
   minions=minions.filter(m=>m.permanent&&m.alive);
   bossWarnings=[]; boss=new Boss(currentLevel,true);
-  bossHealthBar.classList.remove('hidden'); bossName.style.color=''; bossName.textContent=`超级BOSS - ${boss.name}`;
+  bossHealthBar.classList.remove('hidden');
+  document.body.classList.add('boss-active'); // 通知 CSS 精简中间 panel，避免与 Boss 血条重叠 bossName.style.color=''; bossName.textContent=`超级BOSS - ${boss.name}`;
   const petDef=getPetDef(boss.bossIndex);
   updateBossUI();
   // 超级Boss出场戏剧化动画
@@ -520,6 +522,7 @@ function startFinalBoss(){
   boss.armor=Math.max(boss.armor||0,0.15); // 刑天有基础护甲
   document.getElementById('overlay').classList.add('hidden');
   bossHealthBar.classList.remove('hidden');
+  document.body.classList.add('boss-active'); // 通知 CSS 精简中间 panel，避免与 Boss 血条重叠
   bossName.textContent='⚔️ 最终Boss - 刑天';
   bossName.style.color='#8b0000';
   playBossSound(9);
@@ -701,7 +704,8 @@ function spawnTrialBoss(){
   }
   // 试炼Boss随波次增强攻速
   boss._trialIndex=bossTrialIndex;
-  bossHealthBar.classList.remove('hidden'); bossName.style.color=''; bossName.textContent=`试炼 ${bossTrialIndex+1}/${trialBossOrder.length} - ${boss.name}`;
+  bossHealthBar.classList.remove('hidden');
+  document.body.classList.add('boss-active'); // 通知 CSS 精简中间 panel，避免与 Boss 血条重叠 bossName.style.color=''; bossName.textContent=`试炼 ${bossTrialIndex+1}/${trialBossOrder.length} - ${boss.name}`;
   playSound('bossSpawn'); // 试炼Boss出场号角声
   playBossSound(boss.bossIndex); // Boss专属音效
   updateBossUI(); showWaveAnnounce('Boss试炼！',`${boss.name} 出现了！`,true);
@@ -891,7 +895,8 @@ function onBossDefeated(defeatedBoss){
       const normalBosses2=[0,1,2,3,6,7];
       boss.bossIndex=normalBosses2[(((currentLevel-1)+1)%normalBosses2.length)]; boss.bossType=BOSS_TYPES[boss.bossIndex];
       boss.name=boss.bossType.name; boss.color=boss.bossType.color;
-      bossHealthBar.classList.remove('hidden'); bossName.style.color=''; bossName.textContent=`BOSS2 - ${boss.name}`;
+      bossHealthBar.classList.remove('hidden');
+  document.body.classList.add('boss-active'); // 通知 CSS 精简中间 panel，避免与 Boss 血条重叠 bossName.style.color=''; bossName.textContent=`BOSS2 - ${boss.name}`;
       updateBossUI(); showWaveAnnounce('第二只Boss！',`${boss.name} 出现了！`,true);
       maxLevelTime=CONFIG.BOSS_TIME; levelTimer=maxLevelTime;
     },willLevelUp?0:1500); // 若将升级则立即生成（升级面板期间），否则1.5秒后生成
@@ -1142,7 +1147,8 @@ function startEndlessBoss(){
   boss.maxHealth=Math.ceil(boss.maxHealth*endlessHpMul);
   boss.health=boss.maxHealth;
   boss._endlessWave=endlessWave;
-  bossHealthBar.classList.remove('hidden'); bossName.style.color=''; bossName.textContent=`♾️ 无尽Boss - ${boss.name}`;
+  bossHealthBar.classList.remove('hidden');
+  document.body.classList.add('boss-active'); // 通知 CSS 精简中间 panel，避免与 Boss 血条重叠 bossName.style.color=''; bossName.textContent=`♾️ 无尽Boss - ${boss.name}`;
   updateBossUI(); showWaveAnnounce('无尽Boss！',`${boss.name} (血量x${endlessHpMul.toFixed(2)})`,true);
   maxLevelTime=CONFIG.BOSS_TIME+10; levelTimer=maxLevelTime;
 }
