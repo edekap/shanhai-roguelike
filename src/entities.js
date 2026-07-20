@@ -963,8 +963,10 @@ class Player {
       this.x+=dx*spd*dt; this.y+=dy*spd*dt;
       this.walkPhase+=dt*10;
     }
-    this.x=clamp(this.x,this.size,CONFIG.WIDTH-this.size);
-    this.y=clamp(this.y,this.size,CONFIG.HEIGHT-this.size);
+    // 留15%边距防止手指遮挡角色
+    const padX=CONFIG.WIDTH*0.12, padY=CONFIG.HEIGHT*0.12;
+    this.x=clamp(this.x,this.size+padX,CONFIG.WIDTH-this.size-padX);
+    this.y=clamp(this.y,this.size+padY,CONFIG.HEIGHT-this.size-padY);
     // 估算玩家速度向量（单位：像素/秒），供远程怪预判射击
     this.vx=dt>0?(this.x-_prevX)/dt:0;
     this.vy=dt>0?(this.y-_prevY)/dt:0;
@@ -1321,6 +1323,11 @@ class Player {
     const playerColor=skin?skin.color:ch.color;
     const s=this.size;
     ctx.translate(0,bob);
+    // 玩家主体光环：醒目蓝白外圈，与敌人清晰区分
+    ctx.strokeStyle='rgba(120,192,255,0.7)'; ctx.lineWidth=3;
+    ctx.shadowColor='#79c0ff'; ctx.shadowBlur=10;
+    ctx.beginPath(); ctx.arc(0,0,s+5,0,Math.PI*2); ctx.stroke();
+    ctx.shadowBlur=0;
     // 皮肤特效光环
     if(skin){
       if(skin.rarity==='legendary'){
@@ -5002,10 +5009,17 @@ class Pet {
     ctx.save();ctx.translate(this.x,this.y);
     if(this.attackAnim>0){
       const pulseR=this.size+this.attackAnim*25;
-      ctx.strokeStyle=this.def.isSuper?'rgba(255,215,0,'+this.attackAnim*0.6+')':'rgba(88,166,255,'+this.attackAnim*0.5+')';
+      ctx.strokeStyle=this.def.isSuper?'rgba(255,215,0,'+this.attackAnim*0.6+')':'rgba(58,166,80,'+this.attackAnim*0.5+')';
       ctx.lineWidth=2;
       ctx.beginPath();ctx.arc(0,0,pulseR,0,Math.PI*2);ctx.stroke();
     }
+    // 绿色友军标识圈（防止误认为敌人）
+    ctx.strokeStyle='#3fb950'; ctx.lineWidth=2; ctx.setLineDash([5,3]);
+    ctx.beginPath();ctx.arc(0,0,this.size+6,0,Math.PI*2);ctx.stroke();
+    ctx.setLineDash([]);
+    // 友军小标签
+    ctx.fillStyle='#3fb950'; ctx.font='9px Arial'; ctx.textAlign='center';
+    ctx.fillText('友',0,-this.size-4);
     if(this.def.isSuper){
       const glow=0.5+Math.sin(this.glowPhase)*0.2;
       ctx.shadowColor='#ffd700';ctx.shadowBlur=15*glow;

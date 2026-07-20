@@ -1089,7 +1089,7 @@ function startGame(){
 }
 // 自瞄提示模态弹窗（首次玩家专属，必须点击关闭，不会错过）
 function _showAimTipModal(){
-  const html = `<div style="max-width:340px;text-align:center;padding:20px 18px;font-family:'STKaiti',KaiTi,serif">
+  const html = `<div style="max-width:340px;text-align:center;padding:20px 18px;font-family:"PingFang SC","Microsoft YaHei",sans-serif">
     <div style="font-size:48px;margin-bottom:10px">🎯</div>
     <h3 style="color:#ffd970;letter-spacing:2px;margin:0 0 12px;font-size:18px">自动锁定机制</h3>
     <div style="color:#e0d8c8;font-size:13px;line-height:1.9;margin-bottom:16px">
@@ -1106,7 +1106,7 @@ function _showAimTipModal(){
         <div style="color:#d4c5a0;font-size:12px;margin-top:2px">左/右半屏任意位置按下即出现摇杆，松手消失，不挡视野</div>
       </div>
     </div>
-    <button id="aimTipCloseBtn" style="width:100%;padding:12px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">✦ 知道了，开始战斗 ✦</button>
+    <button id="aimTipCloseBtn" style="width:100%;padding:12px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:"PingFang SC","Microsoft YaHei",sans-serif">✦ 知道了，开始战斗 ✦</button>
   </div>`;
   const modal = _showGearModal(html);
   // 弹出时自动暂停，防止玩家挨打
@@ -2781,7 +2781,7 @@ function showTutorial(force){
       title: '第一步 · 基础操作',
       bg: 'linear-gradient(180deg,#0a1a2a,#1a3a5a)',
       content: `
-        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:'STKaiti',KaiTi,serif">
+        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:"PingFang SC","Microsoft YaHei",sans-serif">
           <div style="color:#79c0ff;font-size:min(3.2vw,14px);font-weight:bold;margin-bottom:4px">📱 手机端</div>
           <div>左半屏按下：<span style="color:#ffd970">移动</span></div>
           <div>右半屏按下：<span style="color:#ffd970">射击方向</span>（自动开火）</div>
@@ -2804,7 +2804,7 @@ function showTutorial(force){
       title: '第二步 · 关卡流程',
       bg: 'linear-gradient(180deg,#1a3a5a,#2a4a3a)',
       content: `
-        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:'STKaiti',KaiTi,serif">
+        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:"PingFang SC","Microsoft YaHei",sans-serif">
           <div>每一关有 <span style="color:#ffd970">3 波小怪 + 1 个 Boss</span></div>
           <div>冒险模式共 <span style="color:#ffd970">5 关</span>，难度递增</div>
           <div>击败小怪掉落 <span style="color:#bc8cff">紫色经验球</span>，靠近自动拾取</div>
@@ -2820,7 +2820,7 @@ function showTutorial(force){
       title: '第三步 · 装备与天赋',
       bg: 'linear-gradient(180deg,#2a4a3a,#3a2a4a)',
       content: `
-        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:'STKaiti',KaiTi,serif">
+        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:"PingFang SC","Microsoft YaHei",sans-serif">
           <div style="color:#ffd970;font-weight:bold;margin-bottom:6px">🎒 背包</div>
           <div>查看/装备/合成装备</div>
           <div>3件同品质 → <span style="color:#58a6ff">50%</span> 合成更高一阶</div>
@@ -2838,7 +2838,7 @@ function showTutorial(force){
       title: '第四步 · 日常福利',
       bg: 'linear-gradient(180deg,#3a2a4a,#2a1a3a)',
       content: `
-        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:'STKaiti',KaiTi,serif">
+        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:"PingFang SC","Microsoft YaHei",sans-serif">
           <div style="color:#ffd970;font-weight:bold;margin-bottom:6px">📅 每日签到</div>
           <div>每天可签到1次，连续签到奖励递增</div>
           <div>第7天起掉落 <span style="color:#bc8cff">史诗装备</span></div>
@@ -2863,7 +2863,7 @@ function showTutorial(force){
     if(contentEl){
       contentEl.innerHTML = `
         <div style="font-size:min(7vw,40px);margin-bottom:4px;text-shadow:0 0 20px rgba(255,215,0,0.5)">${s.icon}</div>
-        <h2 style="color:#ffd700;letter-spacing:2px;margin:0 0 6px;font-size:min(3.5vw,16px);font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 10px rgba(255,215,0,0.4)">${s.title}</h2>
+        <h2 style="color:#ffd700;letter-spacing:2px;margin:0 0 6px;font-size:min(4vw,18px);font-family:"PingFang SC","Microsoft YaHei",sans-serif;text-shadow:0 0 10px rgba(255,215,0,0.4)">${s.title}</h2>
         <div style="background:rgba(0,0,0,0.4);border:1px solid rgba(212,160,23,0.3);border-radius:8px;padding:10px 14px">${s.content}</div>
       `;
     }
@@ -2878,15 +2878,15 @@ function showTutorial(force){
   };
   let html = `<div id="tutorialOverlay" style="position:fixed;inset:0;z-index:99997;display:flex;align-items:center;justify-content:center;padding:12px;transition:background 0.6s">`;
   html += `<div style="max-width:480px;width:100%;height:100%;max-height:100vh;display:flex;flex-direction:column;text-align:center;padding:8px 10px;box-sizing:border-box">`;
-  html += `<div style="color:#ffd700;font-size:min(3vw,13px);letter-spacing:2px;margin-bottom:4px;font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 8px rgba(255,215,0,0.4);flex-shrink:0">✦ 新手引导 ✦</div>`;
+  html += `<div style="color:#ffd700;font-size:min(3vw,13px);letter-spacing:2px;margin-bottom:4px;font-family:"PingFang SC","Microsoft YaHei",sans-serif;text-shadow:0 0 8px rgba(255,215,0,0.4);flex-shrink:0">✦ 新手引导 ✦</div>`;
   html += `<div id="tutorialContent" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>`;
   html += `<div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 0;flex-shrink:0">`;
-  html += `<button id="tutorialPrevBtn" style="padding:6px 12px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:6px;cursor:pointer;font-size:min(2.5vw,11px);font-family:'STKaiti',KaiTi,serif">◀ 上一步</button>`;
+  html += `<button id="tutorialPrevBtn" style="padding:6px 12px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:6px;cursor:pointer;font-size:min(2.5vw,11px);font-family:"PingFang SC","Microsoft YaHei",sans-serif">◀ 上一步</button>`;
   html += `<span id="tutorialPageInfo" style="color:#ffd970;font-size:10px;min-width:35px"></span>`;
-  html += `<button id="tutorialNextBtn" style="padding:6px 12px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:6px;cursor:pointer;font-size:min(2.5vw,11px);font-family:'STKaiti',KaiTi,serif">下一步 ▶</button>`;
+  html += `<button id="tutorialNextBtn" style="padding:6px 12px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:6px;cursor:pointer;font-size:min(2.5vw,11px);font-family:"PingFang SC","Microsoft YaHei",sans-serif">下一步 ▶</button>`;
   html += `</div>`;
-  html += `<button id="tutorialDoneBtn" style="display:none;margin-top:4px;width:100%;padding:10px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:min(3.5vw,15px);font-weight:bold;letter-spacing:1px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;flex-shrink:0;box-shadow:0 0 20px rgba(255,215,0,0.5)">⚔️ 开始游戏</button>`;
-  html += `<button id="tutorialSkipBtn" style="margin-top:2px;padding:4px 12px;background:transparent;color:#8b949e;border:none;font-size:10px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;flex-shrink:0">跳过 ⏭</button>`;
+  html += `<button id="tutorialDoneBtn" style="display:none;margin-top:4px;width:100%;padding:10px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:min(3.5vw,15px);font-weight:bold;letter-spacing:1px;cursor:pointer;font-family:"PingFang SC","Microsoft YaHei",sans-serif;flex-shrink:0;box-shadow:0 0 20px rgba(255,215,0,0.5)">⚔️ 开始游戏</button>`;
+  html += `<button id="tutorialSkipBtn" style="margin-top:2px;padding:4px 12px;background:transparent;color:#8b949e;border:none;font-size:10px;cursor:pointer;font-family:"PingFang SC","Microsoft YaHei",sans-serif;flex-shrink:0">跳过 ⏭</button>`;
   html += `</div></div>`;
   document.body.insertAdjacentHTML('beforeend', html);
   renderPage();

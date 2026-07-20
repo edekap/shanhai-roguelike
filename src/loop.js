@@ -617,7 +617,8 @@ let touchMoveX = 0, touchMoveY = 0; // 摇杆方向 (-1 to 1)
 let touchFiring = false; // 是否正在射击
 // 触摸移动向量（带模拟速度）
 let touchMoveVec = {x:0, y:0, active:false};
-const TOUCH_DEADZONE = 0.15; // 统一死区阈值
+const TOUCH_DEADZONE = 0.15; // 左摇杆死区
+const AIM_DEADZONE = 0.40; // 右摇杆死区(更大，防止轻触就切手动)
 
 // 全局最近一次 touchstart 时间戳：用于防止触屏笔记本上 click+touchstart 双触发
 // （触屏笔记本 pointer 为 fine，isTouchDevice=false，但触摸仍会触发 touchstart）
@@ -929,7 +930,7 @@ document.getElementById('pauseHomeBtn').addEventListener('touchstart', e=>{ e.pr
 function updateTouchAim(){
   if(!isTouchDevice || !touchConfirmed || !player) return;
   // 右摇杆激活且有明确方向（超出死区）时：射击方向跟随右摇杆
-  if(aimJoystickActive && (Math.abs(aimJoystickX) > TOUCH_DEADZONE || Math.abs(aimJoystickY) > TOUCH_DEADZONE)){
+  if(aimJoystickActive && (Math.abs(aimJoystickX) > AIM_DEADZONE || Math.abs(aimJoystickY) > AIM_DEADZONE)){
     mouse.x = player.x + aimJoystickX * 400;
     mouse.y = player.y + aimJoystickY * 400;
   }else{
