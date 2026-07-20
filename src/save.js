@@ -656,24 +656,7 @@ function getCharacterStage(charId){
   if(!saveData.characterStages)saveData.characterStages={};
   return saveData.characterStages[charId]||0;
 }
-function addCharacterXp(charId,xp){
-  const c=CHARACTERS[charId]; if(!c||!c.stages)return;
-  if(!saveData.characterStages)saveData.characterStages={};
-  saveData.charXp=saveData.charXp||{};
-  saveData.charXp[charId]=(saveData.charXp[charId]||0)+xp;
-  const curXp=saveData.charXp[charId];
-  let stage=saveData.characterStages[charId]||0;
-  for(let i=stage+1;i<c.stages.length;i++){
-    if(curXp>=c.stages[i].xp){ stage=i; }
-  }
-  if(stage!==(saveData.characterStages[charId]||0)){
-    saveData.characterStages[charId]=stage;
-    saveSave();
-    if(stage===2&&c.stages[2].evo) return {stage, evo:c.stages[2].evo};
-    return {stage};
-  }
-  return null;
-}
+undefined
 // ==================== 角色皮肤系统 ====================
 // 皮肤仅改变外观（颜色/光环），不影响属性
 const SKINS = {

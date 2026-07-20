@@ -852,7 +852,6 @@ class Player {
     // 局外经验累积：所有获得的经验都累积到局外，每1000经验奖励1天赋点
     saveData.totalXp=(saveData.totalXp||0)+amount;
     // 角色经验追踪（用于角色三阶段进阶）
-    if(typeof addCharacterXp==='function' && this.characterId)addCharacterXp(this.characterId,amount);
     let leveledUp=false;
     while(this.xp>=this.xpToNext){
       this.xp-=this.xpToNext;
