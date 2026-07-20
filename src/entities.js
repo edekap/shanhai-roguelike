@@ -3793,21 +3793,22 @@ class Boss {
     if(this._beamActive&&this._beamData){
       const d=this._beamData; d.timer+=dt;
       const beamWidth=50;
+      // 光束伤害用tick节流 + applyDirectDamage（绕过无敌帧，否则受击无敌导致光束=没伤害）
+      if(!d._tick)d._tick=0;
+      d._tick-=dt;
+      const doBeamDmg=()=>{if(d._tick<=0){d._tick=0.3;return true;}return false;};
       if(d.beamType==='horizontal'){
-        // 水平光波：检查玩家是否在光波范围内
-        if(player&&Math.abs(player.y-d.y)<beamWidth)player.takeDamage(dt*5);
+        if(player&&Math.abs(player.y-d.y)<beamWidth&&doBeamDmg())applyDirectDamage(player,1,'💥光束',this.color);
         spawnParticles(this.x,d.y,this.color,3);
       }else if(d.beamType==='vertical'){
-        // 垂直光波
-        if(player&&Math.abs(player.x-d.x)<beamWidth)player.takeDamage(dt*6);
+        if(player&&Math.abs(player.x-d.x)<beamWidth&&doBeamDmg())applyDirectDamage(player,1,'💥光束',this.color);
         spawnParticles(d.x,this.y,this.color,4);
       }else if(d.beamType==='fan'){
-        // 扇形光波
-        if(player){
+        if(player&&doBeamDmg()){
           const a=Math.atan2(player.y-d.y,player.x-d.x);
           for(const fa of d.angles){
             if(Math.abs(((a-fa+Math.PI*3)%(Math.PI*2))-Math.PI)<0.15&&dist(d.x,d.y,player.x,player.y)<600){
-              player.takeDamage(dt*5); break;
+              applyDirectDamage(player,1,'💥扇形光束',this.color); break;
             }
           }
         }
@@ -3863,13 +3864,15 @@ class Boss {
     for(let i=this._trackingBeamActive.length-1;i>=0;i--){
       const d=this._trackingBeamActive[i];
       d.timer+=dt;
+      if(!d._tick)d._tick=0;
+      d._tick-=dt;
+      const doDmg=d._tick<=0;
+      if(doDmg)d._tick=0.3;
       if(d.beamType==='horizontal'){
-        // 水平光束伤害
-        if(player&&Math.abs(player.y-d.y)<beamWidth)player.takeDamage(dt*6);
+        if(player&&Math.abs(player.y-d.y)<beamWidth&&doDmg)applyDirectDamage(player,1,'💥追踪光束',this.color);
         spawnParticles(CONFIG.WIDTH/2,d.y,this.color,2);
       }else{
-        // 垂直光束伤害
-        if(player&&Math.abs(player.x-d.x)<beamWidth)player.takeDamage(dt*6);
+        if(player&&Math.abs(player.x-d.x)<beamWidth&&doDmg)applyDirectDamage(player,1,'💥追踪光束',this.color);
         spawnParticles(d.x,CONFIG.HEIGHT/2,this.color,2);
       }
       if(d.timer>=d.duration){
