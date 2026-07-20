@@ -544,7 +544,7 @@ const MAX_PARTICLES=250;      // 粒子上限（防止卡顿）
 const MAX_BULLETS=300;        // 玩家子弹上限
 const MAX_ENEMY_BULLETS=150;  // 敌方子弹上限
 const MAX_FIRE_EFFECTS=80;    // 火焰/范围特效上限（虚空裂缝需要较大配额）
-const MAX_DROPS=60;           // 掉落物上限（防止经验球堆积卡顿）
+const MAX_DROPS=120;           // 掉落物上限（防止堆积卡顿，不再自动消失）
 const MAX_ENEMIES=80;         // 敌人上限（防止弑神难度敌人堆积卡顿）
 // 移动端性能优化：触摸设备降低粒子上限
 const MAX_PARTICLES_EFFECTIVE = IS_TOUCH_DEVICE ? 150 : 250;
@@ -1086,7 +1086,7 @@ class Player {
       const ty=this.y+Math.sin(this.angle)*100;
       const dmg=fin?effect.damage*2:effect.damage;
       const rad=fin?effect.radius*2:effect.radius;
-      tornadoes.push({x:tx,y:ty,vx:Math.cos(this.angle)*80,vy:Math.sin(this.angle)*80,radius:rad,damage:dmg,life:fin?999:effect.dur,maxLife:fin?999:effect.dur,tick:0});
+      tornadoes.push({x:tx,y:ty,vx:Math.cos(this.angle)*80,vy:Math.sin(this.angle)*80,radius:rad,damage:dmg,life:fin?999:effect.dur,maxLife:fin?999:effect.dur,tick:0,isPlayer:true});
     }
     // fireball 在子弹命中时触发，不在此处
   }
@@ -1859,8 +1859,7 @@ class Drop {
     this.xpPullRange=160; // 经验球吸引范围（小于磁铁范围，避免全屏吸）
   }
   update(dt){
-    this.lifetime-=dt;this.wobble+=dt*3;this.bobOffset=Math.sin(this.wobble)*3;
-    if(this.lifetime<=0){this.alive=false;return;}
+    this.wobble+=dt*3;this.bobOffset=Math.sin(this.wobble)*3;
     if(!player||!player.alive)return;
     const d=dist(this.x,this.y,player.x,player.y);
     // 经验球：进入吸引范围后飞向玩家，玩家触碰才拾取
@@ -1904,8 +1903,8 @@ class Drop {
   }
   draw(){
     ctx.save();ctx.translate(this.x,this.y+this.bobOffset);
-    const c=this.getColor(),a=this.lifetime<3?(Math.sin(this.lifetime*8)*0.3+0.7):1;
-    ctx.globalAlpha=a;ctx.shadowColor=c;ctx.shadowBlur=12;
+    const c=this.getColor();
+    ctx.globalAlpha=1;ctx.shadowColor=c;ctx.shadowBlur=12;
     if(this.type==='health'){ctx.fillStyle=c;ctx.fillRect(-4,-8,8,16);ctx.fillRect(-8,-4,16,8);}
     else if(this.type==='shield'){ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(0,-10);ctx.lineTo(10,-5);ctx.lineTo(8,8);ctx.lineTo(0,12);ctx.lineTo(-8,8);ctx.lineTo(-10,-5);ctx.closePath();ctx.fill();}
     else if(this.type==='xp'){
@@ -5377,8 +5376,8 @@ function updateTornadoes(dt){
         }
       }
       if(boss&&boss.alive&&dist(t.x,t.y,boss.x,boss.y)<t.radius)boss.takeDamage(t.damage);
-      // 伤害玩家（Boss召唤的龙卷风）
-      if(player&&dist(t.x,t.y,player.x,player.y)<t.radius){
+      // 伤害玩家（仅Boss/敌人召唤的龙卷风，玩家的龙卷风不伤自己）
+      if(!t.isPlayer&&player&&dist(t.x,t.y,player.x,player.y)<t.radius){
         player.takeDamage(1);
         // 推开玩家
         const pa=Math.atan2(player.y-t.y,player.x-t.x);
