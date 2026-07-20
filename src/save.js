@@ -524,7 +524,7 @@ const CONFIG = {
   LEVEL_TIME: 30, BOSS_TIME: 50,
   ENEMY_TYPES: {
     grunt:     { size: 16, speed: 140, health: 2, score: 6,  xp: 2, color: '#7fb069', shape: 'blob',     tier: 1 },  // 小妖：绿色史莱姆
-    runner:    { size: 13, speed: 260, health: 2, score: 9,  xp: 2, color: '#8b5cf6', shape: 'imp',      tier: 1 },  // 魍魉：紫色小鬼
+    runner:    { size: 13, speed: 260, health: 2, score: 9,  xp: 2, color: '#f97316', shape: 'imp',      tier: 1 },  // 魍魉：橙色小鬼
     tank:      { size: 24, speed: 90,  health: 6, score: 18, xp: 4, color: '#5c5c5c', shape: 'golem',    tier: 2 },  // 石灵：深灰石头人
     shooter:   { size: 18, speed: 105, health: 3, score: 15, xp: 3, color: '#7b3ff2', shape: 'shaman',   tier: 2, shoots: true, shootCooldown: 2.2 }, // 巫祝
     giant:     { size: 32, speed: 70,  health: 12,score: 38, xp: 8, color: '#a52838', shape: 'oni',      tier: 3 },  // 巨灵：红色鬼

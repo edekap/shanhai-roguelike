@@ -1888,7 +1888,7 @@ class Drop {
       const rar=(typeof GEAR_RARITIES!=='undefined'&&GEAR_RARITIES[this.gear.rarity])||{color:'#f0883e'};
       return rar.color||'#f0883e';
     }
-    return this.type==='health'?'#3fb950':this.type==='shield'?'#58a6ff':this.type==='xp'?'#bc8cff':'#f0883e';
+    return this.type==='health'?'#3fb950':this.type==='shield'?'#58a6ff':this.type==='xp'?'#3fb950':'#f0883e';
   }
   draw(){
     ctx.save();ctx.translate(this.x,this.y+this.bobOffset);
@@ -2091,7 +2091,7 @@ class Enemy {
     // 击退效果：受击时轻微推开（Boss不受击退）
     if(player&&!this.taunt&&this.size<28){
       const ka=Math.atan2(this.y-player.y,this.x-player.x);
-      this.x+=Math.cos(ka)*8; this.y+=Math.sin(ka)*8;
+      this.x+=Math.cos(ka)*2; this.y+=Math.sin(ka)*2;
       this.x=clamp(this.x,this.size,CONFIG.WIDTH-this.size);
       this.y=clamp(this.y,this.size,CONFIG.HEIGHT-this.size);
     }
