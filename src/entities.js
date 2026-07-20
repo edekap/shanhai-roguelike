@@ -2803,6 +2803,17 @@ class Boss {
     if(this.clones.length>0){
       for(const c of this.clones){c.timer-=dt; c.x+=Math.cos(c.angle)*60*dt; c.y+=Math.sin(c.angle)*60*dt; c.x=clamp(c.x,c.size,CONFIG.WIDTH-c.size); c.y=clamp(c.y,c.size,CONFIG.HEIGHT-c.size);}
       this.clones=this.clones.filter(c=>c.timer>0);
+      // 分身射击：每1.5秒向玩家发射子弹
+      if(!this._cloneShootTimer)this._cloneShootTimer=0;
+      this._cloneShootTimer-=dt;
+      if(this._cloneShootTimer<=0&&player&&player.alive){
+        this._cloneShootTimer=1.5;
+        for(const c of this.clones){
+          const a=Math.atan2(player.y-c.y,player.x-c.x);
+          enemyBullets.push(new EnemyBullet(c.x,c.y,a,200,8,'#ff69b4'));
+          enemyBullets.push(new EnemyBullet(c.x,c.y,a-0.15,180,8,'#ff69b4'));
+        }
+      }
     }
     if(this.devourTimer>0){
       this.devourTimer-=dt;
@@ -3592,8 +3603,9 @@ class Boss {
     this.warningType=sp; this.warningIsSpecial2=true; this.warningTime=1.8; // 更长预警时间给玩家反应
     this.attackAnim=1; this.attackAnimMax=1; this.attackType=sp;
     if(sp==='charmBeam'){
-      // 九尾狐魅惑光波：水平贯穿光束
-      this.warningData={beamType:'horizontal',y:this.y};
+      // 九尾狐魅惑光波：水平/垂直交替
+      this._charmBeamH=!this._charmBeamH;
+      this.warningData=this._charmBeamH?{beamType:'horizontal',y:this.y}:{beamType:'vertical',x:this.x};
     }else if(sp==='diveBomb'){
       // 毕方俯冲轰炸：多个区域预警后同时打击
       const cnt=4+Math.min(this.level,3);
