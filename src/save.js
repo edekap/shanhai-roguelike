@@ -520,7 +520,7 @@ function showUpdateNotice() {
 const CONFIG = {
   WIDTH: 1600, HEIGHT: 1000,
   PLAYER: { SIZE: 20, SPEED: 240, MAX_HEALTH: 8, MAX_SHIELD: 8, FIRE_COOLDOWN: 0.22, INVINCIBLE_TIME: 1.2, BULLET_SPEED: 520, BULLET_DAMAGE: 1, BULLET_SIZE: 5 },
-  WAVES_PER_LEVEL: 5,
+  WAVES_PER_LEVEL: 7,
   LEVEL_TIME: 30, BOSS_TIME: 50,
   ENEMY_TYPES: {
     grunt:     { size: 16, speed: 140, health: 2, score: 1,  xp: 2, color: '#7fb069', shape: 'blob',     tier: 1 },
@@ -542,7 +542,7 @@ const DIFFICULTIES = {
   // waveHpGrow: 线性成长系数；waveHpGrow2: 平方项系数（后期加速）
   // Boss公式: (250+level*80) × bossHpMul(全局) × bossHpMul(难度)
   // 普通Lv1: 330×16=5280, Lv5: 650×16=10400
-  normal:    { name:'普通', icon:'🌱', enemyHpMul:2.2, enemyDmgMul:1, enemyCountMul:1.5, enemySpdMul:1, bossHpMul:16, bossCount:1, bossAtkMul:1, bossTrialHpMul:2.5, color:'#3fb950', spawnIntervalMul:0.8, enemyArmor:0, waveHpGrow:0.25, waveHpGrow2:0.015, bossDmgCap:0 },
+  normal:    { name:'普通', icon:'🌱', enemyHpMul:2.2, enemyDmgMul:1, enemyCountMul:2.2, enemySpdMul:1, bossHpMul:16, bossCount:1, bossAtkMul:1, bossTrialHpMul:2.5, color:'#3fb950', spawnIntervalMul:0.65, enemyArmor:0, waveHpGrow:0.25, waveHpGrow2:0.015, bossDmgCap:0 },
   hard:      { name:'困难', icon:'🔥', enemyHpMul:4, enemyDmgMul:1.8, enemyCountMul:1.6, enemySpdMul:1.3, bossHpMul:38, bossCount:1, bossAtkMul:1.4, bossTrialHpMul:3.5, color:'#f0883e', spawnIntervalMul:0.85, enemyArmor:0.1, waveHpGrow:0.28, waveHpGrow2:0.018, bossDmgCap:0.04 },
   hell:      { name:'地狱', icon:'💀', enemyHpMul:7, enemyDmgMul:2.8, enemyCountMul:2.2, enemySpdMul:1.6, bossHpMul:65, bossCount:1, bossAtkMul:1.8, bossTrialHpMul:5, color:'#f85149', spawnIntervalMul:0.7, enemyArmor:0.2, waveHpGrow:0.32, waveHpGrow2:0.022, bossDmgCap:0.03 },
   nightmare: { name:'梦魇', icon:'👹', enemyHpMul:12, enemyDmgMul:4, enemyCountMul:3.5, enemySpdMul:2, bossHpMul:90, bossCount:1, bossAtkMul:2.2, bossTrialHpMul:5.5, color:'#a855f7', spawnIntervalMul:0.55, enemyArmor:0.28, waveHpGrow:0.36, waveHpGrow2:0.026, bossDmgCap:0.025 },

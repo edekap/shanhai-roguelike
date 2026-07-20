@@ -1613,7 +1613,7 @@ class Bullet {
       let nearest=null,nd=200;
       for(const e of enemies){if(!e.alive||this.hitEnemies.has(e))continue; const d=dist(this.x,this.y,e.x,e.y); if(d<nd){nd=d;nearest=e;}}
       if(boss&&boss.alive&&!this.hitEnemies.has(boss)){const d=dist(this.x,this.y,boss.x,boss.y); if(d<nd*1.5)nearest=boss;}
-      if(nearest){const ta=Math.atan2(nearest.y-this.y,nearest.x-this.x); let diff=ta-this.angle; while(diff>Math.PI)diff-=Math.PI*2; while(diff<-Math.PI)diff+=Math.PI*2; this.angle+=diff*this.homing*dt;}
+      if(nearest){const ta=Math.atan2(nearest.y-this.y,nearest.x-this.x); let diff=ta-this.angle; while(diff>Math.PI)diff-=Math.PI*2; while(diff<-Math.PI)diff+=Math.PI*2; this.angle+=diff*this.homing*5*dt;}
     }
     // 刑天干戚回旋机制：飞出最大距离后折返，折返时重置命中列表实现二次伤害
     if(this.boomerang){
@@ -2265,7 +2265,7 @@ class Enemy {
         drops.push(new Drop(this.x+_dx,this.y+_dy,'xp',Math.ceil(this.xp*1.5)));
       }
       // 50%概率掉稀有/史诗装备（比普通小怪1%高得多，鼓励玩家优先击杀精英）
-      if(Math.random()<0.5 && typeof GEAR_SLOTS!=='undefined' && typeof generateGear==='function'){
+      if(Math.random()<0.2 && typeof GEAR_SLOTS!=='undefined' && typeof generateGear==='function'){
         const _rr=Math.random();
         const _rarity=_rr<0.55?'rare':_rr<0.90?'epic':'legendary';
         const _slot=GEAR_SLOTS[randInt(0,GEAR_SLOTS.length-1)];
@@ -2315,7 +2315,7 @@ class Enemy {
     if(hasRelic('treasure'))dropChance+=0.10;
     if(Math.random()<dropChance){const types=['health','shield','coin'];const w=[4,3,5];let tw=w.reduce((a,b)=>a+b,0);let r=Math.random()*tw;let sel='coin';for(let i=0;i<3;i++){r-=w[i];if(r<=0){sel=types[i];break;}}drops.push(new Drop(this.x,this.y,sel));}
     // 小怪1%概率掉普通/稀有装备（增加Build多样性，不与Boss掉落冲突）
-    if(Math.random()<0.01 && typeof GEAR_SLOTS!=='undefined' && typeof generateGear==='function'){
+    if(Math.random()<0.003 && typeof GEAR_SLOTS!=='undefined' && typeof generateGear==='function'){
       // 品质分布：70%普通、25%稀有、5%史诗
       const rr=Math.random();
       const rarity=rr<0.70?'common':rr<0.95?'rare':'epic';
