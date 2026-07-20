@@ -851,6 +851,8 @@ class Player {
     this.xp+=amount;
     // 局外经验累积：所有获得的经验都累积到局外，每1000经验奖励1天赋点
     saveData.totalXp=(saveData.totalXp||0)+amount;
+    // 角色经验追踪（用于角色三阶段进阶）
+    if(typeof addCharacterXp==='function' && this.characterId)addCharacterXp(this.characterId,amount);
     let leveledUp=false;
     while(this.xp>=this.xpToNext){
       this.xp-=this.xpToNext;
@@ -899,7 +901,7 @@ class Player {
     this.combatFuryMax=getTalentBonus('frenzy')*5;       // 战斗狂：5层上限,每层-3%cd(共-15%)
     this.rageFuryMax=getTalentBonus('rage')*5;           // 愤怒：5层上限,每层+3%dmg(共+15%)
   }
-  applyCharacterPassive(){
+  applyCharacterPassive(){const c3=getCurrentCharacter();this.maxSkillCooldown=c3.skillCooldown;this.characterId=c3.id;const stage3=getCharacterStage(c3.id);const s3=c3.stages[stage3];if(s3&&s3.stat){if(s3.stat.cdMul!==1)this.fireCooldown*=s3.stat.cdMul;if(s3.stat.dmgMul!==1)this.bulletDamage=Math.ceil(this.bulletDamage*s3.stat.dmgMul);if(s3.stat.crit>0)this.critChance+=s3.stat.crit;this.characterStage=stage3;}
     const c=getCurrentCharacter();
     this.maxSkillCooldown=c.skillCooldown; this.characterId=c.id;
     if(c.applyPassive)c.applyPassive(this);
@@ -1148,17 +1150,17 @@ class Player {
   useSkill(){
     const c=getCurrentCharacter(); this.skillCooldown=this.maxSkillCooldown;
     if(c.id==='default'){
-      // 弹幕风暴：32发带追踪 + 2秒攻速翻倍
-      for(let i=0;i<32;i++){
-        const a=(i/32)*Math.PI*2;
-        bullets.push(new Bullet(this.x+Math.cos(a)*(this.size+4),this.y+Math.sin(a)*(this.size+4),a,{speed:this.bulletSpeed*0.9,damage:this.bulletDamage,size:this.bulletSize,homing:1.5,elementEffects:{...this.elementEffects},finalUpgrades:[...this.finalUpgrades],specialEffects:{...this.specialEffects},finalSpecials:[...this.finalSpecials],weaponId:this.weaponId,bulletExplode:this.bulletExplode||0,bulletSplit:this.bulletSplit||0}));
+      // 弹幕风暴：32发带追踪+2秒攻速翻倍(三阶段64发+5秒)
+      const _evoBullets=(this.characterStage>=2)?64:32;for(let i=0;i<_evoBullets;i++){
+        const a=(i/_evoBullets)*Math.PI*2;
+        bullets.push(new Bullet(this.x+Math.cos(a)*(this.size+4),this.y+Math.sin(a)*(this.size+4),a,{speed:this.bulletSpeed*0.9,damage:this.bulletDamage,size:this.bulletSize,homing:(this.characterStage>=2?2.0:1.5),elementEffects:{...this.elementEffects},finalUpgrades:[...this.finalUpgrades],specialEffects:{...this.specialEffects},finalSpecials:[...this.finalSpecials],weaponId:this.weaponId,bulletExplode:this.bulletExplode||0,bulletSplit:this.bulletSplit||0}));
       }
-      this.fireCooldown*=0.5; this._skillAtkBoost=2; this._skillAtkBoostTime=2;
+      this.fireCooldown*=0.5; this._skillAtkBoost=2; this._skillAtkBoostTime=(this.characterStage>=2?5:2);
       spawnParticles(this.x,this.y,'#58a6ff',40);
       pushFloatingText(this.x,this.y-30,'弹幕风暴!','#58a6ff',1.5);
     }else if(c.id==='ninja'){
-      // 影分身：3个跟班8秒
-      for(let i=0;i<3;i++){
+      // 影分身：3个跟班8秒(三阶段5个+16秒)
+      const _nEvo=(this.characterStage>=2);for(let i=0;i<(_nEvo?5:3);i++){
         const a=i*(Math.PI*2/3);
         minions.push(new Minion(this.x+Math.cos(a)*40,this.y+Math.sin(a)*40));
       }
@@ -1170,15 +1172,15 @@ class Player {
       spawnParticles(this.x,this.y,'#3fb950',35);
       pushFloatingText(this.x,this.y-30,'符箓阵!','#3fb950',1.5);
     }else if(c.id==='monk'){
-      // 武僧：6秒无敌+回一半血
-      this.invincible=6;
-      this.health=Math.min(this.maxHealth,Math.ceil(this.maxHealth*0.5));
+      // 武僧：6秒无敌+回半血(三阶段12秒+回满)
+      this.invincible=(this.characterStage>=2?12:6);
+      this.health=Math.min(this.maxHealth,(this.characterStage>=2?this.maxHealth:(this.characterStage>=2?this.maxHealth:Math.ceil(this.maxHealth*0.5))));
       spawnParticles(this.x,this.y,'#f0883e',50);
       pushFloatingText(this.x,this.y-30,'金刚护体!','#f0883e',1.5);
     }else if(c.id==='shaman'){
       // 巫祝：元素风暴24发(冰+雷+火) + 强追踪
-      for(let i=0;i<24;i++){
-        const a=(i/24)*Math.PI*2;
+      const _sEvo=(this.characterStage>=2);for(let i=0;i<(_sEvo?48:24);i++){
+        const a=(i/(_sEvo?48:24))*Math.PI*2;
         const el=i%3===0?'ice':(i%3===1?'lightning':'fire');
         const elEffects={};
         if(el==='ice')elEffects.ice={slow:0.7,slowDur:3,freezeChance:1,freezeDur:1.0};
@@ -3191,8 +3193,8 @@ class Boss {
       this.invulnerable=true; this.invulnerableTimer=1.0;
       gameTimeout(()=>{
         if(!this.alive)return;
-        for(let i=0;i<24;i++){
-          const a=(i/24)*Math.PI*2;
+        const _sEvo=(this.characterStage>=2);for(let i=0;i<(_sEvo?48:24);i++){
+          const a=(i/(_sEvo?48:24))*Math.PI*2;
           enemyBullets.push(new EnemyBullet(this.x,this.y,a,200,8,'#58a6ff'));
         }
         spawnParticles(this.x,this.y,'#58a6ff',50);
@@ -3489,7 +3491,7 @@ class Boss {
       // 九尾狐幻影分身：创建3个分身同时射击
       spawnParticles(this.x,this.y,this.color,35);
       this.clones=[];
-      for(let i=0;i<3;i++){const a=(i/3)*Math.PI*2;this.clones.push({x:this.x+Math.cos(a)*80,y:this.y+Math.sin(a)*80,size:this.size*0.6,timer:6,angle:a,color:this.color});}
+      const _nEvo=(this.characterStage>=2);for(let i=0;i<(_nEvo?5:3);i++){const a=(i/3)*Math.PI*2;this.clones.push({x:this.x+Math.cos(a)*80,y:this.y+Math.sin(a)*80,size:this.size*0.6,timer:6,angle:a,color:this.color});}
       // 分身+本体同时发射弹幕（减少弹数）
       const shooters=[{x:this.x,y:this.y},...this.clones];
       for(const sh of shooters){for(let i=0;i<4;i++){const a=(i/4)*Math.PI*2;enemyBullets.push(new EnemyBullet(sh.x,sh.y,a,170,7,this.color));}}
@@ -3661,7 +3663,7 @@ class Boss {
         fireEffects.push({x:p.x,y:p.y,radius:p.radius,damage:0.6,life:2.5,maxLife:2.5,burnDmg:0.6,tick:0,chain:0,playerHazard:true});
         if(player&&player.alive&&dist(p.x,p.y,player.x,player.y)<p.radius)applyDirectDamage(player,3,'💥俯冲轰炸!',this.color);
         // 少量溅射弹（非弹幕海）
-        for(let i=0;i<3;i++){const a=(i/3)*Math.PI*2;enemyBullets.push(new EnemyBullet(p.x,p.y,a,120,7,this.color));}
+        const _nEvo=(this.characterStage>=2);for(let i=0;i<(_nEvo?5:3);i++){const a=(i/3)*Math.PI*2;enemyBullets.push(new EnemyBullet(p.x,p.y,a,120,7,this.color));}
       }
     }else if(sp==='radialPoison'||sp==='poisonSpray'){
       // 相柳毒液喷射：3条扇形光波

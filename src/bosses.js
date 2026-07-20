@@ -551,7 +551,7 @@ function startFinalBoss(){
   boss.isFinalBoss=true;
   // 刑天血量：超级Boss基础 × 难度倍率 × 试炼倍率（若在试炼中）× 最终Boss加成
   const trialMul=(bossTrialMode||resumeTrialAfterFinalBoss)?getDifficulty().bossTrialHpMul:1;
-  boss.maxHealth=Math.ceil(boss.maxHealth*3.0*trialMul); // 最终Boss血量3倍加成
+  boss.maxHealth=Math.ceil(boss.maxHealth*2.2*trialMul); // 最终Boss血量3倍加成
   boss.health=boss.maxHealth;
   boss.name='刑天';
   boss.size=82+currentLevel*4; // 比普通Boss更大

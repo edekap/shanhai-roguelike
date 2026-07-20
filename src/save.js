@@ -542,11 +542,11 @@ const DIFFICULTIES = {
   // waveHpGrow: 线性成长系数；waveHpGrow2: 平方项系数（后期加速）
   // Boss公式: (250+level*80) × bossHpMul(全局) × bossHpMul(难度)
   // 普通Lv1: 330×16=5280, Lv5: 650×16=10400
-  normal:    { name:'普通', icon:'🌱', enemyHpMul:2.2, enemyDmgMul:1, enemyCountMul:2.2, enemySpdMul:1, bossHpMul:16, bossCount:1, bossAtkMul:1, bossTrialHpMul:2.5, color:'#3fb950', spawnIntervalMul:0.65, enemyArmor:0, waveHpGrow:0.25, waveHpGrow2:0.015, bossDmgCap:0 },
-  hard:      { name:'困难', icon:'🔥', enemyHpMul:4, enemyDmgMul:1.8, enemyCountMul:1.6, enemySpdMul:1.3, bossHpMul:38, bossCount:1, bossAtkMul:1.4, bossTrialHpMul:3.5, color:'#f0883e', spawnIntervalMul:0.85, enemyArmor:0.1, waveHpGrow:0.28, waveHpGrow2:0.018, bossDmgCap:0.04 },
-  hell:      { name:'地狱', icon:'💀', enemyHpMul:7, enemyDmgMul:2.8, enemyCountMul:2.2, enemySpdMul:1.6, bossHpMul:65, bossCount:1, bossAtkMul:1.8, bossTrialHpMul:5, color:'#f85149', spawnIntervalMul:0.7, enemyArmor:0.2, waveHpGrow:0.32, waveHpGrow2:0.022, bossDmgCap:0.03 },
-  nightmare: { name:'梦魇', icon:'👹', enemyHpMul:12, enemyDmgMul:4, enemyCountMul:3.5, enemySpdMul:2, bossHpMul:90, bossCount:1, bossAtkMul:2.2, bossTrialHpMul:5.5, color:'#a855f7', spawnIntervalMul:0.55, enemyArmor:0.28, waveHpGrow:0.36, waveHpGrow2:0.026, bossDmgCap:0.025 },
-  godslayer: { name:'弑神', icon:'⚔️', enemyHpMul:22, enemyDmgMul:6, enemyCountMul:7, enemySpdMul:2.5, bossHpMul:130, bossCount:2, bossAtkMul:2.8, bossTrialHpMul:7, color:'#bc8cff', spawnIntervalMul:0.35, enemyArmor:0.35, waveHpGrow:0.40, waveHpGrow2:0.030, bossDmgCap:0.022 }
+  normal:    { name:'普通', icon:'🌱', enemyHpMul:2.2, enemyDmgMul:1, enemyCountMul:2.2, enemySpdMul:1, bossHpMul:18, bossCount:1, bossAtkMul:1, bossTrialHpMul:2.5, color:'#3fb950', spawnIntervalMul:0.65, enemyArmor:0, waveHpGrow:0.25, waveHpGrow2:0.015, bossDmgCap:0 },
+  hard:      { name:'困难', icon:'🔥', enemyHpMul:4, enemyDmgMul:1.8, enemyCountMul:1.6, enemySpdMul:1.3, bossHpMul:42, bossCount:1, bossAtkMul:1.4, bossTrialHpMul:3.5, color:'#f0883e', spawnIntervalMul:0.85, enemyArmor:0.1, waveHpGrow:0.28, waveHpGrow2:0.018, bossDmgCap:0.04 },
+  hell:      { name:'地狱', icon:'💀', enemyHpMul:7, enemyDmgMul:2.8, enemyCountMul:2.2, enemySpdMul:1.6, bossHpMul:72, bossCount:1, bossAtkMul:1.8, bossTrialHpMul:5, color:'#f85149', spawnIntervalMul:0.7, enemyArmor:0.2, waveHpGrow:0.32, waveHpGrow2:0.022, bossDmgCap:0.03 },
+  nightmare: { name:'梦魇', icon:'👹', enemyHpMul:12, enemyDmgMul:4, enemyCountMul:3.5, enemySpdMul:2, bossHpMul:100, bossCount:1, bossAtkMul:2.2, bossTrialHpMul:5.5, color:'#a855f7', spawnIntervalMul:0.55, enemyArmor:0.28, waveHpGrow:0.36, waveHpGrow2:0.026, bossDmgCap:0.025 },
+  godslayer: { name:'弑神', icon:'⚔️', enemyHpMul:22, enemyDmgMul:6, enemyCountMul:7, enemySpdMul:2.5, bossHpMul:145, bossCount:2, bossAtkMul:2.8, bossTrialHpMul:7, color:'#bc8cff', spawnIntervalMul:0.35, enemyArmor:0.35, waveHpGrow:0.40, waveHpGrow2:0.030, bossDmgCap:0.022 }
 };
 function getDifficulty(){ return DIFFICULTIES[saveData.difficulty]||DIFFICULTIES.normal; }
 // ==================== 难度解锁系统 ====================
@@ -609,13 +609,71 @@ function scoreToTalentPoints(s){ return Math.floor(s/400); }
 // 重排：T1神射手(免费)→T2忍者(800)→T3道士(1800)→T4武僧(3500)→T5巫祝(6000)→T6机关师(9000)
 // 技能全面加强：CD缩短、效果增强、被动数值提升
 const CHARACTERS = {
-  default: { id:'default',name:'神射手',icon:'🎯',color:'#58a6ff',price:0,passive:'射速+30% 暴击+10%',skillName:'弹幕风暴',skillDesc:'发射一圈子弹(32发)+2秒攻速翻倍',skillCooldown:8,applyPassive:p=>{p.baseFireCooldown*=0.70;p.baseCritChance=(p.baseCritChance||0)+0.10;} },
-  ninja:   { id:'ninja',name:'忍者',icon:'🥷',color:'#bc8cff',price:800,passive:'暴击率40% 暴伤+30%',skillName:'影分身',skillDesc:'召唤3个跟班攻击8秒',skillCooldown:12,applyPassive:p=>{p.baseCritChance=0.40;p.critDamage=(p.critDamage||2)+0.3;} },
-  taoist:  { id:'taoist',name:'道士',icon:'☯',color:'#3fb950',price:1800,passive:'射程+40% 子弹+1穿透',skillName:'符箓阵',skillDesc:'召唤5张符箓环绕+穿透攻击',skillCooldown:10,applyPassive:p=>{p.bulletSpeed*=1.40;p.bulletPierce=(p.bulletPierce||0)+1;} },
-  monk:    { id:'monk',name:'武僧',icon:'👊',color:'#f0883e',price:3500,passive:'生命+5 移速+20% 反伤3',skillName:'金刚护体',skillDesc:'6秒无敌+霸体+回满血',skillCooldown:14,applyPassive:p=>{p.maxHealth+=5;p.health+=5;p.speed*=1.20;p.thornsDmg=(p.thornsDmg||0)+3;} },
-  shaman:  { id:'shaman',name:'巫祝',icon:'🔮',color:'#daa520',price:6000,passive:'普攻带冰冻+闪电链+灼烧',skillName:'元素乱舞',skillDesc:'释放元素风暴(冰冻+闪电链+火焰燃烧)·24发',skillCooldown:15,applyPassive:p=>{p.elementTiers=p.elementTiers||{};p.elementTiers.ice=Math.max(1,p.elementTiers.ice||0);p.elementTiers.lightning=Math.max(1,p.elementTiers.lightning||0);if(!p.elementEffects)p.elementEffects={};if(!p.elementEffects.ice)p.elementEffects.ice={slow:0.5,slowDur:2};if(!p.elementEffects.lightning)p.elementEffects.lightning={chain:1,chainRange:150,chainDmg:0.5};} },
-  engineer:{ id:'engineer',name:'机关师',icon:'⚙️',color:'#8b949e',price:9000,passive:'子弹+1穿透 射速+15%',skillName:'机关炮台',skillDesc:'放置2座自动炮台12秒',skillCooldown:12,applyPassive:p=>{p.bulletPierce+=1;p.baseFireCooldown*=0.85;} }
+  default: { id:'default',name:'神射手',icon:'🎯',color:'#58a6ff',price:0,passive:'射速+30% 暴击+10%',skillName:'弹幕风暴',skillDesc:'发射一圈子弹(32发)+2秒攻速翻倍',skillCooldown:8,
+    stages:[
+      {xp:0,   stat:{cdMul:1.0,dmgMul:1.0,crit:0}},
+      {xp:500, stat:{cdMul:0.90,dmgMul:1.15,crit:0}},
+      {xp:1500,stat:{cdMul:0.80,dmgMul:1.35,crit:0.05}, evo:'弹幕数量翻倍(64发)+追踪+攻速增益延长至5秒'}
+    ],
+    applyPassive:p=>{p.baseFireCooldown*=0.70;p.baseCritChance=(p.baseCritChance||0)+0.10;} },
+  ninja:   { id:'ninja',name:'忍者',icon:'🥷',color:'#bc8cff',price:800,passive:'暴击率40% 暴伤+30%',skillName:'影分身',skillDesc:'召唤3个跟班攻击8秒',skillCooldown:12,
+    stages:[
+      {xp:0,   stat:{cdMul:1.0,dmgMul:1.0,crit:0}},
+      {xp:500, stat:{cdMul:0.93,dmgMul:1.10,crit:0}},
+      {xp:1500,stat:{cdMul:0.85,dmgMul:1.25,crit:0.08}, evo:'影分身→5个+时间翻倍至16秒'}
+    ],
+    applyPassive:p=>{p.baseCritChance=0.40;p.critDamage=(p.critDamage||2)+0.3;} },
+  taoist:  { id:'taoist',name:'道士',icon:'☯',color:'#3fb950',price:1800,passive:'射程+40% 子弹+1穿透',skillName:'符箓阵',skillDesc:'召唤5张符箓环绕+穿透攻击',skillCooldown:10,
+    stages:[
+      {xp:0,   stat:{cdMul:1.0,dmgMul:1.0,crit:0}},
+      {xp:500, stat:{cdMul:0.92,dmgMul:1.12,crit:0}},
+      {xp:1500,stat:{cdMul:0.82,dmgMul:1.30,crit:0.05}, evo:'符箓阵→10张+环绕速度翻倍+穿透伤害提升'}
+    ],
+    applyPassive:p=>{p.bulletSpeed*=1.40;p.bulletPierce=(p.bulletPierce||0)+1;} },
+  monk:    { id:'monk',name:'武僧',icon:'👊',color:'#f0883e',price:3500,passive:'生命+5 移速+20% 反伤3',skillName:'金刚护体',skillDesc:'6秒无敌+回一半血',skillCooldown:14,
+    stages:[
+      {xp:0,   stat:{cdMul:1.0,dmgMul:1.0,crit:0}},
+      {xp:500, stat:{cdMul:0.95,dmgMul:1.08,crit:0}},
+      {xp:1500,stat:{cdMul:0.88,dmgMul:1.20,crit:0}, evo:'金刚护体→12秒无敌+回满血+反伤翻倍持续期间'}
+    ],
+    applyPassive:p=>{p.maxHealth+=5;p.health+=5;p.speed*=1.20;p.thornsDmg=(p.thornsDmg||0)+3;} },
+  shaman:  { id:'shaman',name:'巫祝',icon:'🔮',color:'#daa520',price:6000,passive:'普攻带冰冻+闪电链+灼烧',skillName:'元素乱舞',skillDesc:'释放元素风暴(冰冻+闪电链+火焰燃烧)·24发',skillCooldown:15,
+    stages:[
+      {xp:0,   stat:{cdMul:1.0,dmgMul:1.0,crit:0}},
+      {xp:500, stat:{cdMul:0.93,dmgMul:1.10,crit:0}},
+      {xp:1500,stat:{cdMul:0.85,dmgMul:1.25,crit:0}, evo:'元素乱舞→48发+追踪强化+全元素增幅'}
+    ],
+    applyPassive:p=>{p.elementTiers=p.elementTiers||{};p.elementTiers.ice=Math.max(1,p.elementTiers.ice||0);p.elementTiers.lightning=Math.max(1,p.elementTiers.lightning||0);if(!p.elementEffects)p.elementEffects={};if(!p.elementEffects.ice)p.elementEffects.ice={slow:0.5,slowDur:2};if(!p.elementEffects.lightning)p.elementEffects.lightning={chain:1,chainRange:150,chainDmg:0.5};} },
+  engineer:{ id:'engineer',name:'机关师',icon:'⚙️',color:'#8b949e',price:9000,passive:'子弹+1穿透 射速+15%',skillName:'机关炮台',skillDesc:'放置2座自动炮台12秒',skillCooldown:12,
+    stages:[
+      {xp:0,   stat:{cdMul:1.0,dmgMul:1.0,crit:0}},
+      {xp:500, stat:{cdMul:0.92,dmgMul:1.10,crit:0}},
+      {xp:1500,stat:{cdMul:0.82,dmgMul:1.25,crit:0}, evo:'炮台→3座+伤害翻倍+射速翻倍'}
+    ],
+    applyPassive:p=>{p.bulletPierce+=1;p.baseFireCooldown*=0.85;} }
 };
+function getCharacterStage(charId){
+  if(!saveData.characterStages)saveData.characterStages={};
+  return saveData.characterStages[charId]||0;
+}
+function addCharacterXp(charId,xp){
+  const c=CHARACTERS[charId]; if(!c||!c.stages)return;
+  if(!saveData.characterStages)saveData.characterStages={};
+  saveData.charXp=saveData.charXp||{};
+  saveData.charXp[charId]=(saveData.charXp[charId]||0)+xp;
+  const curXp=saveData.charXp[charId];
+  let stage=saveData.characterStages[charId]||0;
+  for(let i=stage+1;i<c.stages.length;i++){
+    if(curXp>=c.stages[i].xp){ stage=i; }
+  }
+  if(stage!==(saveData.characterStages[charId]||0)){
+    saveData.characterStages[charId]=stage;
+    saveSave();
+    if(stage===2&&c.stages[2].evo) return {stage, evo:c.stages[2].evo};
+    return {stage};
+  }
+  return null;
+}
 // ==================== 角色皮肤系统 ====================
 // 皮肤仅改变外观（颜色/光环），不影响属性
 const SKINS = {
