@@ -299,6 +299,27 @@ canvas.addEventListener('touchend', e=>{
   }
 }, {passive:false});
 
+// ==================== TapTap 试玩版容器适配 ====================
+// TapTap 试玩版在 TapTap App 的 WebView 中运行：容器自动全屏横屏、自动处理实名+防沉迷
+// 因此在 TapTap 内：跳过 rotateHint/fsRestoreHint/requestFullscreen/orientation.lock 等浏览器适配逻辑
+// 检测方式：UA 包含 "TapTap"（容器注入的 UA 标识）或 window.__TAPTA__/window.TapTap 存在
+const isInTapTap = (function(){
+  try{
+    const ua = (navigator.userAgent || '').toLowerCase();
+    if(ua.indexOf('taptap') !== -1) return true;
+    if(typeof window.__TAPTA__ !== 'undefined') return true;
+    if(typeof window.TapTap !== 'undefined' && window.TapTap && typeof window.TapTap === 'object') return true;
+    // URL 参数兜底（试玩版容器有时会注入 ?from=taptap）
+    if(typeof URLSearchParams !== 'undefined'){
+      const p = new URLSearchParams(window.location.search);
+      if(p.get('from') === 'taptap' || p.get('taptap') === '1') return true;
+    }
+  }catch(e){}
+  return false;
+})();
+// 暴露给其他模块使用（ui.js 的 showHomeTipIfMobile 也会用到）
+if(typeof window !== 'undefined'){ window.isInTapTap = isInTapTap; }
+
 // ==================== 手机端触摸控制 ====================
 // iPadOS 13+ 在 Safari 默认请求桌面 UA（navigator.platform==='MacIntel'），需额外检测
 const _isiPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
@@ -312,6 +333,8 @@ const isInWechat = /MicroMessenger/i.test(navigator.userAgent);
 function updateRotateHint(){
   const hint = document.getElementById('rotateHint');
   if(!hint) return;
+  // TapTap 试玩版容器自动横屏，不需要旋转提示
+  if(isInTapTap){ hint.classList.remove('show'); return; }
   const isPortrait = window.matchMedia('(orientation: portrait)').matches
     || (window.innerHeight > window.innerWidth);
   // 用户已主动关闭遮罩后，本次会话不再自动弹出（避免反复打扰）
@@ -346,6 +369,8 @@ function isFullscreenNow(){
 }
 
 function enterFullscreen(){
+  // TapTap 试玩版容器自动全屏，调用 requestFullscreen 会失败或导致容器异常
+  if(isInTapTap) return false;
   const el = document.documentElement;
   const isFs = isFullscreenNow();
   if(isFs) return false;
@@ -392,6 +417,7 @@ function toggleFullscreen(){
 // 显示"恢复全屏"遮罩
 function showFsRestoreHint(){
   if(!isTouchDevice) return; // 电脑端不强制
+  if(isInTapTap) return; // TapTap 容器已全屏，不弹恢复提示
   if(isFullscreenNow()) return;
   // 竖屏时由 rotateHint 遮罩接管，不重复弹
   const isPortrait = window.matchMedia('(orientation: portrait)').matches || (window.innerHeight > window.innerWidth);
@@ -453,6 +479,7 @@ document.addEventListener('webkitfullscreenchange', () => {
 // iOS Safari 不支持 requestFullscreen API，跳过自动全屏调用，由首页提示语引导用户「添加到主屏幕」
 (function(){
   if(!isTouchDevice) return; // 电脑端不强制
+  if(isInTapTap) return; // TapTap 容器自动全屏，不需要自动进入
   const _isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || _isiPadOS;
   if(_isiOS) return; // iOS Safari 无 Fullscreen API，跳过避免静默失败
   let _firstGestureDone = false;
@@ -516,6 +543,13 @@ function showHomeTipIfMobile(){
   if(!tip) return;
   const fsBtn = document.getElementById('fullscreenBtn');
   const bigBtn = document.getElementById('homeFullscreenBigBtn');
+  // TapTap 试玩版容器自动全屏横屏、已实名认证，所有"全屏/添加主屏幕"提示都无意义
+  if(typeof isInTapTap !== 'undefined' && isInTapTap){
+    if(fsBtn) fsBtn.style.display = 'none';
+    if(bigBtn) bigBtn.style.display = 'none';
+    tip.classList.remove('show');
+    return;
+  }
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
     || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPadOS 13+ 桌面 UA
   const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;

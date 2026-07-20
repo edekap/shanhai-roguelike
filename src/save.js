@@ -23,8 +23,8 @@ let saveData = {
   weaponCrafts: {},
   ownedPets: [], selectedPet: null,
   bonusClicks: 3,        // +300分按钮剩余次数（降低避免开局即可买顶级装备）
-  difficulty: 'normal',  // normal/hard/hell/godslayer
-  difficultyCleared: { normal:false, hard:false, hell:false, godslayer:false }, // 各难度Boss试炼通关标记（用于解锁后续难度）
+  difficulty: 'normal',  // normal/hard/hell/nightmare/godslayer
+  difficultyCleared: { normal:false, hard:false, hell:false, nightmare:false, godslayer:false }, // 各难度Boss试炼通关标记（用于解锁后续难度）
   titleGodslayer: false, // 弑神难度试炼通关后解锁「弑神者」特殊称号
   ranchPets: [],         // 牧场中的宠物索引列表
   eggs: [],              // 蛋列表 {type:'normal'|'epic', def:bossIdx}
@@ -81,7 +81,9 @@ const SAVE_MIGRATIONS = {
     if(!d.equippedSkins) d.equippedSkins = {};
     if(!d.ownedArtifacts) d.ownedArtifacts = [];
     if(d.equippedArtifact === undefined) d.equippedArtifact = null;
-    if(!d.difficultyCleared) d.difficultyCleared = {normal:false, hard:false, hell:false, godslayer:false};
+    if(!d.difficultyCleared) d.difficultyCleared = {normal:false, hard:false, hell:false, nightmare:false, godslayer:false};
+    // 兼容旧存档：补 nightmare 字段
+    if(d.difficultyCleared && d.difficultyCleared.nightmare===undefined) d.difficultyCleared.nightmare=false;
       if(d.titleGodslayer === undefined){
       // 兼容旧存档：曾通关弑神难度的玩家自动解锁称号
       d.titleGodslayer = !!(d.difficultyCleared && d.difficultyCleared.godslayer);
@@ -540,15 +542,18 @@ const DIFFICULTIES = {
   // waveHpGrow: 线性成长系数；waveHpGrow2: 平方项系数（后期加速）
   // HP公式：base × (1 + waveBonus×grow + waveBonus²×grow2) × enemyHpMul
   // 普通模式第8关第5波(waveBonus=39): 1+3.9+6.08=10.98倍血量（原仅2.95倍）
-  normal:    { name:'普通', icon:'🌱', enemyHpMul:1.6, enemyDmgMul:1, enemyCountMul:1, enemySpdMul:1, bossHpMul:3.5, bossCount:1, bossAtkMul:1, bossTrialHpMul:2.5, color:'#3fb950', spawnIntervalMul:1, enemyArmor:0, waveHpGrow:0.12, waveHpGrow2:0.005, bossDmgCap:0 },
+  normal:    { name:'普通', icon:'🌱', enemyHpMul:1.6, enemyDmgMul:1, enemyCountMul:1.5, enemySpdMul:1, bossHpMul:3.5, bossCount:1, bossAtkMul:1, bossTrialHpMul:2.5, color:'#3fb950', spawnIntervalMul:0.8, enemyArmor:0, waveHpGrow:0.12, waveHpGrow2:0.005, bossDmgCap:0 },
   hard:      { name:'困难', icon:'🔥', enemyHpMul:3, enemyDmgMul:1.8, enemyCountMul:1.6, enemySpdMul:1.3, bossHpMul:7, bossCount:1, bossAtkMul:1.4, bossTrialHpMul:3.5, color:'#f0883e', spawnIntervalMul:0.85, enemyArmor:0.1, waveHpGrow:0.13, waveHpGrow2:0.006, bossDmgCap:0.04 },
   hell:      { name:'地狱', icon:'💀', enemyHpMul:5.5, enemyDmgMul:2.8, enemyCountMul:2.2, enemySpdMul:1.6, bossHpMul:16, bossCount:1, bossAtkMul:1.8, bossTrialHpMul:5, color:'#f85149', spawnIntervalMul:0.7, enemyArmor:0.2, waveHpGrow:0.16, waveHpGrow2:0.008, bossDmgCap:0.03 },
+  // 梦魇难度（地狱之上、弑神之下）：平滑过渡，避免地狱→弑神跨度太大劝退玩家
+  nightmare: { name:'梦魇', icon:'👹', enemyHpMul:9, enemyDmgMul:4, enemyCountMul:3.5, enemySpdMul:2, bossHpMul:24, bossCount:1, bossAtkMul:2.2, bossTrialHpMul:5.5, color:'#a855f7', spawnIntervalMul:0.55, enemyArmor:0.28, waveHpGrow:0.18, waveHpGrow2:0.010, bossDmgCap:0.025 },
   godslayer: { name:'弑神', icon:'⚔️', enemyHpMul:18, enemyDmgMul:6, enemyCountMul:7, enemySpdMul:2.5, bossHpMul:40, bossCount:2, bossAtkMul:2.8, bossTrialHpMul:7, color:'#bc8cff', spawnIntervalMul:0.35, enemyArmor:0.35, waveHpGrow:0.22, waveHpGrow2:0.012, bossDmgCap:0.022 }
 };
 function getDifficulty(){ return DIFFICULTIES[saveData.difficulty]||DIFFICULTIES.normal; }
 // ==================== 难度解锁系统 ====================
-// 难度解锁顺序：normal → hard → hell → godslayer
-const DIFFICULTY_ORDER = ['normal','hard','hell','godslayer'];
+// 难度解锁顺序：normal → hard → hell → nightmare → godslayer
+// 梦魇夹在地狱和弑神之间，提供平滑过渡
+const DIFFICULTY_ORDER = ['normal','hard','hell','nightmare','godslayer'];
 // 检查某难度是否已解锁（normal永远解锁，其他需通关前一难度的Boss试炼）
 function isDifficultyUnlocked(key){
   if(key==='normal')return true;
@@ -724,16 +729,23 @@ const BASE_UPGRADES = [
   // === 普通（基础数值）===
   {id:'damage',name:'利刃',icon:'⚔️',desc:'子弹伤害+1',rarity:'common',apply:p=>p.bulletDamage+=1},
   {id:'firerate',name:'疾射',icon:'⚡',desc:'射击冷却-12%(递减)',rarity:'common',apply:p=>{
-    // 射速叠加递减：第1次-12%，第2次-10%，第3次-8%，第4次-6%，第5次+4%
+    // 射速叠加递减：第1次-12%，第2次-10%，第3次-8%，第4次-6%，第5次-4%
     // 防止后期无限叠加后射速过快导致手感无变化
     const cnt=(p._firerateCount||0);
     const reduction=0.12-cnt*0.02;
-    if(reduction>0.04){
+    if(reduction>=0.04){
       p.fireCooldown*=(1-reduction);
       p._firerateCount=cnt+1;
     }
   }},
-  {id:'speed',name:'轻灵',icon:'👟',desc:'移动速度+12%',rarity:'common',apply:p=>p.speed*=1.12},
+  {id:'speed',name:'轻灵',icon:'👟',desc:'移动速度+12%(上限3次)',rarity:'common',apply:p=>{
+    // 移速上限3次：避免玩家堆移速后完全无解风筝怪
+    const cnt=(p._speedCount||0);
+    if(cnt<3){
+      p.speed*=1.12;
+      p._speedCount=cnt+1;
+    }
+  }},
   {id:'health',name:'强韧',icon:'❤️',desc:'最大生命+2并回满',rarity:'common',apply:p=>{p.maxHealth+=2;p.health=p.maxHealth;}},
   {id:'bulletspeed',name:'风之祝福',icon:'💨',desc:'子弹速度+30%',rarity:'common',apply:p=>p.bulletSpeed*=1.30},
   {id:'magnet',name:'聚灵',icon:'🌀',desc:'拾取范围+100',rarity:'common',apply:p=>p.magnetRange=(p.magnetRange||120)+100},
@@ -748,10 +760,24 @@ const BASE_UPGRADES = [
       p._multishotCount=cnt+1;
     }
   }},
-  {id:'pierce',name:'穿透',icon:'🏹',desc:'穿透+1敌人',rarity:'rare',apply:p=>p.bulletPierce+=1},
+  {id:'pierce',name:'穿透',icon:'🏹',desc:'穿透+1敌人(上限3次)',rarity:'rare',apply:p=>{
+    // 穿透上限3次：防止玩家堆穿透后所有怪一枪穿死
+    const cnt=(p._pierceCount||0);
+    if(cnt<3){
+      p.bulletPierce+=1;
+      p._pierceCount=cnt+1;
+    }
+  }},
   {id:'homing',name:'追踪',icon:'🧲',desc:'子弹轻微追踪',rarity:'rare',apply:p=>p.bulletHoming+=0.8},
   {id:'bigbullet',name:'巨型子弹',icon:'🔵',desc:'子弹更大+伤害1',rarity:'rare',apply:p=>{p.bulletSize+=4;p.bulletDamage+=1;}},
-  {id:'crit',name:'暴击专精',icon:'💥',desc:'暴击率+12%',rarity:'rare',apply:p=>p.critChance=(p.critChance||0)+0.12},
+  {id:'crit',name:'暴击专精',icon:'💥',desc:'暴击率+12%(上限4次)',rarity:'rare',apply:p=>{
+    // 暴击上限4次：防止玩家堆到100%暴击无脑红字
+    const cnt=(p._critCount||0);
+    if(cnt<4){
+      p.critChance=(p.critChance||0)+0.12;
+      p._critCount=cnt+1;
+    }
+  }},
   {id:'thorns',name:'反伤护甲',icon:'🌵',desc:'被撞反弹2伤害',rarity:'rare',apply:p=>p.thorns=(p.thorns||0)+2},
   {id:'explode',name:'爆破子弹',icon:'💢',desc:'子弹命中爆炸(范围伤害)',rarity:'rare',apply:p=>p.bulletExplode=(p.bulletExplode||0)+1},
 
@@ -786,6 +812,21 @@ function getAvailableUpgrades(){
     if(u.id==='firerate'){
       const fr=(player._firerateCount||0);
       if(fr>=5)return false;
+    }
+    // 移速：上限3次，达上限后不再出现
+    if(u.id==='speed'){
+      const sp=(player._speedCount||0);
+      if(sp>=3)return false;
+    }
+    // 穿透：上限3次，达上限后不再出现
+    if(u.id==='pierce'){
+      const pc=(player._pierceCount||0);
+      if(pc>=3)return false;
+    }
+    // 暴击：上限4次，达上限后不再出现
+    if(u.id==='crit'){
+      const cc=(player._critCount||0);
+      if(cc>=4)return false;
     }
     return true;
   });
@@ -1581,6 +1622,7 @@ const ACHIEVEMENTS = [
   { id:'trialNormal', name:'试炼初成', icon:'🌱', desc:'通过普通难度Boss试炼', check:f=>f.trialNormalCleared, reward:500 },
   { id:'trialHard', name:'试炼精进', icon:'🔥', desc:'通过困难难度Boss试炼', check:f=>f.trialHardCleared, reward:1000 },
   { id:'trialHell', name:'试炼苦行', icon:'💀', desc:'通过地狱难度Boss试炼', check:f=>f.trialHellCleared, reward:2000 },
+  { id:'trialNightmare', name:'试炼梦魇', icon:'👹', desc:'通过梦魇难度Boss试炼', check:f=>f.trialNightmareCleared, reward:3000 },
   { id:'trialGodslayer', name:'试炼封神', icon:'⚔️', desc:'通过弑神难度Boss试炼', check:f=>f.trialGodslayerCleared, reward:5000 },
   // 挑战类
   { id:'trialClear', name:'试炼通关', icon:'🎯', desc:'完成一次Boss试炼', check:f=>f.trialCleared, reward:400 },

@@ -366,7 +366,15 @@ function updateUI(){
   if(relicTxt!==_ui._lastRelics){if(_ui.relicInfo)_ui.relicInfo.textContent=relicTxt;_ui._lastRelics=relicTxt;}
 }
 function updateBossUI(){
-  if(!boss)return;
+  if(!boss){
+    // Boss 不存在时清理狂暴徽章，避免新 Boss 出现前残留显示
+    const _bd=document.getElementById('bossEnrageBadge');
+    if(_bd && !_bd.classList.contains('hidden')){
+      _bd.classList.add('hidden'); _bd.classList.remove('enraged');
+      _ui._lastEnrageState=undefined; _ui._lastEnrageSec=undefined;
+    }
+    return;
+  }
   if(!_ui._initDone)_initUICache();
   const pct=Math.max(0,boss.health/boss.maxHealth*100);
   if(Math.abs(pct-_ui._lastBossHp)>0.5){_ui.bossBarFill.style.width=pct+'%';_ui._lastBossHp=pct;}
@@ -392,6 +400,40 @@ function updateBossUI(){
     if(lowFlag!==_ui._lastBossLowHp){
       _ui.bossBarFill.classList.toggle('boss-lowhp-shake',lowFlag);
       _ui._lastBossLowHp=lowFlag;
+    }
+  }
+  // ===== 狂暴倒计时徽章更新 =====
+  // 仅当 boss._enrageTimer 字段存在时才显示（避免非Boss实体未定义时报错）
+  if(boss._enrageTimer!==undefined){
+    const badge=document.getElementById('bossEnrageBadge');
+    if(badge){
+      if(boss._enraged){
+        // 已狂暴：显示"🔥 狂暴中"红色脉冲徽章
+        if(_ui._lastEnrageState!==1){
+          badge.classList.remove('hidden');
+          badge.classList.add('enraged');
+          badge.textContent='🔥 狂暴中';
+          _ui._lastEnrageState=1;
+        }
+      }else{
+        // 未狂暴：显示倒计时（仅在最后30秒显示，避免开局就给压力）
+        const secLeft=Math.ceil(boss._enrageTimer);
+        if(secLeft<=30){
+          if(_ui._lastEnrageState!==2 || _ui._lastEnrageSec!==secLeft){
+            badge.classList.remove('hidden','enraged');
+            badge.textContent=`⏰ ${secLeft}s 后狂暴`;
+            _ui._lastEnrageState=2;
+            _ui._lastEnrageSec=secLeft;
+          }
+        }else{
+          // 30秒以上：隐藏徽章（同时移除 enraged 类，避免下次显示时残留红色样式）
+          if(_ui._lastEnrageState!==0){
+            badge.classList.add('hidden');
+            badge.classList.remove('enraged');
+            _ui._lastEnrageState=0;
+          }
+        }
+      }
     }
   }
 }
@@ -885,6 +927,29 @@ function drawWarnings(dt){
           grd.addColorStop(0,`rgba(${cr},${cg},${cb},0.9)`);grd.addColorStop(1,`rgba(${cr},${cg},${cb},0)`);
           ctx.fillStyle=grd;
           ctx.beginPath(); ctx.moveTo(d.x,d.y); ctx.arc(d.x,d.y,600,ang-0.15,ang+0.15); ctx.closePath(); ctx.fill();
+        }
+      }
+      ctx.globalAlpha=1;
+    }
+    // 绘制追踪光束（special3多道光束同时存在）
+    if(boss._trackingBeamActive&&boss._trackingBeamActive.length>0){
+      const c=boss.color;
+      const cr=parseInt(c.substr(1,2),16),cg=parseInt(c.substr(3,2),16),cb=parseInt(c.substr(5,2),16);
+      for(const d of boss._trackingBeamActive){
+        const t=d.timer/d.duration;
+        ctx.globalAlpha=Math.max(0.3,1-t*0.5);
+        if(d.beamType==='horizontal'){
+          const grd=ctx.createLinearGradient(0,d.y-50,0,d.y+50);
+          grd.addColorStop(0,`rgba(${cr},${cg},${cb},0)`);grd.addColorStop(0.5,`rgba(${cr},${cg},${cb},0.9)`);grd.addColorStop(1,`rgba(${cr},${cg},${cb},0)`);
+          ctx.fillStyle=grd; ctx.fillRect(0,d.y-50,CONFIG.WIDTH,100);
+          ctx.fillStyle=`rgba(255,200,150,${0.6*(1-t)})`;
+          ctx.fillRect(0,d.y-3,CONFIG.WIDTH,6);
+        }else{
+          const grd=ctx.createLinearGradient(d.x-50,0,d.x+50,0);
+          grd.addColorStop(0,`rgba(${cr},${cg},${cb},0)`);grd.addColorStop(0.5,`rgba(${cr},${cg},${cb},0.9)`);grd.addColorStop(1,`rgba(${cr},${cg},${cb},0)`);
+          ctx.fillStyle=grd; ctx.fillRect(d.x-50,0,100,CONFIG.HEIGHT);
+          ctx.fillStyle=`rgba(255,200,150,${0.6*(1-t)})`;
+          ctx.fillRect(d.x-3,0,6,CONFIG.HEIGHT);
         }
       }
       ctx.globalAlpha=1;
@@ -1974,12 +2039,14 @@ function gameOver(){
     af.trialCleared=true;
     // 设置对应难度的试炼通关标志（用于解锁后续难度）
     const diff=saveData.difficulty;
-    if(!saveData.difficultyCleared)saveData.difficultyCleared={normal:false,hard:false,hell:false,godslayer:false};
+    if(!saveData.difficultyCleared)saveData.difficultyCleared={normal:false,hard:false,hell:false,nightmare:false,godslayer:false};
+    if(saveData.difficultyCleared.nightmare===undefined)saveData.difficultyCleared.nightmare=false;
     saveData.difficultyCleared[diff]=true;
     // 同步到成就标志
     if(diff==='normal')af.trialNormalCleared=true;
     else if(diff==='hard')af.trialHardCleared=true;
     else if(diff==='hell')af.trialHellCleared=true;
+    else if(diff==='nightmare')af.trialNightmareCleared=true;
     else if(diff==='godslayer'){
       af.trialGodslayerCleared=true;
       // 弑神难度试炼通关：解锁特殊称号（首次解锁）

@@ -355,6 +355,7 @@ const ATTACK_FRAME_MAP = {
   windBlade:'a2', floodWave:'a2',
   voidRift:'a2', dimensionStorm:'a2',
   halberdSweep:'a2', wrathClones:'a2',
+  trackingBeam:'a', edgeWave:'a2',
   safeZone:'a'
 };
 let gameState='menu';
@@ -949,6 +950,8 @@ class Player {
       if(keys['d']||keys['arrowright'])dx+=1;
     }
     this.moving=Math.abs(dx)>0.01||Math.abs(dy)>0.01;
+    // 记录上一帧位置用于估算速度向量（供敌方AI预判使用）
+    const _prevX=this.x, _prevY=this.y;
     if(this.moving){
       const len=Math.sqrt(dx*dx+dy*dy); if(len>0){dx/=len; dy/=len;}
       let spd=this.speed*mag;
@@ -958,6 +961,9 @@ class Player {
     }
     this.x=clamp(this.x,this.size,CONFIG.WIDTH-this.size);
     this.y=clamp(this.y,this.size,CONFIG.HEIGHT-this.size);
+    // 估算玩家速度向量（单位：像素/秒），供远程怪预判射击
+    this.vx=dt>0?(this.x-_prevX)/dt:0;
+    this.vy=dt>0?(this.y-_prevY)/dt:0;
     this.angle=Math.atan2(mouse.y-this.y,mouse.x-this.x);
     // 奇遇临时伤害增益倒计时
     if(this._adventureDmgBoostTime>0){this._adventureDmgBoostTime-=dt; if(this._adventureDmgBoostTime<=0){this._adventureDmgBoost=1;}}
@@ -2020,13 +2026,61 @@ class Enemy {
     const d=dist(this.x,this.y,player.x,player.y);
     this.angle=Math.atan2(player.y-this.y,player.x-this.x);
     const sp=this.speed*this.slowFactor*globalSlow;
-    if(this.suicidal){ // 自爆怪追踪
-      this.x+=Math.cos(this.angle)*sp*dt; this.y+=Math.sin(this.angle)*sp*dt;
+    if(this.suicidal){ // 自爆怪：侧翼接近（斜向切入，避免直冲被风筝）
+      // 每个自爆怪初始化一个侧偏方向（左/右），生命周期内保持一致
+      if(this._flankDir===undefined)this._flankDir=Math.random()<0.5?-1:1;
+      const _flankAngle=this.angle+this._flankDir*0.5; // 偏离30°斜向接近
+      this.x+=Math.cos(_flankAngle)*sp*dt; this.y+=Math.sin(_flankAngle)*sp*dt;
       if(d<this.size+player.size){this.explode(); return;}
+    }else if(this.shoots){
+      // 远程怪：保持距离+预判射击（射击时考虑玩家速度+方向提前量）
+      if(d>320){
+        // 玩家太远，追上去
+        this.x+=Math.cos(this.angle)*sp*dt; this.y+=Math.sin(this.angle)*sp*dt;
+      }else if(d<180){
+        // 玩家太近，后撤拉开距离
+        this.x-=Math.cos(this.angle)*sp*0.7*dt; this.y-=Math.sin(this.angle)*sp*0.7*dt;
+      }else{
+        // 中等距离：横向移动避免站着不动当靶子
+        if(this._strafeDir===undefined)this._strafeDir=Math.random()<0.5?-1:1;
+        // 每隔2-3.5秒切换一次方向，避免一直顺时针/逆时针
+        // 注意：_strafeInterval 必须固定值，不能用 rand() 每帧重新生成（否则永远达不到切换阈值）
+        if(this._strafeInterval===undefined)this._strafeInterval=rand(2,3.5);
+        this._strafeTimer=(this._strafeTimer||0)+dt;
+        if(this._strafeTimer>this._strafeInterval){this._strafeDir*=-1; this._strafeTimer=0; this._strafeInterval=rand(2,3.5);}
+        const _strafeAngle=this.angle+Math.PI/2*this._strafeDir;
+        this.x+=Math.cos(_strafeAngle)*sp*0.6*dt; this.y+=Math.sin(_strafeAngle)*sp*0.6*dt;
+      }
+      // 射击：预判玩家走位（基于玩家速度向量计算提前量）
+      if(this.shootTimer>0){
+        this.shootTimer-=dt;
+        if(this.shootTimer<=0&&d<480){
+          this.shootTimer=this.shootCooldown;
+          this.attackAnim=0.3;
+          // 预判：玩家在子弹飞行时间内会移动到的位置
+          const _bulletSpeed=220;
+          const _ttf=d/_bulletSpeed; // time to fly
+          const _pvx=player.vx||0, _pvy=player.vy||0;
+          const _leadX=player.x+_pvx*_ttf*0.8; // 0.8系数避免预判过激
+          const _leadY=player.y+_pvy*_ttf*0.8;
+          const _leadAngle=Math.atan2(_leadY-this.y,_leadX-this.x);
+          enemyBullets.push(new EnemyBullet(this.x,this.y,_leadAngle,_bulletSpeed));
+        }
+      }
     }else{
-      this.x+=Math.cos(this.angle)*sp*dt; this.y+=Math.sin(this.angle)*sp*dt;
+      // 近战怪：包抄（不全直冲，30%的怪走斜向形成包围）
+      if(this._flankDir===undefined){
+        // 初始化：70%直冲、15%左侧、15%右侧
+        const _r=Math.random();
+        this._flankDir=_r<0.70?0:(_r<0.85?-1:1);
+      }
+      if(this._flankDir===0){
+        this.x+=Math.cos(this.angle)*sp*dt; this.y+=Math.sin(this.angle)*sp*dt;
+      }else{
+        const _flankAngle=this.angle+this._flankDir*0.6; // 偏离34°
+        this.x+=Math.cos(_flankAngle)*sp*dt; this.y+=Math.sin(_flankAngle)*sp*dt;
+      }
     }
-    if(this.shoots&&this.shootTimer>0){this.shootTimer-=dt; if(this.shootTimer<=0&&d<450){this.shootTimer=this.shootCooldown; this.attackAnim=0.3; enemyBullets.push(new EnemyBullet(this.x,this.y,this.angle,200));}}
   }
   applyIceEffect(eff){if(eff.slow){this.slowFactor=1-eff.slow;this.slowTimer=eff.slowDur;}if(eff.freezeChance&&Math.random()<eff.freezeChance){this.frozen=true;this.frozenTimer=1.5;}}
   takeDamage(dmg,bullet){
@@ -2209,6 +2263,26 @@ class Enemy {
       const _xpAmt = hasRelic('xpboost') ? Math.ceil(this.xp*1.5) : this.xp;
       drops.push(new Drop(this.x,this.y,'xp',_xpAmt));
     }
+    // 精英怪保底掉落：3颗经验球 + 50%概率掉装备 + 紫色爆裂粒子
+    if(this.elite){
+      for(let _i=0;_i<3;_i++){
+        const _dx=rand(-20,20), _dy=rand(-20,20);
+        drops.push(new Drop(this.x+_dx,this.y+_dy,'xp',Math.ceil(this.xp*1.5)));
+      }
+      // 50%概率掉稀有/史诗装备（比普通小怪1%高得多，鼓励玩家优先击杀精英）
+      if(Math.random()<0.5 && typeof GEAR_SLOTS!=='undefined' && typeof generateGear==='function'){
+        const _rr=Math.random();
+        const _rarity=_rr<0.55?'rare':_rr<0.90?'epic':'legendary';
+        const _slot=GEAR_SLOTS[randInt(0,GEAR_SLOTS.length-1)];
+        try{
+          const _g=generateGear(_slot,_rarity);
+          drops.push(new Drop(this.x,this.y,'gear',0,_g));
+        }catch(e){ /* generateGear 失败时静默 */ }
+      }
+      spawnParticles(this.x,this.y,'#a855f7',25);
+      pushFloatingText(this.x,this.y-30,'⭐ 精英击破!','#a855f7',1.2,20);
+      screenShake=Math.max(screenShake,0.3);
+    }
     if(!this.isAdventure){enemiesRemaining--;} updateUI();
     spawnParticles(this.x,this.y,this.color,20+this.size);
     pushFloatingText(this.x,this.y,`+${gain}${comboCount>=5?` x${comboCount}`:''}`,comboCount>=10?'#ffd700':comboCount>=5?'#bc8cff':'#f0883e',1);
@@ -2299,6 +2373,25 @@ class Enemy {
     ctx.shadowColor=fc; ctx.shadowBlur=6;
     this.drawShape(fc);
     ctx.shadowBlur=0;
+    // 精英怪紫色光晕脉冲 + ⭐标识（便于玩家识别优先处理）
+    if(this.elite){
+      this._elitePulse=(this._elitePulse||0)+0.06;
+      const _ep=0.5+Math.sin(this._elitePulse)*0.3;
+      ctx.strokeStyle=`rgba(168,85,247,${_ep})`; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(0,0,this.size+6,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle=`rgba(168,85,247,${_ep*0.2})`;
+      ctx.beginPath(); ctx.arc(0,0,this.size+5,0,Math.PI*2); ctx.fill();
+      // 头顶⭐标识（不受翻转影响）
+      ctx.save();
+      ctx.translate(0,-this.size-12);
+      ctx.scale(1,1/sq); // 抵消父级的纵向挤压
+      ctx.font='bold 14px Microsoft YaHei';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle='#a855f7'; ctx.shadowColor='#a855f7'; ctx.shadowBlur=8;
+      ctx.fillText('⭐',0,0);
+      ctx.shadowBlur=0;
+      ctx.restore();
+    }
     // 无敌护盾
     if(this.invincibleTime>0){ctx.strokeStyle=`rgba(121,192,255,${0.5+Math.sin(_NOW/200)*0.3})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,this.size+5,0,Math.PI*2);ctx.stroke();ctx.fillStyle='rgba(121,192,255,0.15)';ctx.fill();}
     // 冰冻光环（巫祝冰元素）：明显冰晶圈
@@ -2523,25 +2616,25 @@ class Enemy {
 // ==================== Boss ====================
 // 山海经Boss定义（4普通+2超级）
 const BOSS_TYPES = [
-  { idx:0, name:'九尾狐', color:'#ff69b4', isSuper:false, attack:'charmBullet',  special:'phantomClone', special2:'charmBeam',    icon:'🦊', shape:'fox',
+  { idx:0, name:'九尾狐', color:'#ff69b4', isSuper:false, attack:'charmBullet',  special:'phantomClone', special2:'charmBeam',    special3:'trackingBeam', icon:'🦊', shape:'fox',
     desc:'魅惑与幻影大师，以分身和光波迷惑敌人' },
-  { idx:1, name:'毕方',   color:'#ff4500', isSuper:false, attack:'fireFeather',  special:'fireRain',     special2:'diveBomb',      icon:'🐦', shape:'bird',
+  { idx:1, name:'毕方',   color:'#ff4500', isSuper:false, attack:'fireFeather',  special:'fireRain',     special2:'diveBomb',      special3:'trackingBeam', icon:'🐦', shape:'bird',
     desc:'天降烈火，以多区域轰炸和俯冲攻击著称' },
-  { idx:2, name:'相柳',   color:'#7cfc00', isSuper:false, attack:'poisonNine',   special:'poisonSwamp',  special2:'poisonSpray',   icon:'🐍', shape:'snake',
+  { idx:2, name:'相柳',   color:'#7cfc00', isSuper:false, attack:'poisonNine',   special:'poisonSwamp',  special2:'poisonSpray',   special3:'trackingBeam', icon:'🐍', shape:'snake',
     desc:'九头毒物，喷射毒液光波与蔓延毒沼' },
-  { idx:3, name:'朱厌',   color:'#daa520', isSuper:false, attack:'rockThrow',    special:'groundShock',  special2:'rockBarrage',   icon:'🦍', shape:'ape',
+  { idx:3, name:'朱厌',   color:'#daa520', isSuper:false, attack:'rockThrow',    special:'groundShock',  special2:'rockBarrage',   special3:'trackingBeam', icon:'🦍', shape:'ape',
     desc:'巨猿之力，震地冲击与巨石弹幕齐发' },
-  { idx:4, name:'烛龙',   color:'#ff6347', isSuper:true,  attack:'lavaPool',     special:'lavaFist',     special2:'lightBeam',     icon:'🐉', shape:'dragon',
+  { idx:4, name:'烛龙',   color:'#ff6347', isSuper:true,  attack:'lavaPool',     special:'lavaFist',     special2:'lightBeam',     special3:'trackingBeam', icon:'🐉', shape:'dragon',
     desc:'熔岩与光束之龙，释放贯穿屏幕的光波' },
-  { idx:5, name:'饕餮',   color:'#4b0082', isSuper:true,  attack:'devourAtk',    special:'bulletAbsorb', special2:'gravityWell',   icon:'👹', shape:'beast',
+  { idx:5, name:'饕餮',   color:'#4b0082', isSuper:true,  attack:'devourAtk',    special:'bulletAbsorb', special2:'gravityWell',   special3:'trackingBeam', icon:'👹', shape:'beast',
     desc:'吞噬万物，以引力井吸引并碾碎敌人' },
-  { idx:6, name:'英招',   color:'#20b2aa', isSuper:false, attack:'windBlade',    special:'tornadoSpin',  special2:'airDash',       icon:'🦅', shape:'bird',
+  { idx:6, name:'英招',   color:'#20b2aa', isSuper:false, attack:'windBlade',    special:'tornadoSpin',  special2:'airDash',       special3:'trackingBeam', icon:'🦅', shape:'bird',
     desc:'人面马身，驾驭风暴与龙卷的飞行神兽' },
-  { idx:7, name:'计蒙',   color:'#4682b4', isSuper:false, attack:'waterJet',     special:'rainStorm',    special2:'floodWave',     icon:'🐲', shape:'dragon',
+  { idx:7, name:'计蒙',   color:'#4682b4', isSuper:false, attack:'waterJet',     special:'rainStorm',    special2:'floodWave',     special3:'trackingBeam', icon:'🐲', shape:'dragon',
     desc:'龙首人身，呼风唤雨召唤洪水与暴雨' },
-  { idx:8, name:'穷奇',   color:'#6a0dad', isSuper:true,  attack:'chaosBolt',    special:'voidRift',     special2:'dimensionStorm',icon:'🐅', shape:'beast',
+  { idx:8, name:'穷奇',   color:'#6a0dad', isSuper:true,  attack:'chaosBolt',    special:'voidRift',     special2:'dimensionStorm',special3:'trackingBeam', icon:'🐅', shape:'beast',
     desc:'有翼之虎，混沌化身，撕裂维度制造虚空' },
-  { idx:9, name:'刑天',   color:'#8b0000', isSuper:true,  attack:'halberdSweep', special:'earthCrack',   special2:'wrathClones',   icon:'⚔️', shape:'giant',
+  { idx:9, name:'刑天',   color:'#8b0000', isSuper:true,  attack:'halberdSweep', special:'earthCrack',   special2:'wrathClones',   special3:'trackingBeam', icon:'⚔️', shape:'giant',
     desc:'无头战神，以乳为目以脐为口，手持干戚永不屈服', isFinalBoss:true }
 ];
 // ==================== Boss背景故事与弱点提示 ====================
@@ -2618,7 +2711,11 @@ class Boss {
     this.speed=(40+level*5)*(isSuper?0.85:1); this.alive=true; this.phase=1; this.attackTimer=2;
     this.moveAngle=0; this.targetX=CONFIG.WIDTH/2; this.targetY=CONFIG.HEIGHT*0.42;
     this.wobble=0; this.hitFlash=0;
-    this.attackPattern=0; this.rage=false; this.specialCooldown=3; this.special2Cooldown=6;
+    this.attackPattern=0; this.rage=false; this.specialCooldown=2; this.special2Cooldown=4; this.special3Cooldown=6;
+    // 狂暴倒计时：60秒后进入狂暴状态（攻速×1.5、技能CD减半、掉落提升一阶）
+    // 设计目的：在冒险/试炼/刑天等长Boss战中防止玩家堆防御慢慢磨血
+    // 普通Boss战时限50s不会触发，但不影响（玩家本就受时限压力）
+    this._enrageTimer=60; this._enraged=false;
     this.isCharging=false; this.chargeDirection={x:0,y:0}; this.chargeTimer=0;
     this.warningTime=0; this.warningType=null; this.warningData=null; this.warningIsSpecial2=false;
     this.slowFactor=1; this.slowTimer=0; this.frozen=false; this.frozenTimer=0;
@@ -2748,7 +2845,24 @@ class Boss {
       }
     }
     this.updateBeam(dt);
-    this.attackTimer-=dt; this.specialCooldown-=dt; this.special2Cooldown-=dt; this.warningTime-=dt;
+    this.updateTrackingBeams(dt);
+    this.attackTimer-=dt; this.specialCooldown-=dt; this.special2Cooldown-=dt; this.special3Cooldown-=dt; this.warningTime-=dt;
+    // ===== 狂暴倒计时：60秒后进入狂暴状态 =====
+    // 设计目的：避免玩家堆防御慢慢磨血战术无脑化，强迫玩家在限时内输出
+    // 狂暴效果：攻速×1.5（attackTimer ×2/3）、技能CD减半、击杀掉落提升一阶
+    if(!this._enraged && this._enrageTimer>0){
+      this._enrageTimer-=dt;
+      if(this._enrageTimer<=0){
+        this._enraged=true; this._enrageTimer=0;
+        // 狂暴触发：视觉/听觉/触觉三重反馈
+        spawnParticles(this.x,this.y,'#ff2020',80);
+        spawnParticles(this.x,this.y,'#ffd700',30);
+        screenShake=Math.max(screenShake,0.8);
+        if(typeof playSound==='function')playSound('bossSkill');
+        pushFloatingText(this.x,this.y-60,'🔥 狂暴!','#ff3030',2.5,28);
+        showWaveAnnounce('⚠️ Boss狂暴!',`${this.name}进入狂暴状态，攻速与技能频率大增!`,true);
+      }
+    }
     if(this.warningTime<=0&&this.warningType){
       if(this.warningIsSpecial2)this.executeSpecial2Attack(); else this.executeSpecialAttack();
       this.warningIsSpecial2=false;
@@ -2756,6 +2870,9 @@ class Boss {
       // 清理本Boss已过期的预警圈
       bossWarnings=bossWarnings.filter(w=>!w.boss||w.boss!==this);
     }
+    // 狂暴攻速/技能CD倍率（仅对未触发的 cooldown 重设时生效，不影响当前正在计时的）
+    const _enrageAtkMul = this._enraged ? (2/3) : 1;    // 攻速×1.5 → 间隔×2/3
+    const _enrageCdrMul = this._enraged ? 0.5 : 1;      // 技能CD减半
     // 试炼Boss随波次加快攻速（每波-8%，最多-40%）
     const trialSpd=this._trialIndex!=null?Math.max(0.6,1-this._trialIndex*0.08):1;
     // 难度影响：高难度下Boss特殊攻击更频繁（额外加快）
@@ -2766,11 +2883,13 @@ class Boss {
     // 刑天技能期间跳过普通攻击，避免doAttack重置attackType/attackAnim干扰技能动画
     if(this.attackTimer<=0){
       if(!xingtianSkillActive) this.doAttack();
-      this.attackTimer=(this.rage?(this.isSuper?0.8:1.0):(this.isSuper?1.2:1.5-this.level*0.08))/getDifficulty().bossAtkMul*trialSpd;
+      this.attackTimer=(this.rage?(this.isSuper?0.8:1.0):(this.isSuper?1.2:1.5-this.level*0.08))/getDifficulty().bossAtkMul*trialSpd*_enrageAtkMul;
     }
-    if(this.specialCooldown<=0&&!this.isCharging&&this.warningTime<=0&&!this.jumping&&!xingtianSkillActive){this.startSpecialAttack(); this.specialCooldown=(this.rage?(this.isSuper?4:5):(this.isSuper?6:7))/getDifficulty().bossAtkMul*specialSpdMul*trialSpd;}
+    if(this.specialCooldown<=0&&!this.isCharging&&this.warningTime<=0&&!this.jumping&&!xingtianSkillActive){this.startSpecialAttack(); this.specialCooldown=(this.rage?(this.isSuper?3:4):(this.isSuper?5:5.5))/getDifficulty().bossAtkMul*specialSpdMul*trialSpd*_enrageCdrMul;}
     // 第二特殊攻击（光波/多区域等互动型）
-    if(this.special2Cooldown<=0&&!this.isCharging&&this.warningTime<=0&&!this.jumping&&!xingtianSkillActive){this.startSpecial2Attack(); this.special2Cooldown=(this.rage?(this.isSuper?7:8):(this.isSuper?9:10))/getDifficulty().bossAtkMul*specialSpdMul*trialSpd;}
+    if(this.special2Cooldown<=0&&!this.isCharging&&this.warningTime<=0&&!this.jumping&&!xingtianSkillActive){this.startSpecial2Attack(); this.special2Cooldown=(this.rage?(this.isSuper?5:6):(this.isSuper?7:8))/getDifficulty().bossAtkMul*specialSpdMul*trialSpd*_enrageCdrMul;}
+    // 第三特殊攻击（追踪光束/边缘攻击，压迫感强化）
+    if(this.special3Cooldown<=0&&!this.isCharging&&this.warningTime<=0&&!this.jumping&&!xingtianSkillActive){this.startSpecial3Attack(); this.special3Cooldown=(this.rage?(this.isSuper?5:6):(this.isSuper?7:8))/getDifficulty().bossAtkMul*specialSpdMul*trialSpd*_enrageCdrMul;}
     // 安全区全屏攻击：绿色预警圈=安全区，玩家须站在圈内躲避全屏伤害
     if(this.safeZoneActive){
       this.safeZoneData.timer-=dt;
@@ -3572,6 +3691,105 @@ class Boss {
     }
     bossWarnings=bossWarnings.filter(w=>w.boss!==this);
   }
+  // ==================== 第三特殊攻击（追踪光束/边缘攻击，压迫感强化） ====================
+  startSpecial3Attack(){
+    // 刑天最终Boss：special3使用更密集的追踪光束
+    if(this.isFinalBoss){
+      this.attackAnim=1.0; this.attackAnimMax=1.0;
+      this.attackType='trackingBeam';
+      this.startTrackingBeams(this.finalBossPhase>=1?5:3);
+      return;
+    }
+    // 50%概率追踪光束，50%概率边缘攻击
+    if(Math.random()<0.5){
+      this.startTrackingBeams(2+Math.floor(this.level/2));
+    }else{
+      this.startEdgeWave();
+    }
+  }
+  // 追踪光束：锁定玩家位置，预警后发射光束（类似Undertale）
+  startTrackingBeams(count){
+    this.attackAnim=1.0; this.attackAnimMax=1.0; this.attackType='trackingBeam';
+    const beams=[];
+    for(let i=0;i<count;i++){
+      // 随机方向：水平或垂直光束
+      const isH=Math.random()<0.5;
+      if(isH){
+        // 水平光束：锁定玩家Y坐标
+        const y=player?player.y:CONFIG.HEIGHT/2;
+        beams.push({beamType:'horizontal',y:y,timer:1.5,maxTimer:1.5});
+        // 推送预警
+        bossWarnings.push({type:'special2',subType:'trackingBeam',data:{beamType:'horizontal',y:y},time:1.5,maxTime:1.5,boss:this,color:'rgba(255,100,50'});
+      }else{
+        // 垂直光束：锁定玩家X坐标
+        const x=player?player.x:CONFIG.WIDTH/2;
+        beams.push({beamType:'vertical',x:x,timer:1.5,maxTimer:1.5});
+        bossWarnings.push({type:'special2',subType:'trackingBeam',data:{beamType:'vertical',x:x},time:1.5,maxTime:1.5,boss:this,color:'rgba(255,100,50'});
+      }
+    }
+    // 延迟发射
+    this._trackingBeams=beams;
+    gameTimeout(()=>{this.executeTrackingBeams();},1500);
+    playSound('warning');
+  }
+  executeTrackingBeams(){
+    if(!this._trackingBeams||!this.alive)return;
+    // 将多道光束存入_trackingBeamActive数组，每帧在updateTrackingBeams中处理
+    if(!this._trackingBeamActive)this._trackingBeamActive=[];
+    for(const b of this._trackingBeams){
+      if(b.beamType==='horizontal'){
+        spawnParticles(CONFIG.WIDTH/2,b.y,this.color,30);
+        this._trackingBeamActive.push({beamType:'horizontal',y:b.y,duration:0.6,timer:0});
+      }else{
+        spawnParticles(b.x,CONFIG.HEIGHT/2,this.color,30);
+        this._trackingBeamActive.push({beamType:'vertical',x:b.x,duration:0.6,timer:0});
+      }
+    }
+    this._trackingBeams=null;
+    screenShake=Math.max(screenShake,0.3);
+  }
+  // 边缘攻击：从屏幕边缘冒出的弹幕/光束（类似Undertale边缘攻击）
+  startEdgeWave(){
+    this.attackAnim=1.0; this.attackAnimMax=1.0; this.attackType='edgeWave';
+    const edges=[];
+    const edgeCount=3+Math.floor(this.level/2);
+    for(let i=0;i<edgeCount;i++){
+      // 随机选择边缘：0=上, 1=下, 2=左, 3=右
+      const side=Math.floor(Math.random()*4);
+      let x,y,w,h;
+      if(side===0){x=rand(100,CONFIG.WIDTH-100);y=0;w=80;h=40;} // 顶部
+      else if(side===1){x=rand(100,CONFIG.WIDTH-100);y=CONFIG.HEIGHT-40;w=80;h=40;} // 底部
+      else if(side===2){x=0;y=rand(100,CONFIG.HEIGHT-100);w=40;h=80;} // 左侧
+      else{x=CONFIG.WIDTH-40;y=rand(100,CONFIG.HEIGHT-100);w=40;h=80;} // 右侧
+      edges.push({x,y,w,h,side,timer:1.2,maxTimer:1.2});
+      bossWarnings.push({type:'edgeWave',x:x+w/2,y:y+h/2,radius:Math.max(w,h),timer:1.2,maxTimer:1.2,color:'rgba(255,60,40',boss:this});
+    }
+    this._edgeWaves=edges;
+    gameTimeout(()=>{this.executeEdgeWave();},1200);
+    playSound('warning');
+  }
+  executeEdgeWave(){
+    if(!this._edgeWaves||!this.alive)return;
+    for(const e of this._edgeWaves){
+      const cx=e.x+e.w/2, cy=e.y+e.h/2;
+      spawnParticles(cx,cy,this.color,30);
+      // 从边缘向屏幕内部发射弹幕
+      const bulletCount=4+Math.floor(this.level/2);
+      for(let i=0;i<bulletCount;i++){
+        let angle;
+        if(e.side===0)angle=rand(Math.PI*0.2,Math.PI*0.8); // 顶部向下
+        else if(e.side===1)angle=rand(-Math.PI*0.8,-Math.PI*0.2); // 底部向上
+        else if(e.side===2)angle=rand(-Math.PI*0.3,Math.PI*0.3); // 左侧向右
+        else angle=rand(Math.PI*0.7,Math.PI*1.3); // 右侧向左
+        const eb=new EnemyBullet(cx,cy,angle,200,8,this.color);
+        eb.homing=0.3;
+        enemyBullets.push(eb);
+      }
+    }
+    this._edgeWaves=null;
+    bossWarnings=bossWarnings.filter(w=>w.boss!==this);
+    screenShake=Math.max(screenShake,0.2);
+  }
   // 更新光波/引力井持续效果
   updateBeam(dt){
     if(this._beamActive&&this._beamData){
@@ -3638,6 +3856,28 @@ class Boss {
         }else allDone=false;
       }
       if(allDone){this._floodActive=false; this._floodData=null; spawnParticles(d.x,d.y,this.color,30);}
+    }
+  }
+  // 更新追踪光束（special3多道光束同时存在）
+  updateTrackingBeams(dt){
+    if(!this._trackingBeamActive||this._trackingBeamActive.length===0)return;
+    const beamWidth=50;
+    for(let i=this._trackingBeamActive.length-1;i>=0;i--){
+      const d=this._trackingBeamActive[i];
+      d.timer+=dt;
+      if(d.beamType==='horizontal'){
+        // 水平光束伤害
+        if(player&&Math.abs(player.y-d.y)<beamWidth)player.takeDamage(dt*6);
+        spawnParticles(CONFIG.WIDTH/2,d.y,this.color,2);
+      }else{
+        // 垂直光束伤害
+        if(player&&Math.abs(player.x-d.x)<beamWidth)player.takeDamage(dt*6);
+        spawnParticles(d.x,CONFIG.HEIGHT/2,this.color,2);
+      }
+      if(d.timer>=d.duration){
+        this._trackingBeamActive.splice(i,1);
+        spawnParticles(CONFIG.WIDTH/2,d.y,this.color,15);
+      }
     }
   }
   doAttack(){
@@ -3799,6 +4039,7 @@ class Boss {
     // 死亡冲击波
     fireEffects.push({x:this.x,y:this.y,radius:this.size*4,damage:0,life:1.2,maxLife:1.2,burnDmg:0,tick:0,chain:0,hammerBlast:true});
     this._beamActive=false; this._beamData=null; this._wellActive=false; this._wellData=null; this._floodActive=false; this._floodData=null;
+    this._trackingBeamActive=[]; this._trackingBeams=null; this._edgeWaves=null; // 清理追踪光束/边缘攻击
     this.safeZoneActive=false; this.safeZoneData=null; // 重置安全区攻击
     this.halberdSweepActive=false; this.halberdSweepData=null;
     this.earthCrackActive=false; this.earthCrackData=null;
@@ -3809,9 +4050,11 @@ class Boss {
     enemyBullets=[];
     this.clones=[];
     // 变异Boss掉落更好：Boss宝宝概率+30%，装备掉落率+20%
+    // 狂暴Boss额外：Boss宝宝+15%、装备掉落+10%
     let petChance=0.15;
     let gearChance=0.7;
     if(this.isVariant){petChance+=0.30; gearChance+=0.20;}
+    if(this._enraged){petChance+=0.15; gearChance+=0.10;}
     if(Math.random()<petChance){
       const petDef=getPetDef(this.bossIndex);
       if(petDef){pendingBossCapture=petDef; showBossCapture(petDef);}
@@ -3819,26 +4062,30 @@ class Boss {
     if(Math.random()<gearChance && !this.isFinalBoss){
       // 刑天最终Boss跳过常规装备掉落（使用下方的 dropMissingBossMythic 必掉一件未拥有的Boss神话）
       const gear=dropGear(this.bossIndex,this.isSuper);
-      // 变异Boss掉落高品质装备（提升一阶）
-      if(this.isVariant&&gear.rarity!=='mythic'){
+      // 变异+狂暴Boss掉落高品质装备：变异+1阶、狂暴+1阶（可叠加，封顶mythic）
+      const _tierBoost=(this.isVariant?1:0)+(this._enraged?1:0);
+      if(_tierBoost>0 && gear.rarity!=='mythic'){
         const order=['common','rare','epic','legendary','mythic'];
-        const idx=order.indexOf(gear.rarity);
-        if(idx>=0&&idx<order.length-1){
-          gear.rarity=order[idx+1];
-          // 重新生成专属词条：神话品质用Boss专属词条，传说用普通传说词条
-          if(gear.rarity==='mythic'){
-            // 神话品质：使用Boss专属词条+专属装备名
-            const bossDef=BOSS_GEAR_TABLE[this.bossIndex];
-            if(bossDef){
-              gear.name=bossDef.mythicName;
-              gear.specialAffix={
-                id:bossDef.affix.id, name:bossDef.affix.name, icon:bossDef.affix.icon,
-                desc:bossDef.affix.desc, special:true, bossAffix:true, bossIdx:this.bossIndex
-              };
+        let idx=order.indexOf(gear.rarity);
+        if(idx>=0){
+          const _newIdx=Math.min(order.length-1, idx+_tierBoost);
+          // 逐阶升级：每升一阶重新生成对应专属词条
+          for(let _step=idx; _step<_newIdx; _step++){
+            gear.rarity=order[_step+1];
+            if(gear.rarity==='mythic'){
+              // 神话品质：使用Boss专属词条+专属装备名
+              const bossDef=BOSS_GEAR_TABLE[this.bossIndex];
+              if(bossDef){
+                gear.name=bossDef.mythicName;
+                gear.specialAffix={
+                  id:bossDef.affix.id, name:bossDef.affix.name, icon:bossDef.affix.icon,
+                  desc:bossDef.affix.desc, special:true, bossAffix:true, bossIdx:this.bossIndex
+                };
+              }
+            }else if(gear.rarity==='legendary'){
+              const pool=GEAR_LEGENDARY_AFFIXES;
+              gear.specialAffix=pool[Math.floor(Math.random()*pool.length)];
             }
-          }else if(gear.rarity==='legendary'){
-            const pool=GEAR_LEGENDARY_AFFIXES;
-            gear.specialAffix=pool[Math.floor(Math.random()*pool.length)];
           }
         }
       }
@@ -3888,6 +4135,10 @@ class Boss {
     const newlyUnlocked=checkAchievements();
     if(newlyUnlocked.length>0){showAchievementNotifications(newlyUnlocked);saveSave();}
     bossHealthBar.classList.add('hidden'); document.body.classList.remove('boss-active'); boss=null; bossWarnings=[];
+    // 清理狂暴徽章：Boss 死亡后隐藏，避免残留显示到下一只 Boss
+    const _enrageBadge=document.getElementById('bossEnrageBadge');
+    if(_enrageBadge){_enrageBadge.classList.add('hidden'); _enrageBadge.classList.remove('enraged');}
+    if(typeof _ui!=='undefined'){_ui._lastEnrageState=undefined; _ui._lastEnrageSec=undefined;}
     // ===== 刑天最终Boss：掉落山海故事书 + 专属武器，显示胜利结算 =====
     if(this.isFinalBoss){
       // 掉落山海故事书
@@ -3975,6 +4226,14 @@ class Boss {
     ctx.scale(breath,breath);
     // 狂暴/超级光效（只用shadow发光，不画圈）
     if(this.rage||this.isSuper){ctx.shadowColor=this.rage?'#ff3030':this.color;ctx.shadowBlur=this.isSuper?45:32;}
+    // 狂暴倒计时状态（60秒后触发）：脉冲红光环 + 深红阴影，区别于普通rage
+    if(this._enraged){
+      ctx.shadowColor='#dc143c'; ctx.shadowBlur=55;
+      const _pulse=0.55+Math.sin(this.breathPhase*4)*0.35;
+      ctx.strokeStyle=`rgba(220,20,60,${_pulse})`;
+      ctx.lineWidth=4;
+      ctx.beginPath(); ctx.arc(0,0,this.size*1.35+Math.sin(this.breathPhase*4)*4,0,Math.PI*2); ctx.stroke();
+    }
     // 变异Boss：紫色粒子环绕（不画圈）
     if(this.isVariant){
       ctx.shadowColor='#ff00ff'; ctx.shadowBlur=40;
@@ -5328,7 +5587,9 @@ function checkCollisions(){
     if(!enemy.alive||!player)continue;
     const _r4=enemy.size+player.size*0.7;
     if(distSq(enemy.x,enemy.y,player.x,player.y)<_r4*_r4){
-      player.takeDamage(edmg);
+      // 精英怪伤害×1.5（dmgMul 在 spawnWaveEnemy 时设置）
+      const _finalDmg = enemy.elite ? Math.max(1, Math.round(edmg*(enemy.dmgMul||1))) : edmg;
+      player.takeDamage(_finalDmg);
       if(player.thorns&&enemy.alive){enemy.takeDamage(player.thorns); spawnParticles(enemy.x,enemy.y,'#c0c0c0',5);}
     }
   }

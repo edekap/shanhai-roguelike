@@ -324,12 +324,12 @@ function drawBossDeathFx(){
     }
   }
 }
-function getWaveEnemyCount(wave){return Math.ceil((8+wave*4+Math.floor(wave/2)*3)*getDifficulty().enemyCountMul);}
+function getWaveEnemyCount(wave){return Math.ceil((12+wave*5+Math.floor(wave/2)*4)*getDifficulty().enemyCountMul);}
 function getWaveEnemyTypes(wave){
   const t=['grunt']; if(wave>=2)t.push('runner'); if(wave>=3)t.push('tank','spiky'); if(wave>=4)t.push('shooter','invincible'); if(wave>=5)t.push('giant','bomber');
   if(wave>=7)t.push('taunt');
-  // 弑神难度额外加入分裂怪
-  if(saveData.difficulty==='godslayer'&&wave>=4)t.push('splitter');
+  // 弑神/梦魇难度额外加入分裂怪（增加清场压力）
+  if((saveData.difficulty==='godslayer'||saveData.difficulty==='nightmare')&&wave>=4)t.push('splitter');
   return t;
 }
 function spawnWaveEnemy(){
@@ -346,6 +346,18 @@ function spawnWaveEnemy(){
     e.maxHealth=Math.ceil(e.maxHealth*em); e.health=e.maxHealth;
     e.speed*=sm; e.baseSpeed*=sm;
     e._endlessBuff=true;
+  }
+  // 精英化机制：5%概率生成精英怪（紫光特效），HP×2.5、伤害×1.5、移速+20%
+  // 击杀掉落保底经验球×3 + 50%概率掉装备，打破"无脑清屏"循环，玩家须优先处理
+  // 概率随波次微增：第5波后6%、第8波后7%（高波次增加压力）
+  const _eliteBaseRate = wave>=8 ? 0.07 : (wave>=5 ? 0.06 : 0.05);
+  if(Math.random()<_eliteBaseRate){
+    e.elite=true;
+    e.maxHealth=Math.ceil(e.maxHealth*2.5); e.health=e.maxHealth;
+    e.speed*=1.2; e.baseSpeed*=1.2;
+    e.dmgMul=(e.dmgMul||1)*1.5;     // 伤害倍率（takeDamage 时应用）
+    e.size*=1.15;                    // 体型更大，便于识别
+    e._elitePulse=0;                 // 紫光脉冲动画相位
   }
   enemies.push(e);
 }
@@ -381,8 +393,10 @@ function startBoss(){
   // 按需加载当前Boss图片
   loadBossImagesForIdx(currentLevel);
   bossWarnings=[]; boss=new Boss(currentLevel);
-  // Boss变异：10%概率遇到变异Boss，技能组合不同，掉落更好
-  if(!endlessMode&&Math.random()<0.10){
+  // Boss变异：概率随波次提升（基础10%，第3波后15%，第5波后20%）
+  // 变异Boss借用其他Boss的技能，掉落更好
+  const _variantRate = currentWave>=5 ? 0.20 : (currentWave>=3 ? 0.15 : 0.10);
+  if(!endlessMode&&Math.random()<_variantRate){
     applyBossVariant(boss);
     bossVariant=true;
   }else{
@@ -394,7 +408,12 @@ function startBoss(){
   bossHealthBar.classList.remove('hidden');
   document.body.classList.add('boss-active'); // 通知 CSS 精简中间 panel，避免与 Boss 血条重叠
   bossName.style.color=''; // 重置颜色（刑天用红色，需清空）
-  bossName.textContent=bossVariant?`变异BOSS - ${boss.name}`:`BOSS - ${boss.name}`;
+  // 变异Boss显示借用的技能名，让玩家预知威胁
+  if(bossVariant && boss._variantName){
+    bossName.innerHTML=`<span style="color:#bc8cff">⚡变异</span> ${boss.name} <span style="font-size:11px;color:#ff69b4">借用【${boss._variantName}】技能</span>`;
+  }else{
+    bossName.textContent=`BOSS - ${boss.name}`;
+  }
   playBossSound(boss.bossIdx); // Boss专属音效
   const petDef=getPetDef(boss.bossIndex);
   updateBossUI();
@@ -402,7 +421,7 @@ function startBoss(){
   startBossIntro(boss, boss.name, petDef?('⚡'+petDef.desc):'');
   gameTimeout(()=>{
     if(gameState!=='boss')return;
-    showWaveAnnounce(bossVariant?'⚠️ 变异Boss!':'BOSS战！',`${boss.name} 出现了！${bossVariant?'\n🔥 变异体：技能混搭，掉落更佳！':''}${petDef?'\n⚡'+petDef.desc:''}`,true);
+    showWaveAnnounce(bossVariant?'⚠️ 变异Boss!':'BOSS战！',`${boss.name} 出现了！${bossVariant?`\n🔥 变异体：借用【${boss._variantName}】的技能！掉落更佳！`:''}${petDef?'\n⚡'+petDef.desc:''}`,true);
   }, 1900);
   maxLevelTime=CONFIG.BOSS_TIME; levelTimer=maxLevelTime;
   // 启动时间挑战
@@ -416,6 +435,7 @@ function applyBossVariant(b){
   // 攻速+30%（缩短攻击和技能冷却）
   b.specialCooldown=Math.max(1, b.specialCooldown*0.7);
   b.special2Cooldown=Math.max(1, b.special2Cooldown*0.7);
+  b.special3Cooldown=Math.max(1, b.special3Cooldown*0.7);
   if(b.attackTimer)b.attackTimer*=0.7;
   // 借用其他Boss的special技能（混搭）
   const otherBosses=BOSS_TYPES.filter(x=>x.idx!==b.bossIndex&&!x.isSuper);
