@@ -3017,7 +3017,8 @@ function showMainMenu(){
       <div class="menu-section">
         ${_renderDailyCheckIn()}
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-          <button class="action-btn" id="startBtn" style="width:100%;max-width:360px;padding:18px;font-size:22px;letter-spacing:4px;background:linear-gradient(135deg,#ffd700,#ff8c42);border:2px solid #ffd700;box-shadow:0 0 24px rgba(255,215,0,0.5);border-radius:12px;margin:8px auto;display:block">⚔️ 开始冒险</button>
+          <div class="sj-boss-showcase" id="bossShowcase" style="width:100px;height:100px;margin:4px auto"><div class="sj-avatar-inner" style="width:100px;height:100px">${showcaseImg?`<img src="${showcaseImg}" alt="${showcaseBoss.name}" onerror="this.style.display=none">`:`<div style="font-size:50px">${showcaseBoss.icon}</div>`}</div><div class="sj-boss-label" style="font-size:10px;bottom:0">烛龙·镇守</div></div>
+      <button class="action-btn" id="startBtn" style="width:100%;max-width:360px;padding:18px;font-size:22px;letter-spacing:4px;background:linear-gradient(135deg,#ffd700,#ff8c42);border:2px solid #ffd700;box-shadow:0 0 24px rgba(255,215,0,0.5);border-radius:12px;margin:8px auto;display:block">⚔️ 开始冒险</button>
         </div></div>
         ${(saveData.pendingChests&&saveData.pendingChests.length>0)?`
         <div style="margin-top:4px;display:flex;justify-content:center">
