@@ -2994,7 +2994,7 @@ function showMainMenu(){
 
       <div class="sj-scroll-frame" style="padding:6px 12px">
         <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:4px 0">
-          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px" style="border-color:#ffd700;box-shadow:0 0 10px rgba(255,215,0,0.4)"><span class="pill-icon">🎖️</span><span class="pill-value" style="color:#ffd700">${playerLvl.level}</span><span class="pill-label">等级</span></div>
+          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px;border-color:#ffd700;box-shadow:0 0 10px rgba(255,215,0,0.4)"><span class="pill-icon">🎖️</span><span class="pill-value" style="color:#ffd700">${playerLvl.level}</span><span class="pill-label">等级</span></div>
           <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🪙</span><span class="pill-value">${saveData.totalScore}</span><span class="pill-label">积分</span></div>
           <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints}</span><span class="pill-label">天赋</span></div>
           <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🐉</span><span class="pill-value">${petCount}</span><span class="pill-label">宠物</span></div>
@@ -3014,13 +3014,10 @@ function showMainMenu(){
           <div style="text-align:center;font-size:10px;color:#8b949e;margin-top:2px">距下个天赋点：还差 ${1000-(saveData.totalXp%1000)} XP</div>
         </div>
       </div>
-     </div>
-
-     <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0">
       <div class="menu-section">
         ${_renderDailyCheckIn()}
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-          <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:60vh"><button class="action-btn" id="startBtn" style="width:100%;max-width:360px;padding:18px;font-size:22px;letter-spacing:4px;background:linear-gradient(135deg,#ffd700,#ff8c42);border:2px solid #ffd700;box-shadow:0 0 24px rgba(255,215,0,0.5);border-radius:12px;margin:8px auto;display:block">⚔️ 开始冒险</button>
+          <button class="action-btn" id="startBtn" style="width:100%;max-width:360px;padding:18px;font-size:22px;letter-spacing:4px;background:linear-gradient(135deg,#ffd700,#ff8c42);border:2px solid #ffd700;box-shadow:0 0 24px rgba(255,215,0,0.5);border-radius:12px;margin:8px auto;display:block">⚔️ 开始冒险</button>
         </div></div>
         ${(saveData.pendingChests&&saveData.pendingChests.length>0)?`
         <div style="margin-top:4px;display:flex;justify-content:center">
@@ -3046,10 +3043,10 @@ function showMainMenu(){
           ${Object.entries(DIFFICULTIES).map(([k,d])=>{
             const unlocked=isDifficultyUnlocked(k);
             const sel=saveData.difficulty===k;
-            if(true){
+            if(true){ // show all
               return `<button class="diff-pill ${sel?'active':''}" data-diff="${k}" style="${sel?`border-color:${d.color};color:${d.color}`:''}">${d.icon} ${d.name}</button>`;
             }else{
-              return `<button class="diff-pill" data-diff-lock="${k}" style="opacity:0.5;cursor:not-allowed;border-color:#555;color:#888" title="${getDifficultyUnlockHint(k)}">🔒 ${d.name}</button>`;
+              return `<button class="diff-pill" data-diff-lock="${k}" style="opacity:0.5;cursor:not-allowed;border-color:#555;color:#888diff-pill" data-diff-lock="${k}" style="opacity:0.5;cursor:not-allowed;border-color:#555;color:#888" title="${getDifficultyUnlockHint(k)}">🔒 ${d.name}</button>`;
             }
           }).join('')}
         </div>
