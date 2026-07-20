@@ -3474,7 +3474,26 @@ function showCharMenu(){
   for(const[id,c]of Object.entries(CHARACTERS)){
     const unlocked=saveData.unlockedCharacters.includes(id);
     const sel=saveData.currentCharacter===id;
-    html+=`<div class="char-card ${sel?'selected':''} ${!unlocked?'locked':''}" data-char="${id}"><div style="font-size:40px">${c.icon}</div><h3>${c.name}</h3><p style="font-size:12px;color:#8b949e">被动: ${c.passive}</p><p style="font-size:12px;color:#bc8cff">${c.skillName}</p><p style="font-size:min(2.5vw,11px);color:#8b949e">${c.skillDesc}</p>${!unlocked?`<p style="color:#f0883e;margin-top:6px">🪙 ${c.price}</p>`:''}</div>`;
+    // 角色三阶段显示：★/★★/★★★ + 进阶按钮（已解锁角色才显示）
+    let stageHtml='';
+    if(unlocked && c.stages){
+      const stage=getCharacterStage(id);
+      const stars='★'.repeat(stage+1)+'☆'.repeat(c.stages.length-stage-1);
+      const maxStage=stage>=c.stages.length-1;
+      const cost=stage===0?2000:5000;
+      const evoText=(stage===2 && c.stages[2].evo)?c.stages[2].evo:(stage===1?c.stages[2].evo:'');
+      stageHtml=`<p style="font-size:13px;color:#ffd970;letter-spacing:2px;margin-top:4px">${stars}</p>`;
+      if(evoText && stage>=1){
+        stageHtml+=`<p style="font-size:min(2.2vw,10px);color:#bc8cff;margin-top:2px;line-height:1.3">进化: ${evoText}</p>`;
+      }
+      if(maxStage){
+        stageHtml+=`<p style="font-size:11px;color:#3fb950;margin-top:4px">已满阶</p>`;
+      }else{
+        const canAfford=(saveData.totalScore||0)>=cost;
+        stageHtml+=`<button class="sec-btn" data-upgrade-char="${id}" style="margin-top:5px;font-size:11px;padding:4px 10px;min-height:30px;${canAfford?'':'opacity:0.5;'}">进阶 ${cost}分</button>`;
+      }
+    }
+    html+=`<div class="char-card ${sel?'selected':''} ${!unlocked?'locked':''}" data-char="${id}"><div style="font-size:40px">${c.icon}</div><h3>${c.name}</h3><p style="font-size:12px;color:#8b949e">被动: ${c.passive}</p><p style="font-size:12px;color:#bc8cff">${c.skillName}</p><p style="font-size:min(2.5vw,11px);color:#8b949e">${c.skillDesc}</p>${stageHtml}${!unlocked?`<p style="color:#f0883e;margin-top:6px">🪙 ${c.price}</p>`:''}</div>`;
   }
   html+='</div>';
   // 皮肤选择区域
@@ -3505,10 +3524,27 @@ function showCharMenu(){
   html+='<div class="panel-actions"><button class="sec-btn" id="backFromChar">返回</button></div>';
   ov.innerHTML=html;
   ov.scrollTop=0;
+  // 进阶按钮点击：消费积分升级角色阶段
+  ov.querySelectorAll('[data-upgrade-char]').forEach(btn=>{
+    _bindTap(btn,e=>{
+      e.stopPropagation(); // 阻止冒泡到角色卡片（避免误触发切换角色）
+      const id=btn.dataset.upgradeChar;
+      const r=upgradeCharacterStage(id);
+      if(r.ok){
+        let msg=`✨ ${CHARACTERS[id].name} 进阶至 ${r.stage+1}★！`;
+        if(r.evo)msg+=`\n进化: ${r.evo}`;
+        flashMsg(msg);
+        showCharMenu(); // 刷新UI
+      }else{
+        flashMsg(r.reason);
+      }
+    });
+  });
   // 角色卡片点击：切换/解锁角色
   ov.querySelectorAll('[data-char]').forEach(el=>{
     _bindTap(el,e=>{
       if(e.target.closest('[data-skin]'))return;
+      if(e.target.closest('[data-upgrade-char]'))return; // 进阶按钮已处理
       const id=el.dataset.char; const c=CHARACTERS[id];
       if(saveData.unlockedCharacters.includes(id)){selectCharacter(id);showCharMenu();}
       else{if(unlockCharacter(id))showCharMenu(); else flashMsg('积分不足！');}

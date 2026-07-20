@@ -656,7 +656,24 @@ function getCharacterStage(charId){
   if(!saveData.characterStages)saveData.characterStages={};
   return saveData.characterStages[charId]||0;
 }
-undefined
+// 角色三阶段进阶：Stage 0→1 消费 2000 积分，Stage 1→2 消费 5000 积分
+// 替代原 addCharacterXp 经验自动进阶机制（避免角色无脑满阶、丧失策略选择）
+// 返回值：{ok:true, stage, evo} 成功；{ok:false, reason} 失败
+function upgradeCharacterStage(charId){
+  const c=CHARACTERS[charId];
+  if(!c||!c.stages)return {ok:false, reason:'该角色不支持进阶'};
+  if(!saveData.characterStages)saveData.characterStages={};
+  const curStage=saveData.characterStages[charId]||0;
+  if(curStage>=c.stages.length-1)return {ok:false, reason:'已达最高阶'};
+  const cost=curStage===0?2000:5000;
+  if((saveData.score||0)<cost)return {ok:false, reason:'积分不足，需 '+cost+' 积分'};
+  saveData.score-=cost;
+  saveData.characterStages[charId]=curStage+1;
+  saveSave();
+  const newStage=curStage+1;
+  const evo=newStage===2?c.stages[2].evo:null;
+  return {ok:true, stage:newStage, evo};
+}
 // ==================== 角色皮肤系统 ====================
 // 皮肤仅改变外观（颜色/光环），不影响属性
 const SKINS = {
