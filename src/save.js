@@ -666,8 +666,8 @@ function upgradeCharacterStage(charId){
   const curStage=saveData.characterStages[charId]||0;
   if(curStage>=c.stages.length-1)return {ok:false, reason:'已达最高阶'};
   const cost=curStage===0?2000:5000;
-  if((saveData.score||0)<cost)return {ok:false, reason:'积分不足，需 '+cost+' 积分'};
-  saveData.score-=cost;
+  if((saveData.totalScore||0)<cost)return {ok:false, reason:'积分不足，需 '+cost+' 积分'};
+  saveData.totalScore-=cost;
   saveData.characterStages[charId]=curStage+1;
   saveSave();
   const newStage=curStage+1;
