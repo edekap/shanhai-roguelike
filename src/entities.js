@@ -4162,11 +4162,15 @@ class Boss {
     if(this.isFinalBoss){
       // 掉落山海故事书
       saveData.hasShanHaiBook=true;
+      showWaveAnnounce('📖 山海故事解锁！','战胜刑天，山海经故事集已收录',true);
+      pushFloatingText(CONFIG.WIDTH/2,CONFIG.HEIGHT/2-80,'📖 山海故事集！','#ffd700',2.5);
       // 掉落专属武器：刑天干戚
       let gotNewWeapon=false;
       if(!saveData.ownedWeapons.xingtiangeqi){
-        saveData.ownedWeapons.xingtiangeqi=1; // 阶段1
+        saveData.ownedWeapons.xingtiangeqi=1;
         gotNewWeapon=true;
+        showWaveAnnounce('🪓 传说武器！','刑天干戚 — 旋转战斧，可回旋二次伤害',true);
+        pushFloatingText(this.x,this.y-40,'🪓 刑天干戚!','#ff4500',3);
       }
       // 刑天击败必掉一件Boss神话装备（优先未拥有的Boss）
       const xingtianGear=dropMissingBossMythic();
