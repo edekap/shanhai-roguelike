@@ -964,9 +964,9 @@ class Player {
       this.walkPhase+=dt*10;
     }
     // 留15%边距防止手指遮挡角色
-    const padX=CONFIG.WIDTH*0.12, padY=CONFIG.HEIGHT*0.12;
-    this.x=clamp(this.x,this.size+padX,CONFIG.WIDTH-this.size-padX);
-    this.y=clamp(this.y,this.size+padY,CONFIG.HEIGHT-this.size-padY);
+    // camera handles edges
+    this.x=clamp(this.x,this.size,CONFIG.WIDTH-this.size);
+    this.y=clamp(this.y,this.size,CONFIG.HEIGHT-this.size);
     // 估算玩家速度向量（单位：像素/秒），供远程怪预判射击
     this.vx=dt>0?(this.x-_prevX)/dt:0;
     this.vy=dt>0?(this.y-_prevY)/dt:0;

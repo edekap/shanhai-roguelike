@@ -266,6 +266,7 @@ function gameLoop(timestamp){
         updateParticles(dt); drawParticles();
       }
     }
+    ctx.restore(); // 恢复相机变换
   }catch(e){
     console.error('gameLoop error:',e);
   }

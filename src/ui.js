@@ -2973,7 +2973,7 @@ function showMainMenu(){
     <div class="sj-cloud-deco tl">山</div>
     <div class="sj-cloud-deco br">海</div>
     <div class="sj-main" style="position:relative;z-index:1;width:100%;margin:auto 0;padding:8px 0">
-     <div class="sj-col-left" style="text-align:center">
+     <div class="sj-col-left" style="position:absolute;top:8px;left:8px;z-index:5;text-align:left;padding:4px 8px;background:rgba(13,17,23,0.7);border-radius:8px;border:1px solid rgba(255,215,0,0.2);max-width:160px">
       <div class="sj-title-wrap">
         <h1 class="title-shimmer" style="animation:titleFloat 3s ease-in-out infinite, shimmer 4s linear infinite;">痛扁山海</h1>
         
@@ -3019,7 +3019,7 @@ function showMainMenu(){
       </div>
      </div>
 
-     <div class="sj-col-right">
+     <div class="sj-col-right" style="display:flex;flex-direction:column;align-items:center;gap:4px">
       <div class="menu-section">
         ${_renderDailyCheckIn()}
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
@@ -3065,7 +3065,7 @@ function showMainMenu(){
       </div>
      </div>
 
-     <div class="sj-col-bottom" style="text-align:center">
+     <div class="sj-col-bottom" style="display:none">
       <div class="controls" style="margin:4px auto 2px">
       </div>
       <div class="home-diff-row" style="display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0;flex-wrap:wrap">
