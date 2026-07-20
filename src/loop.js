@@ -416,7 +416,8 @@ function toggleFullscreen(){
 
 // 显示"恢复全屏"遮罩
 function showFsRestoreHint(){
-  if(!isTouchDevice) return; // 电脑端不强制
+  return; // APK不需要全屏恢复
+  if(!isTouchDevice) return;
   if(isInTapTap) return; // TapTap 容器已全屏，不弹恢复提示
   if(isFullscreenNow()) return;
   // 竖屏时由 rotateHint 遮罩接管，不重复弹
