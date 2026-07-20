@@ -2867,7 +2867,7 @@ class Boss {
     if(this._radialAngles&&this._radialAngles.length>0){
       this._radialTimer+=dt;
       const next=this._radialAngles.find(a=>!a.fired);
-      if(next&&this._radialTimer>=0.12){
+      if(next&&this._radialTimer>=0.25){
         this._radialTimer=0;
         next.fired=true;
         for(let d=30;d<800;d+=25){
