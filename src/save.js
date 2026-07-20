@@ -395,9 +395,9 @@ function showOpeningStory(){
     const contentEl = document.getElementById('storyContent');
     if(contentEl){
       contentEl.innerHTML = `
-        <div style="font-size:36px;margin-bottom:8px;text-shadow:0 0 20px rgba(255,215,0,0.5)">${ch.icon}</div>
-        <h2 style="color:#ffd700;letter-spacing:2px;margin:0 0 12px;font-size:16px;font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 10px rgba(255,215,0,0.4)">${ch.title}</h2>
-        <div style="color:#e0d8c8;font-size:12px;line-height:1.8;text-align:center;font-family:'STKaiti',KaiTi,serif;letter-spacing:1px">${ch.text}</div>
+        <div style="font-size:min(8vw,36px);margin-bottom:4px;text-shadow:0 0 20px rgba(255,215,0,0.5)">${ch.icon}</div>
+        <h2 style="color:#ffd700;letter-spacing:2px;margin:0 0 6px;font-size:min(4vw,16px);font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 10px rgba(255,215,0,0.4)">${ch.title}</h2>
+        <div style="color:#e0d8c8;font-size:min(3.2vw,13px);line-height:1.6;text-align:center;font-family:'STKaiti',KaiTi,serif;letter-spacing:0.5px">${ch.text}</div>
       `;
     }
     const infoEl = document.getElementById('storyPageInfo');
@@ -409,18 +409,18 @@ function showOpeningStory(){
     if(nextBtn) nextBtn.style.display = (currentPage < totalPages - 1) ? 'inline-block' : 'none';
     if(startBtn) startBtn.style.display = (currentPage === totalPages - 1) ? 'block' : 'none';
   };
-  let html = `<div id="storyOverlay" style="position:fixed;inset:0;z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:16px;transition:background 0.6s;overflow-y:auto;-webkit-overflow-scrolling:touch">`;
-  html += `<div style="max-width:480px;width:100%;text-align:center;padding:16px 12px 24px">`;
-  html += `<div id="storyContent" style="min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center"></div>`;
+  let html = `<div id="storyOverlay" style="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:12px;transition:background 0.6s">`;
+  html += `<div style="max-width:480px;width:100%;height:100%;max-height:100vh;display:flex;flex-direction:column;text-align:center;padding:8px 10px;box-sizing:border-box">`;
+  html += `<div id="storyContent" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden"></div>`;
   // 翻页按钮
-  html += `<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px">`;
-  html += `<button id="storyPrevBtn" style="padding:8px 14px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:12px;font-family:'STKaiti',KaiTi,serif">◀ 上一页</button>`;
-  html += `<span id="storyPageInfo" style="color:#ffd970;font-size:11px;min-width:40px"></span>`;
-  html += `<button id="storyNextBtn" style="padding:8px 14px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:12px;font-family:'STKaiti',KaiTi,serif">下一页 ▶</button>`;
+  html += `<div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 0;flex-shrink:0">`;
+  html += `<button id="storyPrevBtn" style="padding:6px 12px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:6px;cursor:pointer;font-size:11px;font-family:'STKaiti',KaiTi,serif">◀ 上一页</button>`;
+  html += `<span id="storyPageInfo" style="color:#ffd970;font-size:10px;min-width:35px"></span>`;
+  html += `<button id="storyNextBtn" style="padding:6px 12px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:6px;cursor:pointer;font-size:11px;font-family:'STKaiti',KaiTi,serif">下一页 ▶</button>`;
   html += `</div>`;
   // 开始冒险按钮（最后一页）
-  html += `<button id="storyStartBtn" style="display:none;margin-top:12px;width:100%;padding:12px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:10px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;box-shadow:0 0 20px rgba(255,215,0,0.5)">⚔️ 开始冒险</button>`;
-  html += `<button id="storySkipBtn" style="margin-top:8px;padding:6px 16px;background:transparent;color:#8b949e;border:none;font-size:11px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">跳过 ⏭</button>`;
+  html += `<button id="storyStartBtn" style="display:none;margin-top:4px;width:100%;padding:10px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:min(3.5vw,15px);font-weight:bold;letter-spacing:1px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;flex-shrink:0;box-shadow:0 0 20px rgba(255,215,0,0.5)">⚔️ 开始冒险</button>`;
+  html += `<button id="storySkipBtn" style="margin-top:2px;padding:4px 12px;background:transparent;color:#8b949e;border:none;font-size:10px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;flex-shrink:0">跳过 ⏭</button>`;
   html += `</div></div>`;
   document.body.insertAdjacentHTML('beforeend', html);
   renderPage();

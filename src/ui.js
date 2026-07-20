@@ -45,7 +45,7 @@ function _confirmDialog(message, onYes, onNo, opts){
   const yesColor = opts.yesColor || '#f85149';
   const title = opts.title || '请确认';
   const html = `<div style="max-width:380px;width:100%;margin:auto;padding:18px 16px;background:linear-gradient(180deg,#1a1f2e,#0d1117);border:1px solid ${yesColor};border-radius:10px;box-shadow:0 0 24px rgba(0,0,0,0.6);text-align:center">
-    <div style="color:${yesColor};font-size:15px;font-weight:bold;margin-bottom:8px;letter-spacing:1px">${title}</div>
+    <div style="color:${yesColor};font-size:15px;font-weight:bold;margin-bottom:4px;letter-spacing:1px">${title}</div>
     <div style="color:#c9d1d9;font-size:13px;line-height:1.6;margin-bottom:14px;word-break:break-word">${message}</div>
     <div style="display:flex;gap:8px;justify-content:center">
       <button class="sec-btn" id="_confirmNo" style="flex:1;min-width:100px;padding:10px 14px;min-height:44px">${noText}</button>
@@ -112,7 +112,7 @@ function showBossWeaknessModal(){
         <div style="font-size:36px;filter:drop-shadow(0 0 8px ${b.color}aa)">${b.icon}</div>
         <div style="flex:1;text-align:left">
           <div style="font-size:22px;font-weight:900;color:${b.color};text-shadow:0 0 10px ${b.color}66;letter-spacing:2px">${boss.name||b.name}</div>
-          <div style="font-size:11px;color:#8b949e;margin-top:3px">${b.desc}</div>
+          <div style="font-size:min(2.5vw,11px);color:#8b949e;margin-top:3px">${b.desc}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
           ${isFinalBoss?'<span style="font-size:10px;color:#ff4444;background:rgba(255,68,68,0.18);padding:2px 8px;border-radius:4px;border:1px solid #ff4444;font-weight:bold">最终Boss</span>':''}
@@ -121,11 +121,11 @@ function showBossWeaknessModal(){
         </div>
       </div>
       <div style="padding:14px 18px;max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
-        <div style="font-size:12px;color:#d4c5a0;margin-bottom:6px;letter-spacing:1px">📜 <b>山海经·背景故事</b></div>
+        <div style="font-size:12px;color:#d4c5a0;margin-bottom:4px;letter-spacing:1px">📜 <b>山海经·背景故事</b></div>
         <div style="font-size:13px;color:#c9d1d9;line-height:1.85;margin-bottom:14px;padding:10px 12px;background:rgba(212,197,160,0.06);border-left:3px solid #d4c5a0;border-radius:0 6px 6px 0;text-align:left">${lore.story}</div>
-        <div style="font-size:12px;color:#ff6347;margin-bottom:6px;letter-spacing:1px">⚔️ <b>弱点提示</b></div>
+        <div style="font-size:12px;color:#ff6347;margin-bottom:4px;letter-spacing:1px">⚔️ <b>弱点提示</b></div>
         <div style="font-size:13px;color:#ffa0a0;line-height:1.8;margin-bottom:14px;padding:10px 12px;background:rgba(255,99,71,0.10);border-left:3px solid #ff6347;border-radius:0 6px 6px 0;text-align:left">${lore.weakness}</div>
-        <div style="font-size:12px;color:#58a6ff;margin-bottom:8px;letter-spacing:1px">✨ <b>Boss技能</b></div>
+        <div style="font-size:12px;color:#58a6ff;margin-bottom:4px;letter-spacing:1px">✨ <b>Boss技能</b></div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
           ${lore.skills.map((s,si)=>`<span style="font-size:12px;color:#c9d1d9;background:rgba(88,166,255,0.12);border:1px solid rgba(88,166,255,0.35);padding:4px 12px;border-radius:14px">${si+1}. ${s}</span>`).join('')}
         </div>
@@ -1612,7 +1612,7 @@ function _renderChestOverlay(){
     const glowClass = st.phase === 'shaking' ? 'chest-glow-pulse' : 'chest-glow-idle';
     ov.innerHTML = `
       <div style="color:#ffd700;font-size:13px;letter-spacing:2px;margin-bottom:10px;text-shadow:0 0 8px rgba(255,215,0,0.5)">📦 待开宝箱 ${remaining} 个</div>
-      <div style="color:#8b949e;font-size:11px;margin-bottom:20px">来源：${srcLabel} · 本局 ${st.chest.runScore||0}分 / ${st.chest.runBossKills||0}Boss</div>
+      <div style="color:#8b949e;font-size:min(2.5vw,11px);margin-bottom:20px">来源：${srcLabel} · 本局 ${st.chest.runScore||0}分 / ${st.chest.runBossKills||0}Boss</div>
       <div class="chest-container${shakeClass}" id="chestBox">
         <div class="chest-glow ${glowClass}" style="background:radial-gradient(circle, ${def.glow}88 0%, transparent 70%)"></div>
         <div class="chest-body" style="border-color:${def.color};box-shadow:0 0 40px ${def.glow}aa, inset 0 0 20px ${def.color}44">
@@ -1654,14 +1654,14 @@ function _renderChestOverlay(){
       gearHtml = `<div style="background:rgba(22,27,34,0.9);border:2px solid ${gr.color};border-radius:10px;padding:12px 16px;margin:10px 0;box-shadow:0 0 20px ${gr.color}66;animation:cardEnter 0.6s">
         <div style="color:${gr.color};font-size:12px;font-weight:bold;letter-spacing:1px;margin-bottom:4px">${GEAR_SLOT_ICONS[r.gear.slot]} ${gr.name}装备</div>
         <div style="color:#e0d8c8;font-size:13px;font-weight:bold;margin-bottom:4px">${r.gear.name}</div>
-        <div style="font-size:11px;color:#c9d1d9">${r.gear.stats.map(s=>`<div>${s.icon} ${s.name} +${s.value}</div>`).join('')}</div>
-        ${r.gear.specialAffix?`<div style="color:${gr.color};font-size:11px;margin-top:6px">✦ ${r.gear.specialAffix.name}：${r.gear.specialAffix.desc}</div>`:''}
+        <div style="font-size:min(2.5vw,11px);color:#c9d1d9">${r.gear.stats.map(s=>`<div>${s.icon} ${s.name} +${s.value}</div>`).join('')}</div>
+        ${r.gear.specialAffix?`<div style="color:${gr.color};font-size:min(2.5vw,11px);margin-top:6px">✦ ${r.gear.specialAffix.name}：${r.gear.specialAffix.desc}</div>`:''}
       </div>`;
     }
     let talentHtml = r.talent > 0 ? `<div style="color:#ffd700;font-size:18px;font-weight:bold;margin:6px 0;text-shadow:0 0 10px rgba(255,215,0,0.6)">⭐ +${r.talent} 天赋点</div>` : '';
 
     ov.innerHTML = `
-      <div style="color:${def.color};font-size:14px;letter-spacing:2px;margin-bottom:8px;text-shadow:0 0 8px ${def.glow}">${def.icon} ${def.name} 已开启</div>
+      <div style="color:${def.color};font-size:14px;letter-spacing:2px;margin-bottom:4px;text-shadow:0 0 8px ${def.glow}">${def.icon} ${def.name} 已开启</div>
       <div style="background:rgba(22,27,34,0.85);border:1px solid ${def.color}66;border-radius:14px;padding:20px 24px;max-width:360px;width:100%;text-align:center;box-shadow:0 0 30px ${def.glow}66">
         <div style="color:#ffd700;font-size:36px;font-weight:bold;margin:6px 0;text-shadow:0 0 15px rgba(255,215,0,0.7);animation:titleFloat 2s ease-in-out infinite">+${r.score}</div>
         <div style="color:#8b949e;font-size:12px;margin-bottom:8px">🪙 积分</div>
@@ -1907,16 +1907,16 @@ function _renderDailyGoals(){
     const rewardStr = `${g.reward.score?`🪙${g.reward.score}`:''}${g.reward.chest?` +${CHEST_TYPES[g.reward.chest].icon}`:''}${g.reward.talent?` ⭐${g.reward.talent}`:''}`;
     let btnHtml = '';
     if(claimed){
-      btnHtml = `<span style="color:#3fb950;font-size:11px;font-weight:bold">✓ 已领取</span>`;
+      btnHtml = `<span style="color:#3fb950;font-size:min(2.5vw,11px);font-weight:bold">✓ 已领取</span>`;
     } else if(done){
-      btnHtml = `<button class="sec-btn" id="dailyGoalClaimBtn_${i}" style="font-size:11px;padding:4px 12px;min-height:28px;border-color:#ffd700;color:#ffd700;background:rgba(255,215,0,0.1)">领取 ${rewardStr}</button>`;
+      btnHtml = `<button class="sec-btn" id="dailyGoalClaimBtn_${i}" style="font-size:min(2.5vw,11px);padding:4px 12px;min-height:28px;border-color:#ffd700;color:#ffd700;background:rgba(255,215,0,0.1)">领取 ${rewardStr}</button>`;
     } else {
-      btnHtml = `<span style="color:#8b949e;font-size:11px">${rewardStr}</span>`;
+      btnHtml = `<span style="color:#8b949e;font-size:min(2.5vw,11px)">${rewardStr}</span>`;
     }
     const barColor = done ? '#3fb950' : '#ffd700';
     return `<div style="background:rgba(22,27,34,0.7);border:1px solid ${done?'rgba(63,185,80,0.4)':'rgba(255,215,0,0.2)'};border-radius:6px;padding:6px 10px;margin:4px 0">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <span style="color:${done?'#3fb950':'#e0d8c8'};font-size:11px">${done?'✓ ':''}${g.name}</span>
+        <span style="color:${done?'#3fb950':'#e0d8c8'};font-size:min(2.5vw,11px)">${done?'✓ ':''}${g.name}</span>
         ${btnHtml}
       </div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -1931,7 +1931,7 @@ function _renderDailyGoals(){
   if(allDone && !allClaimed){
     bonusHtml = `<button class="action-btn" id="dailyAllBonusBtn" style="margin-top:6px;background:linear-gradient(135deg,#ffd700,#ff8c42);font-size:12px;padding:8px 16px;min-height:36px;animation:pulseGlow 1.5s ease-in-out infinite">🎉 领取全部完成奖励 +${DAILY_ALL_COMPLETE_BONUS.score}积分 +${CHEST_TYPES[DAILY_ALL_COMPLETE_BONUS.chest].icon}${CHEST_TYPES[DAILY_ALL_COMPLETE_BONUS.chest].name}</button>`;
   } else if(allClaimed){
-    bonusHtml = `<div style="text-align:center;color:#3fb950;font-size:11px;margin-top:6px">✓ 今日全部完成，明日刷新</div>`;
+    bonusHtml = `<div style="text-align:center;color:#3fb950;font-size:min(2.5vw,11px);margin-top:6px">✓ 今日全部完成，明日刷新</div>`;
   }
   return `<details style="margin:4px 0;padding:6px 10px;background:rgba(22,27,34,0.6);border:1px solid rgba(255,215,0,0.25);border-radius:8px" ${allDone&&!allClaimed?'open':''}>
     <summary style="cursor:pointer;color:#ffd700;font-size:12px;letter-spacing:1px">🎯 每日目标 ${allClaimed?'✓':`(${dg.goals.filter(g=>g.claimed).length}/${dg.goals.length})`}</summary>
@@ -2084,19 +2084,19 @@ function gameOver(){
       const g=saveData.equippedGear[sl];
       if(!g)return null;
       const rc=GEAR_RARITIES[g.rarity].color;
-      return `<span style="color:${rc};font-size:11px">${GEAR_SLOT_ICONS[sl]}${g.name}</span>`;
-    }).filter(Boolean).join(' / ') || '<span style="color:#8b949e;font-size:11px">无装备</span>';
+      return `<span style="color:${rc};font-size:min(2.5vw,11px)">${GEAR_SLOT_ICONS[sl]}${g.name}</span>`;
+    }).filter(Boolean).join(' / ') || '<span style="color:#8b949e;font-size:min(2.5vw,11px)">无装备</span>';
     // Build回顾：激活的装备联动
     const _synergies = (typeof activeGearSynergies!=='undefined' && activeGearSynergies.length>0)
       ? activeGearSynergies.map(s=>`<span style="display:inline-block;background:rgba(188,140,255,0.15);border:1px solid rgba(188,140,255,0.4);border-radius:3px;padding:1px 5px;margin:1px;font-size:10px;color:#bc8cff">${s.icon} ${s.name}</span>`).join('')
-      : '<span style="color:#8b949e;font-size:11px">无激活联动</span>';
+      : '<span style="color:#8b949e;font-size:min(2.5vw,11px)">无激活联动</span>';
     // Build回顾：选过的强化
     const _upgrades = rs.upgradesTaken.length>0
       ? rs.upgradesTaken.map(u=>`<span style="display:inline-block;background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.3);border-radius:3px;padding:1px 5px;margin:1px;font-size:10px;color:#58a6ff">${u}</span>`).join('')
-      : '<span style="color:#8b949e;font-size:11px">无强化</span>';
+      : '<span style="color:#8b949e;font-size:min(2.5vw,11px)">无强化</span>';
     recapHtml=`
       <div style="max-width:520px;margin:4px auto;padding:5px 8px;background:rgba(22,27,34,0.7);border:1px solid rgba(136,144,150,0.3);border-radius:6px;width:100%;box-sizing:border-box">
-        <div style="color:#f85149;font-size:11px;font-weight:bold;margin-bottom:4px;word-break:break-word">💀 死因：${rs.deathCause}</div>
+        <div style="color:#f85149;font-size:min(2.5vw,11px);font-weight:bold;margin-bottom:4px;word-break:break-word">💀 死因：${rs.deathCause}</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px;font-size:10px;margin-bottom:3px">
           <div style="background:rgba(13,17,23,0.7);padding:3px 5px;border-radius:3px"><span style="color:#8b949e">⏱</span> <b style="color:#c9d1d9">${_fmtTime(rs.duration)}</b></div>
           <div style="background:rgba(13,17,23,0.7);padding:3px 5px;border-radius:3px"><span style="color:#8b949e">⚔</span> <b style="color:#3fb950">${rs.kills}</b><span style="color:#8b949e;font-size:9px">(${rs.bossKills}Boss)</span></div>
@@ -2134,8 +2134,8 @@ function gameOver(){
   }
   ov.innerHTML=`<div class="bg-runes"><span class="bg-rune">💀</span><span class="bg-rune">⚔</span><span class="bg-rune">🔥</span><span class="bg-rune">☠</span><span class="bg-rune">🌑</span><span class="bg-rune">💫</span></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:6px;padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px));min-height:100%;box-sizing:border-box;gap:2px">
   <h1 style="color:#f85149;animation:titleFloat 3s ease-in-out infinite;font-size:20px;margin:0">游戏结束 · ${wasTrial?'试炼终结':endlessMode?'无尽止步':'冒险落幕'}</h1>
-  <div id="finalScore" class="card-enter" style="font-size:32px;line-height:1.05;margin:1px 0">${score}<span style="font-size:11px;color:#8b949e;margin-left:6px">${wasTrial?'试炼':endlessMode?`无尽${endlessWave}波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?'🏆':''}`:`${currentLevel}关${currentWave}波`}</span></div>
-  <div style="display:flex;gap:4px;justify-content:center;margin:2px 0;flex-wrap:wrap;font-size:11px">
+  <div id="finalScore" class="card-enter" style="font-size:32px;line-height:1.05;margin:1px 0">${score}<span style="font-size:min(2.5vw,11px);color:#8b949e;margin-left:6px">${wasTrial?'试炼':endlessMode?`无尽${endlessWave}波${endlessWave>0&&endlessWave>=(saveData.bestEndlessWave||0)?'🏆':''}`:`${currentLevel}关${currentWave}波`}</span></div>
+  <div style="display:flex;gap:4px;justify-content:center;margin:2px 0;flex-wrap:wrap;font-size:min(2.5vw,11px)">
     <span style="color:#ffd970">🪙+${score}</span>
     <span style="color:#bc8cff">⭐${saveData.talentPoints||0}天赋</span>
     ${newEggs>0?`<span style="color:#3fb950">🥚x${newEggs}</span>`:''}
@@ -2366,12 +2366,12 @@ function showRanchMenu(){
     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:flex-start;max-width:760px;margin:0 auto">
       <div style="flex:1;min-width:320px;max-width:500px">
         <canvas id="ranchCanvas" width="480" height="300" style="width:100%;height:auto;border-radius:12px;border:2px solid rgba(63,185,80,0.5);box-shadow:0 8px 28px rgba(0,0,0,0.6),inset 0 0 20px rgba(0,0,0,0.4);cursor:pointer;background:#1a2818;display:block"></canvas>
-        <div style="display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+        <div style="display:flex;gap:6px;justify-content:center;margin-top:4px;flex-wrap:wrap">
           <button class="sec-btn" id="feedBtn" style="${canFeed?'border-color:#3fb950;color:#3fb950':'opacity:0.4;cursor:not-allowed'};font-size:12px;padding:6px 16px">🍗 投喂小鸡 (100积分)</button>
           <button class="sec-btn" id="ranchManageBtn" style="border-color:#ffd970;color:#ffd970;font-size:12px;padding:6px 16px">📋 管理宠物</button>
           <button class="sec-btn" id="backFromRanch" style="font-size:12px;padding:6px 16px">返回</button>
         </div>
-        <p style="font-size:11px;color:#8b949e;margin-top:6px;text-align:center">宠物 ${saveData.ranchPets.length}/3 · 小鸡存活15秒 · 蛋 ${saveData.eggs.length}/5</p>
+        <p style="font-size:min(2.5vw,11px);color:#8b949e;margin-top:6px;text-align:center">宠物 ${saveData.ranchPets.length}/3 · 小鸡存活15秒 · 蛋 ${saveData.eggs.length}/5</p>
       </div>
       <div id="ranchSidePanel" style="width:230px;max-height:340px;overflow-y:auto;background:rgba(22,27,34,0.7);border:1px solid rgba(63,185,80,0.3);border-radius:10px;padding:10px;text-align:left"></div>
     </div>
@@ -2393,27 +2393,27 @@ function showRanchMenu(){
 // 渲染侧边面板（牧场宠物+蛋+可放入）
 function renderRanchSidePanel(){
   const panel=document.getElementById('ranchSidePanel'); if(!panel)return;
-  let html='<div style="font-size:12px;color:#3fb950;font-weight:bold;margin-bottom:6px;letter-spacing:1px">🐐 牧场中 ('+saveData.ranchPets.length+'/3)</div>';
-  if(saveData.ranchPets.length===0){html+='<div style="font-size:11px;color:#8b949e;margin-bottom:8px">空空如也，点管理放入</div>';}
+  let html='<div style="font-size:12px;color:#3fb950;font-weight:bold;margin-bottom:4px;letter-spacing:1px">🐐 牧场中 ('+saveData.ranchPets.length+'/3)</div>';
+  if(saveData.ranchPets.length===0){html+='<div style="font-size:min(2.5vw,11px);color:#8b949e;margin-bottom:8px">空空如也，点管理放入</div>';}
   else{
     saveData.ranchPets.forEach((p,idx)=>{
       const def=getPetDef(p.def); if(!def)return;
       html+=`<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;margin-bottom:4px;background:rgba(13,17,23,0.6);border-radius:6px;border-left:2px solid ${def.isSuper?'#bc8cff':'#3fb950'}">
         <span style="font-size:20px">${def.icon}</span>
-        <div style="flex:1;min-width:0"><div style="font-size:11px;color:#e6c8a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${def.name}</div><div style="font-size:9px;color:#ffd970">${'★'.repeat(p.stage+1)}</div></div>
+        <div style="flex:1;min-width:0"><div style="font-size:min(2.5vw,11px);color:#e6c8a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${def.name}</div><div style="font-size:9px;color:#ffd970">${'★'.repeat(p.stage+1)}</div></div>
         <button class="sec-btn" data-takeout="${idx}" style="font-size:10px;padding:2px 8px">取回</button>
       </div>`;
     });
   }
   html+='<div style="font-size:12px;color:#ffd970;font-weight:bold;margin:8px 0 6px;letter-spacing:1px">🥚 蛋 ('+saveData.eggs.length+'/5)</div>';
-  if(saveData.eggs.length===0){html+='<div style="font-size:11px;color:#8b949e;margin-bottom:8px">放入宠物完成一局即产蛋</div>';}
+  if(saveData.eggs.length===0){html+='<div style="font-size:min(2.5vw,11px);color:#8b949e;margin-bottom:8px">放入宠物完成一局即产蛋</div>';}
   else{
     saveData.eggs.forEach((egg,idx)=>{
       const isEpic=egg.type==='epic';
       const eggColor=isEpic?'#bc8cff':'#8b949e';
       html+=`<div data-hatch="${idx}" style="display:flex;align-items:center;gap:6px;padding:4px 6px;margin-bottom:4px;background:rgba(13,17,23,0.6);border-radius:6px;cursor:pointer;border-left:2px solid ${eggColor}">
         <span style="font-size:18px">🥚</span>
-        <div style="flex:1"><div style="font-size:11px;color:${eggColor}">${isEpic?'史诗蛋':'普通蛋'}</div><div style="font-size:9px;color:#3fb950">点击孵化</div></div>
+        <div style="flex:1"><div style="font-size:min(2.5vw,11px);color:${eggColor}">${isEpic?'史诗蛋':'普通蛋'}</div><div style="font-size:9px;color:#3fb950">点击孵化</div></div>
       </div>`;
     });
   }
@@ -2428,21 +2428,21 @@ function renderRanchSidePanel(){
 // 管理宠物弹窗（放入牧场）
 function showRanchManageModal(){
   const side=document.getElementById('ranchSidePanel');
-  let html='<div style="font-size:12px;color:#ffd970;font-weight:bold;margin-bottom:6px;letter-spacing:1px">📦 可放入宠物</div>';
+  let html='<div style="font-size:12px;color:#ffd970;font-weight:bold;margin-bottom:4px;letter-spacing:1px">📦 可放入宠物</div>';
   const available=[];
   saveData.ownedPets.forEach((p,idx)=>{if(p)available.push({idx,p});});
-  if(available.length===0){html+='<div style="font-size:11px;color:#8b949e;margin-bottom:8px">没有可放入的宠物</div>';}
+  if(available.length===0){html+='<div style="font-size:min(2.5vw,11px);color:#8b949e;margin-bottom:8px">没有可放入的宠物</div>';}
   else{
     available.forEach(({idx,p})=>{
       const def=getPetDef(p.def); if(!def)return;
       html+=`<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;margin-bottom:4px;background:rgba(13,17,23,0.6);border-radius:6px;border-left:2px solid ${def.isSuper?'#bc8cff':'#3fb950'}">
         <span style="font-size:20px">${def.icon}</span>
-        <div style="flex:1;min-width:0"><div style="font-size:11px;color:#e6c8a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${def.name}</div><div style="font-size:9px;color:#ffd970">${'★'.repeat(p.stage+1)}</div></div>
+        <div style="flex:1;min-width:0"><div style="font-size:min(2.5vw,11px);color:#e6c8a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${def.name}</div><div style="font-size:9px;color:#ffd970">${'★'.repeat(p.stage+1)}</div></div>
         <button class="sec-btn" data-putin="${idx}" style="font-size:10px;padding:2px 8px;${saveData.ranchPets.length>=3?'opacity:0.4;cursor:not-allowed':''}" ${saveData.ranchPets.length>=3?'disabled':''}>放入</button>
       </div>`;
     });
   }
-  html+=`<button class="sec-btn" id="ranchManageBack" style="font-size:11px;padding:4px 12px;margin-top:6px;width:100%">返回牧场</button>`;
+  html+=`<button class="sec-btn" id="ranchManageBack" style="font-size:min(2.5vw,11px);padding:4px 12px;margin-top:6px;width:100%">返回牧场</button>`;
   side.innerHTML=html;
   side.querySelectorAll('[data-putin]').forEach(el=>{
     _bindTap(el,e=>{e.stopPropagation();if(saveData.ranchPets.length>=3)return;putPetInRanch(parseInt(el.dataset.putin));syncRanchPets();renderRanchSidePanel();});
@@ -2716,7 +2716,7 @@ function _renderDailyCheckIn(){
     </button>`;
   }else{
     // 今日已签到
-    return `<div style="text-align:center;font-size:11px;color:#8b949e;margin:0 auto 6px;padding:4px 10px;background:rgba(22,27,34,0.6);border:1px solid #30363d;border-radius:6px;max-width:460px">
+    return `<div style="text-align:center;font-size:min(2.5vw,11px);color:#8b949e;margin:0 auto 6px;padding:4px 10px;background:rgba(22,27,34,0.6);border:1px solid #30363d;border-radius:6px;max-width:460px">
       ✓ 今日已签到 · 连续 ${streak} 天 · 明日再来
     </div>`;
   }
@@ -2761,7 +2761,7 @@ function claimDailyCheckIn(){
         <div style="color:#ffd970">✦ +${scoreReward} 积分</div>
         ${bonusGear?`<div style="color:${rarColor};margin-top:6px">✦ +1件 ${rarName}装备：${bonusGear.name||'神秘装备'}</div>`:''}
       </div>
-      <p style="color:#8b949e;font-size:11px;margin:8px 0">连续签到7天可得史诗装备</p>
+      <p style="color:#8b949e;font-size:min(2.5vw,11px);margin:8px 0">连续签到7天可得史诗装备</p>
       <button class="main-btn" id="closeCheckInBtn" style="background:linear-gradient(135deg,#daa520,#ff8c00);font-size:14px;padding:8px 28px;margin-top:6px">✓ 收下</button>
     </div>
   `;
@@ -2788,21 +2788,21 @@ function showTutorial(force){
       title: '第一步 · 基础操作',
       bg: 'linear-gradient(180deg,#0a1a2a,#1a3a5a)',
       content: `
-        <div style="color:#e0d8c8;font-size:13px;line-height:2;text-align:left;font-family:'STKaiti',KaiTi,serif">
-          <div style="color:#79c0ff;font-size:14px;font-weight:bold;margin-bottom:8px">📱 手机端</div>
+        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:'STKaiti',KaiTi,serif">
+          <div style="color:#79c0ff;font-size:min(3.2vw,14px);font-weight:bold;margin-bottom:4px">📱 手机端</div>
           <div>左半屏按下：<span style="color:#ffd970">移动</span></div>
           <div>右半屏按下：<span style="color:#ffd970">射击方向</span>（自动开火）</div>
-          <div style="color:#58a6ff;font-size:11px;margin-top:2px">✨ 浮动摇杆：手指戳哪摇杆出现在哪，松手消失</div>
+          <div style="color:#58a6ff;font-size:min(2.5vw,11px);margin-top:1px">✨ 浮动摇杆：手指戳哪摇杆出现在哪，松手消失</div>
           <div>双手可同时操控，互不干扰</div>
-          <div style="margin-top:10px;padding:8px 10px;background:rgba(255,215,0,0.1);border-left:3px solid #ffd970;border-radius:4px">
+          <div style="margin-top:6px;padding:6px 8px;background:rgba(255,215,0,0.1);border-left:3px solid #ffd970;border-radius:4px">
             <div style="color:#ffd970;font-weight:bold">🎯 右半屏按下不动 = 自动锁定最近敌人</div>
-            <div style="color:#b0a090;font-size:11px;margin-top:2px">滑动手指 = 手动瞄准射击</div>
+            <div style="color:#b0a090;font-size:min(2.5vw,11px);margin-top:1px">滑动手指 = 手动瞄准射击</div>
           </div>
-          <div style="color:#79c0ff;font-size:14px;font-weight:bold;margin:14px 0 8px">💻 电脑端</div>
+          <div style="color:#79c0ff;font-size:min(3.2vw,14px);font-weight:bold;margin:8px 0 4px">💻 电脑端</div>
           <div>WASD / 方向键：移动</div>
           <div>鼠标移动：瞄准 · 自动开火</div>
           <div>ESC：暂停</div>
-          <div style="color:#8b949e;font-size:11px;margin-top:10px">建议横屏游玩，体验更佳</div>
+          <div style="color:#8b949e;font-size:min(2.5vw,11px);margin-top:6px">建议横屏游玩，体验更佳</div>
         </div>
       `
     },
@@ -2811,14 +2811,14 @@ function showTutorial(force){
       title: '第二步 · 关卡流程',
       bg: 'linear-gradient(180deg,#1a3a5a,#2a4a3a)',
       content: `
-        <div style="color:#e0d8c8;font-size:13px;line-height:2;text-align:left;font-family:'STKaiti',KaiTi,serif">
+        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:'STKaiti',KaiTi,serif">
           <div>每一关有 <span style="color:#ffd970">3 波小怪 + 1 个 Boss</span></div>
           <div>冒险模式共 <span style="color:#ffd970">5 关</span>，难度递增</div>
           <div>击败小怪掉落 <span style="color:#bc8cff">紫色经验球</span>，靠近自动拾取</div>
           <div>升级后获得 <span style="color:#ffd970">天赋点</span>，可在3选1强化中选技能</div>
-          <div style="margin-top:10px;color:#ff6347;font-weight:bold">⚔️ 第5关后：最终Boss 刑天</div>
-          <div style="color:#8b949e;font-size:11px">击败刑天后可进入 ♾️ 无尽模式</div>
-          <div style="color:#8b949e;font-size:11px">也可跳过刑天直接挑战无尽</div>
+          <div style="margin-top:6px;color:#ff6347;font-weight:bold">⚔️ 第5关后：最终Boss 刑天</div>
+          <div style="color:#8b949e;font-size:min(2.5vw,11px)">击败刑天后可进入 ♾️ 无尽模式</div>
+          <div style="color:#8b949e;font-size:min(2.5vw,11px)">也可跳过刑天直接挑战无尽</div>
         </div>
       `
     },
@@ -2827,16 +2827,16 @@ function showTutorial(force){
       title: '第三步 · 装备与天赋',
       bg: 'linear-gradient(180deg,#2a4a3a,#3a2a4a)',
       content: `
-        <div style="color:#e0d8c8;font-size:13px;line-height:2;text-align:left;font-family:'STKaiti',KaiTi,serif">
+        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:'STKaiti',KaiTi,serif">
           <div style="color:#ffd970;font-weight:bold;margin-bottom:6px">🎒 背包</div>
           <div>查看/装备/合成装备</div>
           <div>3件同品质 → <span style="color:#58a6ff">50%</span> 合成更高一阶</div>
-          <div style="color:#ffd970;font-weight:bold;margin:10px 0 6px">🧬 天赋</div>
+          <div style="color:#ffd970;font-weight:bold;margin:6px 0 4px">🧬 天赋</div>
           <div>消耗天赋点升级被动属性</div>
           <div>每升一级获得 <span style="color:#ffd970">2 天赋点</span></div>
-          <div style="color:#ffd970;font-weight:bold;margin:10px 0 6px">🔮 魂器</div>
+          <div style="color:#ffd970;font-weight:bold;margin:6px 0 4px">🔮 魂器</div>
           <div>击败超级Boss掉落，局外装备</div>
-          <div style="color:#8b949e;font-size:11px;margin-top:8px">5次未掉魂器后第6次必掉</div>
+          <div style="color:#8b949e;font-size:min(2.5vw,11px);margin-top:8px">5次未掉魂器后第6次必掉</div>
         </div>
       `
     },
@@ -2845,16 +2845,16 @@ function showTutorial(force){
       title: '第四步 · 日常福利',
       bg: 'linear-gradient(180deg,#3a2a4a,#2a1a3a)',
       content: `
-        <div style="color:#e0d8c8;font-size:13px;line-height:2;text-align:left;font-family:'STKaiti',KaiTi,serif">
+        <div style="color:#e0d8c8;font-size:min(3vw,13px);line-height:1.6;text-align:left;font-family:'STKaiti',KaiTi,serif">
           <div style="color:#ffd970;font-weight:bold;margin-bottom:6px">📅 每日签到</div>
           <div>每天可签到1次，连续签到奖励递增</div>
           <div>第7天起掉落 <span style="color:#bc8cff">史诗装备</span></div>
-          <div style="color:#ffd970;font-weight:bold;margin:10px 0 6px">⭐ 训练等级</div>
+          <div style="color:#ffd970;font-weight:bold;margin:6px 0 4px">⭐ 训练等级</div>
           <div>累积经验升级局外等级</div>
           <div>每 <span style="color:#ffd970">1000 XP</span> 额外奖励 1 天赋点</div>
-          <div style="color:#ffd970;font-weight:bold;margin:10px 0 6px">🏆 难度解锁</div>
+          <div style="color:#ffd970;font-weight:bold;margin:6px 0 4px">🏆 难度解锁</div>
           <div>通关当前难度试炼 → 解锁下一难度</div>
-          <div style="color:#8b949e;font-size:11px;margin-top:10px">普通 → 困难 → 地狱 → 弑神</div>
+          <div style="color:#8b949e;font-size:min(2.5vw,11px);margin-top:10px">普通 → 困难 → 地狱 → 弑神</div>
         </div>
       `
     }
@@ -2869,9 +2869,9 @@ function showTutorial(force){
     const contentEl = document.getElementById('tutorialContent');
     if(contentEl){
       contentEl.innerHTML = `
-        <div style="font-size:48px;margin-bottom:12px;text-shadow:0 0 20px rgba(255,215,0,0.5)">${s.icon}</div>
-        <h2 style="color:#ffd700;letter-spacing:3px;margin:0 0 18px;font-size:18px;font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 10px rgba(255,215,0,0.4)">${s.title}</h2>
-        <div style="background:rgba(0,0,0,0.4);border:1px solid rgba(212,160,23,0.3);border-radius:10px;padding:18px 20px">${s.content}</div>
+        <div style="font-size:min(7vw,40px);margin-bottom:4px;text-shadow:0 0 20px rgba(255,215,0,0.5)">${s.icon}</div>
+        <h2 style="color:#ffd700;letter-spacing:2px;margin:0 0 6px;font-size:min(3.5vw,16px);font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 10px rgba(255,215,0,0.4)">${s.title}</h2>
+        <div style="background:rgba(0,0,0,0.4);border:1px solid rgba(212,160,23,0.3);border-radius:8px;padding:10px 14px">${s.content}</div>
       `;
     }
     const infoEl = document.getElementById('tutorialPageInfo');
@@ -2883,17 +2883,17 @@ function showTutorial(force){
     if(nextBtn) nextBtn.style.display = (currentPage < totalPages - 1) ? 'inline-block' : 'none';
     if(doneBtn) doneBtn.style.display = (currentPage === totalPages - 1) ? 'block' : 'none';
   };
-  let html = `<div id="tutorialOverlay" style="position:fixed;inset:0;z-index:99997;display:flex;align-items:flex-start;justify-content:center;padding:16px;transition:background 0.6s;overflow-y:auto;-webkit-overflow-scrolling:touch">`;
-  html += `<div style="max-width:480px;width:100%;text-align:center;padding:16px 12px 24px">`;
-  html += `<div style="color:#ffd700;font-size:13px;letter-spacing:4px;margin-bottom:12px;font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ 新手引导 ✦</div>`;
-  html += `<div id="tutorialContent" style="min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start"></div>`;
-  html += `<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px">`;
-  html += `<button id="tutorialPrevBtn" style="padding:8px 14px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:12px;font-family:'STKaiti',KaiTi,serif">◀ 上一步</button>`;
-  html += `<span id="tutorialPageInfo" style="color:#ffd970;font-size:11px;min-width:40px"></span>`;
-  html += `<button id="tutorialNextBtn" style="padding:8px 14px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:12px;font-family:'STKaiti',KaiTi,serif">下一步 ▶</button>`;
+  let html = `<div id="tutorialOverlay" style="position:fixed;inset:0;z-index:99997;display:flex;align-items:center;justify-content:center;padding:12px;transition:background 0.6s">`;
+  html += `<div style="max-width:480px;width:100%;height:100%;max-height:100vh;display:flex;flex-direction:column;text-align:center;padding:8px 10px;box-sizing:border-box">`;
+  html += `<div style="color:#ffd700;font-size:min(3vw,13px);letter-spacing:2px;margin-bottom:4px;font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 8px rgba(255,215,0,0.4);flex-shrink:0">✦ 新手引导 ✦</div>`;
+  html += `<div id="tutorialContent" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden"></div>`;
+  html += `<div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 0;flex-shrink:0">`;
+  html += `<button id="tutorialPrevBtn" style="padding:6px 12px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:6px;cursor:pointer;font-size:min(2.5vw,11px);font-family:'STKaiti',KaiTi,serif">◀ 上一步</button>`;
+  html += `<span id="tutorialPageInfo" style="color:#ffd970;font-size:10px;min-width:35px"></span>`;
+  html += `<button id="tutorialNextBtn" style="padding:6px 12px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:6px;cursor:pointer;font-size:min(2.5vw,11px);font-family:'STKaiti',KaiTi,serif">下一步 ▶</button>`;
   html += `</div>`;
-  html += `<button id="tutorialDoneBtn" style="display:none;margin-top:12px;width:100%;padding:12px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:10px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;box-shadow:0 0 20px rgba(255,215,0,0.5)">⚔️ 开始游戏</button>`;
-  html += `<button id="tutorialSkipBtn" style="margin-top:8px;padding:6px 16px;background:transparent;color:#8b949e;border:none;font-size:11px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">跳过 ⏭</button>`;
+  html += `<button id="tutorialDoneBtn" style="display:none;margin-top:4px;width:100%;padding:10px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:min(3.5vw,15px);font-weight:bold;letter-spacing:1px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;flex-shrink:0;box-shadow:0 0 20px rgba(255,215,0,0.5)">⚔️ 开始游戏</button>`;
+  html += `<button id="tutorialSkipBtn" style="margin-top:2px;padding:4px 12px;background:transparent;color:#8b949e;border:none;font-size:10px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;flex-shrink:0">跳过 ⏭</button>`;
   html += `</div></div>`;
   document.body.insertAdjacentHTML('beforeend', html);
   renderPage();
@@ -2979,7 +2979,7 @@ function showMainMenu(){
         <div class="sj-boss-label">烛龙 · 镇守</div>
       </div>
 
-      <p class="subtitle" style="font-family:'STKaiti','KaiTi',serif;letter-spacing:2px;margin-top:8px;line-height:1.6;font-size:12px">
+      <p class="subtitle" style="font-family:'STKaiti','KaiTi',serif;letter-spacing:2px;margin-top:4px;line-height:1.6;font-size:12px">
         ⚔️ 九大异兽 · 最终Boss<b style="color:#8b0000">刑天</b>
       </p>
 
@@ -2995,7 +2995,7 @@ function showMainMenu(){
           <div class="stat-pill"><span class="pill-icon">🏆</span><span class="pill-value">${achCount}</span><span class="pill-label">成就</span></div>
         </div>
         <div style="max-width:460px;margin:4px auto 2px;padding:0 6px">
-          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+          <div style="display:flex;justify-content:space-between;font-size:min(2.5vw,11px);margin-bottom:3px">
             <span style="color:#ffd700;font-weight:bold;text-shadow:0 0 4px rgba(255,215,0,0.6)">🎖️ 训练等级 Lv.${playerLvl.level}</span>
             <span style="color:#8b949e">${playerLvl.inLevel}/${playerLvl.needed} XP</span>
           </div>
@@ -3016,7 +3016,7 @@ function showMainMenu(){
           <button class="action-btn endless" id="endlessBtn">♾️ 无尽模式 ${saveData.bestEndlessWave>0?`<span style="font-size:12px;opacity:0.9">最佳${saveData.bestEndlessWave}波</span>`:''}</button>
         </div>
         ${(saveData.pendingChests&&saveData.pendingChests.length>0)?`
-        <div style="margin-top:8px;display:flex;justify-content:center">
+        <div style="margin-top:4px;display:flex;justify-content:center">
           <button class="action-btn" id="chestBtn" style="background:linear-gradient(135deg,#cd7f32,#ffd700);font-size:15px;padding:12px 28px;min-height:44px;border:2px solid #ffd700;box-shadow:0 0 16px rgba(255,215,0,0.5);animation:pulseGlow 1.5s ease-in-out infinite">
             📦 开箱领奖 <span style="display:inline-block;background:#ff4444;color:#fff;border-radius:10px;padding:1px 8px;font-size:12px;margin-left:6px;box-shadow:0 0 6px rgba(255,68,68,0.8)">${saveData.pendingChests.length}</span>
           </button>
@@ -3047,7 +3047,7 @@ function showMainMenu(){
           }).join('')}
         </div>
         ${(!saveData.difficultyCleared||!saveData.difficultyCleared.godslayer)?`<div style="text-align:center;font-size:10px;color:#bc8cff;margin-top:4px;letter-spacing:1px">⚔️ 通关弑神难度Boss试炼解锁特殊称号！</div>`:''}
-        ${saveData.titleGodslayer?`<div style="text-align:center;font-size:11px;color:#ffd970;margin-top:4px;letter-spacing:2px;text-shadow:0 0 6px rgba(255,217,112,0.5);font-weight:bold">⚔️ 弑神者 ⚔️</div>`:''}
+        ${saveData.titleGodslayer?`<div style="text-align:center;font-size:min(2.5vw,11px);color:#ffd970;margin-top:4px;letter-spacing:2px;text-shadow:0 0 6px rgba(255,217,112,0.5);font-weight:bold">⚔️ 弑神者 ⚔️</div>`:''}
       </div>
 
       <div style="margin:4px 0;text-align:center">
@@ -3065,16 +3065,16 @@ function showMainMenu(){
         <div class="ctrl-item"><span class="key">📱摇杆</span><span class="desc">手机端</span></div>
       </div>
       <div class="home-diff-row" style="display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0;flex-wrap:wrap">
-        <span class="subtitle" style="font-size:11px;margin:0">难度：${diff.icon} ${diff.name}</span>
+        <span class="subtitle" style="font-size:min(2.5vw,11px);margin:0">难度：${diff.icon} ${diff.name}</span>
         <button id="fullscreenBtn">⛶ 点我全屏</button>
-        ${saveData.hasShanHaiBook?'<button id="bookBtn" style="margin:0;padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#8b0000,#ffd700);color:#fff;border:1px solid #ffd700;border-radius:6px;cursor:pointer">📖 山海故事</button>':''}
+        ${saveData.hasShanHaiBook?'<button id="bookBtn" style="margin:0;padding:4px 10px;font-size:min(2.5vw,11px);background:linear-gradient(135deg,#8b0000,#ffd700);color:#fff;border:1px solid #ffd700;border-radius:6px;cursor:pointer">📖 山海故事</button>':''}
       </div>
       <button id="homeFullscreenBigBtn">⛶ 点我全屏播放</button>
       <div id="homeFullscreenTip"></div>
-      <div class="home-author" style="margin:4px 0;font-family:'STKaiti','KaiTi',serif;font-size:11px;letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
+      <div class="home-author" style="margin:4px 0;font-family:'STKaiti','KaiTi',serif;font-size:min(2.5vw,11px);letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
 
       <details class="home-guide" style="margin:4px auto 8px;max-width:680px;padding:6px 12px;border:1px solid rgba(212,160,23,0.3);border-radius:8px;background:rgba(22,27,34,0.7);font-size:10px;color:#8b949e;text-align:left;backdrop-filter:blur(8px)">
-        <summary style="cursor:pointer;color:#ffd970;font-size:11px;letter-spacing:1px">📖 新手指南（点击展开）</summary>
+        <summary style="cursor:pointer;color:#ffd970;font-size:min(2.5vw,11px);letter-spacing:1px">📖 新手指南（点击展开）</summary>
         <div style="margin-top:6px;line-height:1.6;font-size:10px">
           <div style="color:#f0883e">⚡ <b>核心</b>：WASD移动，鼠标瞄准射击。每关30秒（Boss关50秒），时间到自动进下一关。</div>
           <div style="color:#8b0000">⚔️ <b>最终Boss·刑天</b>：击败超级Boss后50%几率触发，掉落山海故事书与「刑天干戚」。</div>
@@ -3087,7 +3087,7 @@ function showMainMenu(){
           <div style="color:#bc8cff">📊 <b>4大难度</b>：普通→困难→地狱→弑神，需通关前一难度Boss试炼解锁。</div>
         </div>
       </details>
-      <button class="home-guide-mobile" id="homeGuideMobileBtn" style="margin:4px auto 6px;padding:4px 16px;border:1px solid rgba(212,160,23,0.4);border-radius:6px;background:rgba(22,27,34,0.8);color:#ffd970;font-size:11px;letter-spacing:1px;cursor:pointer;">📖 新手指南</button>
+      <button class="home-guide-mobile" id="homeGuideMobileBtn" style="margin:4px auto 6px;padding:4px 16px;border:1px solid rgba(212,160,23,0.4);border-radius:6px;background:rgba(22,27,34,0.8);color:#ffd970;font-size:min(2.5vw,11px);letter-spacing:1px;cursor:pointer;">📖 新手指南</button>
      </div>
     </div>
   `;
@@ -3172,10 +3172,10 @@ function showTalentMenu(){
   const xpProgress=Math.floor((saveData.totalXp||0)%1000);
   const xpMilestones=Math.floor((saveData.totalXp||0)/1000);
   // 顶部固定栏：标题 + 积分 + 返回按钮（始终可见，无需滑动）
-  let html=`<div style="position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#0d1117 0%,#0d1117 90%,rgba(13,17,23,0) 100%);padding:8px 0 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+  let html=`<div style="position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#0d1117 0%,#0d1117 90%,rgba(13,17,23,0) 100%);padding:8px 0 10px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;gap:10px">
     <div style="text-align:left;flex:1;min-width:0">
       <h2 style="margin:0;font-size:18px">🌟 天赋系统</h2>
-      <p style="margin:2px 0 0;font-size:11px;color:#f0883e">天赋点: <b style="font-size:14px">${saveData.talentPoints}</b> · 已达成 ${xpMilestones} 里程碑</p>
+      <p style="margin:2px 0 0;font-size:min(2.5vw,11px);color:#f0883e">天赋点: <b style="font-size:14px">${saveData.talentPoints}</b> · 已达成 ${xpMilestones} 里程碑</p>
     </div>
     <button class="sec-btn" id="backFromTalent" style="flex-shrink:0;font-size:14px;padding:8px 16px;min-height:44px">← 返回</button>
   </div>`;
@@ -3196,7 +3196,7 @@ function showTalentMenu(){
     const lv=getTalentLevel(t.id); const maxed=lv>=t.maxLevel; const afford=saveData.talentPoints>=t.costPerLevel;
     const stateClass=maxed?'maxed':(!afford?'unaffordable':'');
     const lockDisplay=maxed?'已满级':(t.costPerLevel+'点');
-    html+=`<div class="talent-node ${stateClass}" data-talent="${t.id}" style="position:relative;padding:8px 6px;min-height:auto"><div class="talent-icon" style="font-size:22px;margin-bottom:2px">${t.icon}</div><div class="talent-name" style="font-size:11px;margin-bottom:2px">${t.name}</div><div class="talent-desc" style="font-size:9px;margin-bottom:3px;line-height:1.2">${t.desc}</div><div class="talent-level" style="font-size:10px">Lv.${lv}/${t.maxLevel}</div><div class="talent-cost" style="font-size:10px">${lockDisplay}</div></div>`;
+    html+=`<div class="talent-node ${stateClass}" data-talent="${t.id}" style="position:relative;padding:8px 6px;min-height:auto"><div class="talent-icon" style="font-size:22px;margin-bottom:2px">${t.icon}</div><div class="talent-name" style="font-size:min(2.5vw,11px);margin-bottom:2px">${t.name}</div><div class="talent-desc" style="font-size:9px;margin-bottom:3px;line-height:1.2">${t.desc}</div><div class="talent-level" style="font-size:10px">Lv.${lv}/${t.maxLevel}</div><div class="talent-cost" style="font-size:10px">${lockDisplay}</div></div>`;
   }
   html+=`</div>`;
   // 辅助/高级天赋：折叠（默认收起，玩家点击展开）
@@ -3217,7 +3217,7 @@ function showTalentMenu(){
       const advTag=t.advanced?'<span style="position:absolute;top:2px;right:4px;font-size:8px;color:#ff4444;background:rgba(255,68,68,0.15);padding:1px 3px;border-radius:2px">高级</span>':'';
       const stateClass=maxed?'maxed':(!afford||lockedByMutual?'unaffordable':'');
       const lockDisplay=maxed?'已满级':(lockedByMutual?lockHint:(t.costPerLevel+'点'));
-      html+=`<div class="talent-node ${stateClass}" data-talent="${t.id}" style="position:relative;padding:8px 6px;min-height:auto;${lockedByMutual?'opacity:0.45;cursor:not-allowed':''}">${advTag}<div class="talent-icon" style="font-size:22px;margin-bottom:2px">${t.icon}</div><div class="talent-name" style="font-size:11px;margin-bottom:2px">${t.name}</div><div class="talent-desc" style="font-size:9px;margin-bottom:3px;line-height:1.2">${t.desc}</div><div class="talent-level" style="font-size:10px">Lv.${lv}/${t.maxLevel}</div><div class="talent-cost" style="font-size:10px">${lockDisplay}</div></div>`;
+      html+=`<div class="talent-node ${stateClass}" data-talent="${t.id}" style="position:relative;padding:8px 6px;min-height:auto;${lockedByMutual?'opacity:0.45;cursor:not-allowed':''}">${advTag}<div class="talent-icon" style="font-size:22px;margin-bottom:2px">${t.icon}</div><div class="talent-name" style="font-size:min(2.5vw,11px);margin-bottom:2px">${t.name}</div><div class="talent-desc" style="font-size:9px;margin-bottom:3px;line-height:1.2">${t.desc}</div><div class="talent-level" style="font-size:10px">Lv.${lv}/${t.maxLevel}</div><div class="talent-cost" style="font-size:10px">${lockDisplay}</div></div>`;
     }
     html+=`</div></details>`;
   }
@@ -3363,7 +3363,7 @@ function showBagMenu(){
   // 套装效果显示（如果有4件神话装备）
   const mythicCount=Object.values(saveData.equippedGear).filter(g=>g&&g.rarity==='mythic').length;
   if(mythicCount>=4){
-    html+='<div style="background:linear-gradient(90deg,#3a1a1a,#5a2a2a,#3a1a1a);border:1px solid #ff4444;border-radius:8px;padding:10px;margin-top:8px;color:#ffd970;font-weight:bold">🔥 神话套装已激活 (${mythicCount}/4)<br><span style="color:#ffa0a0;font-size:11px;font-weight:normal">伤害×1.6 | 移速×1.3 | 生命×1.3 | 暴击+20% | 暴伤+50% | 穿透+2 | 吸血+3%</span></div>';
+    html+='<div style="background:linear-gradient(90deg,#3a1a1a,#5a2a2a,#3a1a1a);border:1px solid #ff4444;border-radius:8px;padding:10px;margin-top:4px;color:#ffd970;font-weight:bold">🔥 神话套装已激活 (${mythicCount}/4)<br><span style="color:#ffa0a0;font-size:min(2.5vw,11px);font-weight:normal">伤害×1.6 | 移速×1.3 | 生命×1.3 | 暴击+20% | 暴伤+50% | 穿透+2 | 吸血+3%</span></div>';
   }
   html+='<div class="panel-actions"><button class="sec-btn" id="backFromBag">返回主菜单</button></div>';
   ov.innerHTML=html;
@@ -3388,7 +3388,7 @@ function showArtifactMenu(){
   html+='<p class="subtitle">击败超级Boss有概率掉落对应魂器 · 装备魂器后释放技能时会自动附带魂器技能</p>';
   html+=`<p style="font-size:18px;color:#a855f7">已收集: ${saveData.ownedArtifacts.length}/${SOUL_ARTIFACTS.length}</p>`;
   // 说明
-  html+=`<div style="max-width:680px;margin:0 auto 12px;padding:8px;border:1px solid rgba(168,85,247,0.3);border-radius:6px;font-size:11px;color:#8b949e;text-align:left">
+  html+=`<div style="max-width:680px;margin:0 auto 12px;padding:8px;border:1px solid rgba(168,85,247,0.3);border-radius:6px;font-size:min(2.5vw,11px);color:#8b949e;text-align:left">
     <div style="color:#c9d1d9;margin-bottom:4px">📜 <b>魂器机制</b></div>
     • 魂器在角色释放技能(C键)时<b>同时触发</b>，不占用技能冷却<br>
     • 变异超级Boss掉落概率更高(40% vs 20%)<br>
@@ -3423,17 +3423,17 @@ function showArtifactMenu(){
     const bossDef=BOSS_TYPES.find(b=>b.idx===art.bossIdx);
     if(owned){
       html+=`<div style="background:linear-gradient(180deg,#2a1a3a,#161b22);border:2px solid ${isEquipped?'#ffd970':art.color};border-radius:10px;padding:14px;text-align:left;cursor:pointer;box-shadow:${isEquipped?'0 0 16px rgba(255,217,112,0.4)':'0 0 10px '+art.color+'33'};position:relative" data-equip-art="${art.bossIdx}">
-        ${isEquipped?'<div style="position:absolute;top:6px;right:8px;font-size:11px;color:#ffd970;font-weight:bold">✓ 已装备</div>':''}
+        ${isEquipped?'<div style="position:absolute;top:6px;right:8px;font-size:min(2.5vw,11px);color:#ffd970;font-weight:bold">✓ 已装备</div>':''}
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
           <div style="font-size:36px;text-shadow:0 0 10px ${art.color}">${art.icon}</div>
           <div>
             <div style="color:${art.color};font-weight:bold;font-size:15px">${art.name}</div>
-            <div style="font-size:11px;color:#8b949e">来自: ${bossDef?bossDef.name:'未知Boss'}</div>
+            <div style="font-size:min(2.5vw,11px);color:#8b949e">来自: ${bossDef?bossDef.name:'未知Boss'}</div>
           </div>
         </div>
         <div style="font-size:13px;color:#ffd970;margin-bottom:4px">✦ ${art.skillName}</div>
-        <div style="font-size:11px;color:#c9d1d9;line-height:1.5">${art.desc}</div>
-        <div style="font-size:11px;color:#58a6ff;margin-top:8px;text-align:center">${isEquipped?'点击卸下':'点击装备'}</div>
+        <div style="font-size:min(2.5vw,11px);color:#c9d1d9;line-height:1.5">${art.desc}</div>
+        <div style="font-size:min(2.5vw,11px);color:#58a6ff;margin-top:4px;text-align:center">${isEquipped?'点击卸下':'点击装备'}</div>
       </div>`;
     }else{
       html+=`<div style="background:#0d1117;border:1px dashed #30363d;border-radius:10px;padding:14px;text-align:left;opacity:0.65">
@@ -3441,7 +3441,7 @@ function showArtifactMenu(){
           <div style="font-size:36px;filter:grayscale(1) brightness(0.5)">❓</div>
           <div>
             <div style="color:#8b949e;font-weight:bold;font-size:15px">??? 魂器</div>
-            <div style="font-size:11px;color:#6e7681">来自: ${bossDef?bossDef.name:'未知Boss'} (未获得)</div>
+            <div style="font-size:min(2.5vw,11px);color:#6e7681">来自: ${bossDef?bossDef.name:'未知Boss'} (未获得)</div>
           </div>
         </div>
         <div style="font-size:12px;color:#6e7681;line-height:1.5">击败 ${bossDef?bossDef.name:'该Boss'} 后有几率掉落<br>(变异Boss掉落率提升至40%)</div>
@@ -3478,7 +3478,7 @@ function showCharMenu(){
   for(const[id,c]of Object.entries(CHARACTERS)){
     const unlocked=saveData.unlockedCharacters.includes(id);
     const sel=saveData.currentCharacter===id;
-    html+=`<div class="char-card ${sel?'selected':''} ${!unlocked?'locked':''}" data-char="${id}"><div style="font-size:40px">${c.icon}</div><h3>${c.name}</h3><p style="font-size:12px;color:#8b949e">被动: ${c.passive}</p><p style="font-size:12px;color:#bc8cff">${c.skillName}</p><p style="font-size:11px;color:#8b949e">${c.skillDesc}</p>${!unlocked?`<p style="color:#f0883e;margin-top:6px">🪙 ${c.price}</p>`:''}</div>`;
+    html+=`<div class="char-card ${sel?'selected':''} ${!unlocked?'locked':''}" data-char="${id}"><div style="font-size:40px">${c.icon}</div><h3>${c.name}</h3><p style="font-size:12px;color:#8b949e">被动: ${c.passive}</p><p style="font-size:12px;color:#bc8cff">${c.skillName}</p><p style="font-size:min(2.5vw,11px);color:#8b949e">${c.skillDesc}</p>${!unlocked?`<p style="color:#f0883e;margin-top:6px">🪙 ${c.price}</p>`:''}</div>`;
   }
   html+='</div>';
   // 皮肤选择区域
@@ -3491,7 +3491,7 @@ function showCharMenu(){
   }else{
     html+='<div style="display:flex;flex-wrap:wrap;justify-content:center">';
     // 默认皮肤（无）
-    html+=`<div class="char-card ${!equippedSkinId?'selected':''}" data-skin="" style="width:160px"><div style="font-size:32px">${curChar.icon}</div><h3>默认</h3><p style="font-size:11px;color:#8b949e">原始外观</p><p style="font-size:11px;color:#3fb950">已装备</p></div>`;
+    html+=`<div class="char-card ${!equippedSkinId?'selected':''}" data-skin="" style="width:160px"><div style="font-size:32px">${curChar.icon}</div><h3>默认</h3><p style="font-size:min(2.5vw,11px);color:#8b949e">原始外观</p><p style="font-size:min(2.5vw,11px);color:#3fb950">已装备</p></div>`;
     for(const s of skins){
       const owned=saveData.ownedSkins.includes(s.id);
       const equipped=equippedSkinId===s.id;
@@ -3499,9 +3499,9 @@ function showCharMenu(){
       html+=`<div class="char-card ${equipped?'selected':''} ${!owned?'locked':''}" data-skin="${s.id}" style="width:160px">
         <div style="font-size:32px">${s.icon}</div>
         <h3>${s.name}</h3>
-        <p style="font-size:11px;color:#8b949e">${s.desc}</p>
+        <p style="font-size:min(2.5vw,11px);color:#8b949e">${s.desc}</p>
         <p style="font-size:10px;color:${rarColor};font-weight:bold">${GEAR_RARITIES[s.rarity]?.name||''}</p>
-        ${equipped?'<p style="font-size:11px;color:#3fb950">已装备</p>':(owned?'<p style="font-size:10px;color:#4a9b8e">点击装备</p>':'<p style="font-size:10px;color:#8b949e">抽奖获取</p>')}
+        ${equipped?'<p style="font-size:min(2.5vw,11px);color:#3fb950">已装备</p>':(owned?'<p style="font-size:10px;color:#4a9b8e">点击装备</p>':'<p style="font-size:10px;color:#8b949e">抽奖获取</p>')}
       </div>`;
     }
     html+='</div>';
@@ -3554,10 +3554,10 @@ function showWeaponMenu(){
   const pageItems=visibleList.slice(start,end);
 
   // 顶部固定栏：标题 + 积分 + 返回按钮（始终可见，无需滑动）
-  let html=`<div style="position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#0d1117 0%,#0d1117 90%,rgba(13,17,23,0) 100%);padding:8px 0 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+  let html=`<div style="position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#0d1117 0%,#0d1117 90%,rgba(13,17,23,0) 100%);padding:8px 0 12px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;gap:12px">
     <div style="text-align:left;flex:1;min-width:0">
       <h2 style="margin:0;font-size:18px">🔫 武器商店</h2>
-      <p style="margin:2px 0 0;font-size:11px;color:#f0883e">积分: ${saveData.totalScore}</p>
+      <p style="margin:2px 0 0;font-size:min(2.5vw,11px);color:#f0883e">积分: ${saveData.totalScore}</p>
     </div>
     <button class="sec-btn" id="backFromWeapon" style="flex-shrink:0;font-size:14px;padding:8px 16px;min-height:44px">← 返回</button>
   </div>`;
@@ -3730,7 +3730,7 @@ function showPetMenu(){
       const canEvolve=p.stage<2&&sameCount>0;
       let evoHint='';
       if(p.stage<2){
-        evoHint=canEvolve?`<button class="sec-btn" style="margin-top:6px;font-size:11px;border-color:#ffd700;color:#ffd700" data-evolve="${i}">升阶 (消耗1只同类)</button>`:'<p style="font-size:10px;color:#8b949e;margin-top:4px">需要1只同类宝宝升阶</p>';
+        evoHint=canEvolve?`<button class="sec-btn" style="margin-top:6px;font-size:min(2.5vw,11px);border-color:#ffd700;color:#ffd700" data-evolve="${i}">升阶 (消耗1只同类)</button>`:'<p style="font-size:10px;color:#8b949e;margin-top:4px">需要1只同类宝宝升阶</p>';
       }else{
         evoHint='<p style="color:#3fb950;font-size:12px">已满阶</p>';
       }
@@ -3738,8 +3738,8 @@ function showPetMenu(){
         <div style="font-size:36px">${def.icon}</div>
         <h3>${def.name}</h3>
         <p style="color:#ffd700">${'★'.repeat(p.stage+1)}</p>
-        <p style="font-size:11px;color:#8b949e">${def.desc}</p>
-        <p style="font-size:11px;color:#58a6ff">伤害x${evo.dmgMul}</p>
+        <p style="font-size:min(2.5vw,11px);color:#8b949e">${def.desc}</p>
+        <p style="font-size:min(2.5vw,11px);color:#58a6ff">伤害x${evo.dmgMul}</p>
         ${canEvolve?`<p style="font-size:10px;color:#3fb950">同类x${sameCount}</p>`:''}
         ${evoHint}
         <button class="sec-btn" style="margin-top:4px;font-size:10px;border-color:#f85149;color:#f85149" data-recycle="${i}">回收 +500分</button>
@@ -3767,7 +3767,7 @@ function showPetMenu(){
         const toRecycle=pets.filter(p=>p.stage<maxStage);
         if(toRecycle.length===0)continue;
         const reward=toRecycle.reduce((s,p)=>s+500+p.stage*250,0);
-        html+=`<button class="sec-btn" data-batch-recycle="${defId}" style="margin:3px;font-size:11px;border-color:#f85149;color:#f85149">${def.icon} ${def.name} 回收${toRecycle.length}只 +${reward}分</button>`;
+        html+=`<button class="sec-btn" data-batch-recycle="${defId}" style="margin:3px;font-size:min(2.5vw,11px);border-color:#f85149;color:#f85149">${def.icon} ${def.name} 回收${toRecycle.length}只 +${reward}分</button>`;
       }
       html+='</div>';
     }
@@ -3866,9 +3866,9 @@ function showRouletteMenu(){
   html+=`<p style="font-size:18px;color:#f0883e">当前积分: ${saveData.totalScore}</p>`;
   // 奖池预览
   html+='<div style="display:flex;gap:10px;margin:14px 0;flex-wrap:wrap;justify-content:center">';
-  html+='<div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:10px;text-align:center;width:130px"><div style="color:#58a6ff;font-weight:bold">🐉 Boss宝宝</div><div style="font-size:11px;color:#8b949e;margin-top:4px">50%概率</div><div style="font-size:11px;color:#6e7681">重复自动升阶</div></div>';
-  html+='<div style="background:#161b22;border:1px solid #ffd700;border-radius:8px;padding:10px;text-align:center;width:130px"><div style="color:#ffd700;font-weight:bold">⚒️ 传说装备</div><div style="font-size:11px;color:#8b949e;margin-top:4px">35%概率</div><div style="font-size:11px;color:#6e7681">随机部位金装</div></div>';
-  html+='<div style="background:#161b22;border:1px solid #bc8cff;border-radius:8px;padding:10px;text-align:center;width:130px"><div style="color:#bc8cff;font-weight:bold">✨ 角色皮肤</div><div style="font-size:11px;color:#8b949e;margin-top:4px">15%概率</div><div style="font-size:11px;color:#6e7681">当前角色池</div></div>';
+  html+='<div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:10px;text-align:center;width:130px"><div style="color:#58a6ff;font-weight:bold">🐉 Boss宝宝</div><div style="font-size:min(2.5vw,11px);color:#8b949e;margin-top:4px">50%概率</div><div style="font-size:min(2.5vw,11px);color:#6e7681">重复自动升阶</div></div>';
+  html+='<div style="background:#161b22;border:1px solid #ffd700;border-radius:8px;padding:10px;text-align:center;width:130px"><div style="color:#ffd700;font-weight:bold">⚒️ 传说装备</div><div style="font-size:min(2.5vw,11px);color:#8b949e;margin-top:4px">35%概率</div><div style="font-size:min(2.5vw,11px);color:#6e7681">随机部位金装</div></div>';
+  html+='<div style="background:#161b22;border:1px solid #bc8cff;border-radius:8px;padding:10px;text-align:center;width:130px"><div style="color:#bc8cff;font-weight:bold">✨ 角色皮肤</div><div style="font-size:min(2.5vw,11px);color:#8b949e;margin-top:4px">15%概率</div><div style="font-size:min(2.5vw,11px);color:#6e7681">当前角色池</div></div>';
   html+='</div>';
   if(lastRouletteResult){
     html+=`<div style="background:#1a1f2e;border:1px solid #ffd970;border-radius:8px;padding:12px;margin:10px 0">${lastRouletteResult}</div>`;
@@ -4016,7 +4016,7 @@ function showCraftMenu(){
     const res=document.getElementById('craftResult');
     let rh=`<div style="background:#161b22;padding:12px;border-radius:8px;border:1px solid #f0883e;margin:8px 0">`;
     rh+=`<div style="color:#f0883e;margin-bottom:8px">⚠️ ${WEAPONS[wid].name} 已满4词条！新获得：<span class="rarity-${newCraft.rarity}">${newCraft.name}+${newCraft.value}</span></div>`;
-    rh+=`<div style="color:#8b949e;margin-bottom:6px;font-size:13px">选择一个已有词条进行替换，或舍弃新词条：</div>`;
+    rh+=`<div style="color:#8b949e;margin-bottom:4px;font-size:13px">选择一个已有词条进行替换，或舍弃新词条：</div>`;
     const crafts=saveData.weaponCrafts[wid];
     crafts.forEach((c,i)=>{
       rh+=`<button class="sec-btn" data-replace-idx="${i}" style="margin:4px;display:block;width:100%;text-align:left">替换 <span class="rarity-${c.rarity}">${c.name}+${c.value}</span> → <span class="rarity-${newCraft.rarity}">${newCraft.name}+${newCraft.value}</span></button>`;
@@ -4163,7 +4163,7 @@ function showGearMenu(){
   // 专属词条总览（可折叠）- 让玩家了解传说/神话词条功效
   html+=`<details style="max-width:680px;margin:0 auto 8px;padding:6px 10px;background:rgba(22,27,34,0.7);border:1px solid rgba(212,160,23,0.25);border-radius:6px">
     <summary style="cursor:pointer;color:#ffd970;font-size:12px;letter-spacing:1px">📜 专属词条功效总览（点击展开）</summary>
-    <div style="margin-top:8px;font-size:11px;line-height:1.7">
+    <div style="margin-top:4px;font-size:min(2.5vw,11px);line-height:1.7">
       <div style="color:#ffd970;margin-bottom:4px">✨ 传说词条（金色）：</div>
       ${GEAR_LEGENDARY_AFFIXES.map(a=>`<div style="color:#c9d1d9;padding:1px 8px">${a.icon} <b style="color:#ffd970">${a.name}</b> - <span style="color:#8b949e">${a.desc}</span></div>`).join('')}
       <div style="color:#ff4444;margin:8px 0 4px">🔥 神话词条（红色）：</div>
@@ -4203,7 +4203,7 @@ function showGearMenu(){
     html+=`<div style="background:#161b22;border:2px solid ${rc};border-radius:6px;padding:6px;width:155px;text-align:center;cursor:pointer;position:relative" data-unequip="${slot}">
       ${_bossIcon?`<div style="position:absolute;top:2px;right:4px;font-size:14px;${_isBossMythic?'filter:drop-shadow(0 0 3px #ffd700)':''}" title="${BOSS_TYPES[g.bossIdx].name}装备">${_bossIcon}</div>`:''}
       <div style="font-size:16px">${GEAR_SLOT_ICONS[slot]} <span style="font-size:10px;color:#8b949e">${GEAR_SLOT_NAMES[slot]}</span></div>
-      ${g?`<div style="font-size:11px;color:${rc};font-weight:bold;margin-top:2px">${g.name}</div>
+      ${g?`<div style="font-size:min(2.5vw,11px);color:${rc};font-weight:bold;margin-top:2px">${g.name}</div>
       <div style="margin-top:3px">${(g.stats||[]).map(s=>_renderStatBar(s)).join('')}</div>
       ${g.specialAffix?`<div style="font-size:9px;color:${g.rarity==='mythic'?'#ff4444':'#ffd700'};margin-top:3px;padding:2px 4px;background:${g.rarity==='mythic'?'rgba(255,68,68,0.1)':'rgba(255,215,0,0.1)'};border-radius:3px;${_isBossMythic?'border:1px solid #ffd700;':''}">${g.specialAffix.icon} ${g.specialAffix.name}${_isBossMythic?' 👑':''}</div>`:''}
       <div style="font-size:9px;color:#f85149;margin-top:2px">点击卸下</div>`:'<div style="font-size:10px;color:#8b949e;margin-top:4px">空</div>'}
@@ -4211,11 +4211,11 @@ function showGearMenu(){
   }
   html+=`</div>`;
   // 套装提示
-  if(mythicEquipped>=4)html+=`<div style="text-align:center;margin-bottom:4px;padding:4px;background:linear-gradient(90deg,#3a1a1a,#5a2a2a,#3a1a1a);border:1px solid #ff4444;border-radius:4px"><span style="color:#ff4444;font-size:11px;font-weight:bold">🔥 神话套装 ${mythicEquipped}/4 已激活！</span><br><span style="color:#ffa0a0;font-size:9px">伤害×1.6 移速×1.3 生命×1.3 暴击+20% 暴伤+50% 穿透+2 吸血+3%</span></div>`;
+  if(mythicEquipped>=4)html+=`<div style="text-align:center;margin-bottom:4px;padding:4px;background:linear-gradient(90deg,#3a1a1a,#5a2a2a,#3a1a1a);border:1px solid #ff4444;border-radius:4px"><span style="color:#ff4444;font-size:min(2.5vw,11px);font-weight:bold">🔥 神话套装 ${mythicEquipped}/4 已激活！</span><br><span style="color:#ffa0a0;font-size:9px">伤害×1.6 移速×1.3 生命×1.3 暴击+20% 暴伤+50% 穿透+2 吸血+3%</span></div>`;
   else if(mythicEquipped>0)html+=`<div style="text-align:center;margin-bottom:4px"><span style="color:#ff4444;font-size:10px">🔥 神话 ${mythicEquipped}/4</span></div>`;
   // Boss神话套装进度（4件不同Boss激活圆弧护盾）
   if(_bossMythicCnt>=4){
-    html+=`<div style="text-align:center;margin-bottom:4px;padding:4px;background:linear-gradient(90deg,#3a2a0a,#5a4015,#3a2a0a);border:1px solid #ffd700;border-radius:4px"><span style="color:#ffd700;font-size:11px;font-weight:bold">✨ Boss神话套装 ${_bossMythicCnt}/4 已激活！</span><br><span style="color:#ffe080;font-size:9px">技能键释放召唤圆弧护盾（120°金色光环挡弹幕，持续4秒）</span></div>`;
+    html+=`<div style="text-align:center;margin-bottom:4px;padding:4px;background:linear-gradient(90deg,#3a2a0a,#5a4015,#3a2a0a);border:1px solid #ffd700;border-radius:4px"><span style="color:#ffd700;font-size:min(2.5vw,11px);font-weight:bold">✨ Boss神话套装 ${_bossMythicCnt}/4 已激活！</span><br><span style="color:#ffe080;font-size:9px">技能键释放召唤圆弧护盾（120°金色光环挡弹幕，持续4秒）</span></div>`;
   }else if(_bossMythicCnt>0){
     html+=`<div style="text-align:center;margin-bottom:4px"><span style="color:#ffd700;font-size:10px">✨ Boss神话 ${_bossMythicCnt}/4（凑齐4件不同Boss激活圆弧护盾）</span></div>`;
   }else{
@@ -4251,12 +4251,12 @@ function showGearMenu(){
     html+=`<div style="text-align:center;margin-bottom:4px;padding:3px;background:#161b22;border:1px solid ${rc};border-radius:4px"><span style="color:${rc};font-size:10px">筛选:${GEAR_RARITIES[synthFilterRarity].name}(${cnt}件)</span><button class="sec-btn" id="resetFilter" style="margin-left:4px;font-size:9px;padding:1px 5px">全部</button><button class="main-btn" id="oneClickSynth" style="margin-left:3px;font-size:10px;padding:2px 8px" ${cnt>=3?'':'disabled'}>一键合成(${Math.floor(cnt/3)}组)</button></div>`;
   }
   // ===== Tab页签：部位切换 =====
-  html+=`<div style="display:flex;gap:4px;justify-content:center;margin-bottom:6px;flex-wrap:wrap">`;
+  html+=`<div style="display:flex;gap:4px;justify-content:center;margin-bottom:4px;flex-wrap:wrap">`;
   const tabs=[{slot:'',icon:'📋',name:'全部'},...GEAR_SLOTS.map(s=>({slot:s,icon:GEAR_SLOT_ICONS[s],name:GEAR_SLOT_NAMES[s]}))];
   for(const t of tabs){
     const active=(!gearFilterSlot&&t.slot==='')||(gearFilterSlot===t.slot);
     const cnt=t.slot?saveData.gearBag.filter(g=>g.slot===t.slot).length:saveData.gearBag.length;
-    html+=`<button class="sec-btn" data-filter-slot="${t.slot}" style="font-size:11px;padding:4px 12px;${active?'border-color:#58a6ff;color:#58a6ff;background:rgba(88,166,255,0.1)':''}">${t.icon}${t.name}(${cnt})</button>`;
+    html+=`<button class="sec-btn" data-filter-slot="${t.slot}" style="font-size:min(2.5vw,11px);padding:4px 12px;${active?'border-color:#58a6ff;color:#58a6ff;background:rgba(88,166,255,0.1)':''}">${t.icon}${t.name}(${cnt})</button>`;
   }
   html+=`</div>`;
   // ===== 装备网格（翻页式，手机友好） =====
@@ -4307,7 +4307,7 @@ function showGearMenu(){
       html+=`<div style="background:#161b22;border:1px solid ${selected?'#ffd970':rc};border-left:3px solid ${rc};border-radius:5px;padding:6px;cursor:default;position:relative" data-equip="${g.uid}">
         ${_bossIcon?`<div style="position:absolute;top:2px;right:4px;font-size:14px;${_isBossMythic?'filter:drop-shadow(0 0 3px #ffd700)':''}" title="${_bossName}装备">${_bossIcon}</div>`:''}
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <span style="color:${rc};font-weight:bold;font-size:11px">${GEAR_SLOT_ICONS[g.slot]} ${g.name}${selected?' <span style="color:#ffd970">✓</span>':''}</span>
+          <span style="color:${rc};font-weight:bold;font-size:min(2.5vw,11px)">${GEAR_SLOT_ICONS[g.slot]} ${g.name}${selected?' <span style="color:#ffd970">✓</span>':''}</span>
           <span style="color:#8b949e;font-size:9px">${GEAR_RARITIES[g.rarity].name}</span>
         </div>
         <div style="margin-top:3px">${(g.stats||[]).map(s=>_renderStatBar(s)).join('')}</div>
@@ -4340,7 +4340,7 @@ function showGearMenu(){
   // ===== 词条重铸（紧凑横排，可折叠） =====
   const rerollable=saveData.gearBag.filter(g=>g.specialAffix && !g.specialAffix.bossAffix);
   if(rerollable.length>0){
-    html+=`<details style="max-width:680px;margin:4px auto 0"><summary style="color:#bc8cff;font-size:11px;cursor:pointer">🔮 词条重铸 · ${rerollable.length}件可重铸（随机${GEAR_REFORGE_COST.random}分 / 定向${GEAR_REFORGE_COST.direct_legendary}分传说 / ${GEAR_REFORGE_COST.direct_mythic}分神话）</summary>`;
+    html+=`<details style="max-width:680px;margin:4px auto 0"><summary style="color:#bc8cff;font-size:min(2.5vw,11px);cursor:pointer">🔮 词条重铸 · ${rerollable.length}件可重铸（随机${GEAR_REFORGE_COST.random}分 / 定向${GEAR_REFORGE_COST.direct_legendary}分传说 / ${GEAR_REFORGE_COST.direct_mythic}分神话）</summary>`;
     html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px;margin-top:4px">`;
     for(const g of rerollable){
       const rc=GEAR_RARITIES[g.rarity].color;
@@ -4487,13 +4487,13 @@ function showGearMenu(){
       const cost=isMythic?GEAR_REFORGE_COST.direct_mythic:GEAR_REFORGE_COST.direct_legendary;
       const pool=isMythic?GEAR_MYTHIC_AFFIXES:GEAR_LEGENDARY_AFFIXES;
       // 弹出词条选择面板
-      let rh=`<div style="color:#ffd700;font-size:13px;margin-bottom:8px;font-weight:bold">🔮 定向重铸 - ${g.name}</div>`;
-      rh+=`<div style="color:#8b949e;font-size:11px;margin-bottom:8px">当前：${g.specialAffix.icon} ${g.specialAffix.name}<br>消耗：${cost}积分</div>`;
-      rh+=`<div style="color:#8b949e;font-size:11px;margin-bottom:6px">选择目标词条：</div>`;
+      let rh=`<div style="color:#ffd700;font-size:13px;margin-bottom:4px;font-weight:bold">🔮 定向重铸 - ${g.name}</div>`;
+      rh+=`<div style="color:#8b949e;font-size:min(2.5vw,11px);margin-bottom:8px">当前：${g.specialAffix.icon} ${g.specialAffix.name}<br>消耗：${cost}积分</div>`;
+      rh+=`<div style="color:#8b949e;font-size:min(2.5vw,11px);margin-bottom:6px">选择目标词条：</div>`;
       rh+=`<div style="display:grid;grid-template-columns:1fr;gap:4px;max-height:50vh;overflow-y:auto">`;
       for(const aff of pool){
         if(aff.id===g.specialAffix.id)continue;
-        rh+=`<button class="sec-btn" data-pick-affix="${aff.id}" style="font-size:11px;padding:6px 10px;text-align:left;color:${isMythic?'#ff4444':'#ffd700'};border-color:${isMythic?'#ff4444':'#ffd700'}">${aff.icon} <b>${aff.name}</b><br><span style="color:#8b949e;font-size:10px">${aff.desc}</span></button>`;
+        rh+=`<button class="sec-btn" data-pick-affix="${aff.id}" style="font-size:min(2.5vw,11px);padding:6px 10px;text-align:left;color:${isMythic?'#ff4444':'#ffd700'};border-color:${isMythic?'#ff4444':'#ffd700'}">${aff.icon} <b>${aff.name}</b><br><span style="color:#8b949e;font-size:10px">${aff.desc}</span></button>`;
       }
       rh+=`</div>`;
       rh+=`<div style="text-align:center;margin-top:8px"><button class="sec-btn" id="cancelDirectReforge">取消</button></div>`;
@@ -4528,8 +4528,8 @@ function showGearMenu(){
       const modal=_showGearModal(`<div style="max-width:440px;width:100%;padding:16px;background:#161b22;border:1px solid #bc8cff;border-radius:8px;text-align:center">
         <div style="color:#bc8cff;font-size:14px;font-weight:bold;margin-bottom:8px">⬆ 装备升阶确认</div>
         <div style="color:#c9d1d9;font-size:12px;margin-bottom:8px">${GEAR_SLOT_ICONS[g.slot]} ${g.name} (${GEAR_RARITIES[g.rarity].name})</div>
-        <div style="color:#8b949e;font-size:11px;margin-bottom:6px">→ 升阶为 <span style="color:${newRarityDef.color};font-weight:bold">${newRarityDef.name}</span> 品质</div>
-        <div style="color:#f0883e;font-size:11px;margin-bottom:8px;padding:6px;background:rgba(255,136,62,0.08);border-radius:4px">⚠ 升阶会重新生成词条数值与专属词条<br>Boss传说装备升阶为神话后变为普通神话（失去Boss标记）</div>
+        <div style="color:#8b949e;font-size:min(2.5vw,11px);margin-bottom:6px">→ 升阶为 <span style="color:${newRarityDef.color};font-weight:bold">${newRarityDef.name}</span> 品质</div>
+        <div style="color:#f0883e;font-size:min(2.5vw,11px);margin-bottom:4px;padding:6px;background:rgba(255,136,62,0.08);border-radius:4px">⚠ 升阶会重新生成词条数值与专属词条<br>Boss传说装备升阶为神话后变为普通神话（失去Boss标记）</div>
         <div style="color:#ffd700;font-size:12px;margin-bottom:10px">消耗：${cost}积分</div>
         <div style="display:flex;gap:8px;justify-content:center">
           <button class="main-btn" id="confirmAscend" style="background:linear-gradient(135deg,#bc8cff,#58a6ff);font-size:13px;padding:8px 18px">确认升阶</button>
@@ -4646,7 +4646,7 @@ function showBondMenu(){
   const ov=document.getElementById('bondOverlay'); ov.classList.remove('hidden');
   let html=`<h2>🔗 羁绊系统</h2><p class="subtitle">通过收集Boss宝宝激活羁绊 | 羁绊效果在每局游戏开始时自动生效</p>`;
   // 羁绊说明
-  html+=`<div style="max-width:680px;margin:0 auto 12px;padding:8px;border:1px solid #30363d;border-radius:6px;font-size:11px;color:#8b949e;text-align:left">
+  html+=`<div style="max-width:680px;margin:0 auto 12px;padding:8px;border:1px solid #30363d;border-radius:6px;font-size:min(2.5vw,11px);color:#8b949e;text-align:left">
     <div style="color:#c9d1d9;margin-bottom:4px">💡 <b>羁绊机制</b></div>
     <div>· 羁绊根据你<b>当前拥有的Boss宝宝数量和种类</b>自动激活</div>
     <div>· 多个羁绊可同时生效，效果叠加</div>
@@ -4661,7 +4661,7 @@ function showBondMenu(){
       html+=`<div style="background:rgba(63,185,80,0.1);border:2px solid #3fb950;border-radius:10px;padding:14px;text-align:center">
         <div style="font-size:32px">${b.icon}</div>
         <div style="font-size:14px;font-weight:bold;color:#3fb950;margin-top:4px">${b.name}</div>
-        <div style="font-size:11px;color:#8b949e;margin:4px 0">${b.desc}</div>
+        <div style="font-size:min(2.5vw,11px);color:#8b949e;margin:4px 0">${b.desc}</div>
         <div style="font-size:12px;color:#ffd700;padding:4px 8px;background:rgba(255,215,0,0.1);border-radius:4px">⚡ ${b.effect.name}</div>
       </div>`;
     }
@@ -4675,7 +4675,7 @@ function showBondMenu(){
     html+=`<div style="background:#161b22;border:2px solid ${isA?'#3fb950':'#30363d'};border-radius:10px;padding:14px;text-align:center;${isA?'':'opacity:0.6'}">
       <div style="font-size:28px">${b.icon}</div>
       <div style="font-size:14px;font-weight:bold;margin-top:4px;color:${isA?'#3fb950':'#c9d1d9'}">${b.name} ${isA?'✓':'🔒'}</div>
-      <div style="font-size:11px;color:#8b949e;margin:4px 0">${b.desc}</div>
+      <div style="font-size:min(2.5vw,11px);color:#8b949e;margin:4px 0">${b.desc}</div>
       <div style="font-size:12px;color:#ffd700">${b.effect.name}</div>
     </div>`;
   }
@@ -4719,7 +4719,7 @@ function showPediaMenu(initialTab){
       <div style="color:#daa520;margin-bottom:6px">🔗 <b>羁绊</b>：收集Boss宝宝激活被动加成。🎰 <b>抽奖</b>：800积分/次。</div>
       <div style="color:#ff6347;margin-bottom:6px">🔥 <b>半血机制</b>：Boss半血触发独有特殊机制。💥 <b>连击</b>：5连击+5%分数/击。</div>
       <div style="color:#bc8cff;margin-bottom:6px">📊 <b>4大难度</b>：普通→困难→地狱→弑神，需通关前一难度Boss试炼解锁。</div>
-      <div style="color:#8b949e;margin-top:8px;text-align:center;font-size:11px;letter-spacing:3px">✦ Edeka 制作 ✦</div>
+      <div style="color:#8b949e;margin-top:4px;text-align:center;font-size:min(2.5vw,11px);letter-spacing:3px">✦ Edeka 制作 ✦</div>
     </div>`;
   }
   // ===== 装备图鉴：展示10件Boss红装收集情况 =====
@@ -4735,7 +4735,7 @@ function showPediaMenu(initialTab){
       const slotIcon=GEAR_SLOT_ICONS[def.slot];
       html+=`<div style="background:${owned?'rgba(255,215,0,0.08)':'rgba(13,17,23,0.7)'};border:1px solid ${owned?'#ffd700':'#30363d'};border-radius:6px;padding:8px;text-align:center;${owned?'':'opacity:0.6'}">
         <div style="font-size:24px">${owned?b.icon:'❓'}</div>
-        <div style="font-size:11px;font-weight:bold;color:${owned?'#ffd700':'#8b949e'};margin-top:3px">${owned?def.mythicName:'未发现'}</div>
+        <div style="font-size:min(2.5vw,11px);font-weight:bold;color:${owned?'#ffd700':'#8b949e'};margin-top:3px">${owned?def.mythicName:'未发现'}</div>
         <div style="font-size:9px;color:#8b949e;margin:2px 0">${slotIcon} ${slotName} · ${b.name}</div>
         ${owned?`<div style="font-size:9px;color:#bc8cff;padding:2px 4px;background:rgba(188,140,255,0.1);border-radius:3px;margin-top:2px">${def.affix.icon} ${def.affix.name}</div>
         <div style="font-size:9px;color:#8b949e;margin-top:3px;line-height:1.4">${def.affix.desc}</div>`:'<div style="font-size:9px;color:#8b949e;margin-top:4px">击败此Boss有几率掉落</div>'}
@@ -4744,13 +4744,13 @@ function showPediaMenu(initialTab){
     html+=`</div>`;
     // 4件套提示
     if(_ownedBossMythics.size>=4){
-      html+=`<div style="text-align:center;margin-top:10px;padding:8px;background:linear-gradient(90deg,#3a2a0a,#5a4015,#3a2a0a);border:1px solid #ffd700;border-radius:6px">
+      html+=`<div style="text-align:center;margin-top:6px;padding:8px;background:linear-gradient(90deg,#3a2a0a,#5a4015,#3a2a0a);border:1px solid #ffd700;border-radius:6px">
         <span style="color:#ffd700;font-size:13px;font-weight:bold">✨ Boss神话套装已激活！</span><br>
-        <span style="color:#ffe080;font-size:11px">技能键释放召唤圆弧护盾（120°金色光环挡弹幕，持续4秒）</span>
+        <span style="color:#ffe080;font-size:min(2.5vw,11px)">技能键释放召唤圆弧护盾（120°金色光环挡弹幕，持续4秒）</span>
       </div>`;
     }else{
-      html+=`<div style="text-align:center;margin-top:10px;padding:6px;background:rgba(13,17,23,0.7);border-radius:6px">
-        <span style="color:#8b949e;font-size:11px">💡 凑齐4件不同Boss的神话装备激活圆弧护盾（当前 ${_ownedBossMythics.size}/4）</span>
+      html+=`<div style="text-align:center;margin-top:6px;padding:6px;background:rgba(13,17,23,0.7);border-radius:6px">
+        <span style="color:#8b949e;font-size:min(2.5vw,11px)">💡 凑齐4件不同Boss的神话装备激活圆弧护盾（当前 ${_ownedBossMythics.size}/4）</span>
       </div>`;
     }
     html+=`</div>`;
@@ -4809,7 +4809,7 @@ function showPediaMenu(initialTab){
     // 收集进度头
     html+=`<div style="text-align:center;margin-bottom:10px">
       <div style="color:#daa520;font-size:14px;font-weight:bold;text-shadow:0 0 8px rgba(218,165,32,0.4)">📜 山海残页 · ${pages.length}/10</div>
-      <div style="color:#8b949e;font-size:11px;margin-top:4px">击败各Boss首杀即得残页，集齐10页可解锁山海图卷</div>
+      <div style="color:#8b949e;font-size:min(2.5vw,11px);margin-top:4px">击败各Boss首杀即得残页，集齐10页可解锁山海图卷</div>
       <div style="margin:8px auto 0;width:80%;height:6px;background:#0d1117;border-radius:3px;overflow:hidden;border:1px solid #30363d">
         <div style="width:${pages.length*10}%;height:100%;background:linear-gradient(90deg,#daa520,#ffd700);transition:width 0.3s"></div>
       </div>
@@ -4818,13 +4818,13 @@ function showPediaMenu(initialTab){
     if(allCollected){
       html+=`<div style="background:linear-gradient(135deg,#3a2a0a,#5a4015,#3a2a0a);border:2px solid #ffd700;border-radius:8px;padding:12px;margin:10px 0;text-align:center;box-shadow:0 0 20px rgba(255,215,0,0.3)">
         <div style="color:#ffd700;font-size:15px;font-weight:bold;letter-spacing:2px">🗺️ 山海图卷 · 已开启</div>
-        <div style="color:#ffe080;font-size:11px;margin-top:6px;line-height:1.6">十卷残页合一，山海异兽之谜尽收眼底。<br>你已成为真正的山海猎人，万物有灵，皆为你所知。</div>
-        <div style="color:#daa520;font-size:11px;margin-top:6px">奖励：+5000 积分（已发放）</div>
+        <div style="color:#ffe080;font-size:min(2.5vw,11px);margin-top:6px;line-height:1.6">十卷残页合一，山海异兽之谜尽收眼底。<br>你已成为真正的山海猎人，万物有灵，皆为你所知。</div>
+        <div style="color:#daa520;font-size:min(2.5vw,11px);margin-top:6px">奖励：+5000 积分（已发放）</div>
       </div>`;
     }else{
       const remaining = 10 - pages.length;
       html+=`<div style="background:rgba(13,17,23,0.7);border:1px dashed #daa52055;border-radius:6px;padding:8px;margin:8px 0;text-align:center">
-        <span style="color:#8b949e;font-size:11px">💡 还需 ${remaining} 页残页即可解锁山海图卷</span>
+        <span style="color:#8b949e;font-size:min(2.5vw,11px)">💡 还需 ${remaining} 页残页即可解锁山海图卷</span>
       </div>`;
     }
     // 残页列表（按Boss顺序）
@@ -4844,7 +4844,7 @@ function showPediaMenu(initialTab){
             <div style="color:#3fb950;font-size:18px">✓</div>
           </div>
           <div style="color:#d4c5a0;font-size:12px;line-height:1.9;padding:6px 10px;background:rgba(212,197,160,0.06);border-left:2px solid #d4c5a0;border-radius:0 4px 4px 0;margin-bottom:6px">「${page.original}」</div>
-          <div style="color:#b0a090;font-size:11px;line-height:1.7;padding:4px 10px;border-left:2px solid #8b949e">${page.interpretation}</div>
+          <div style="color:#b0a090;font-size:min(2.5vw,11px);line-height:1.7;padding:4px 10px;border-left:2px solid #8b949e">${page.interpretation}</div>
         </div>`;
       }else{
         html+=`<div style="background:rgba(13,17,23,0.7);border:1px solid #30363d;border-radius:8px;padding:12px 14px;opacity:0.5;font-family:STKaiti,KaiTi,serif">
@@ -4883,7 +4883,7 @@ function showPediaMenu(initialTab){
         <div style="width:80px;height:80px;margin:0 auto;border-radius:50%;overflow:hidden;border:2px solid ${p?b.color:'#30363d'};background:#0d1117">${imgHtml}</div>
         <div style="font-size:13px;font-weight:bold;color:${p?b.color:'#8b949e'};margin-top:6px">${p?b.name:'???'}</div>
         ${p&&petDef?`<div style="font-size:10px;color:#8b949e;margin-top:3px">${petDef.desc}</div>`:''}
-        <div style="font-size:11px;color:#8b949e;margin-top:4px">${p?`击败${p.killCount}次`:''}</div>
+        <div style="font-size:min(2.5vw,11px);color:#8b949e;margin-top:4px">${p?`击败${p.killCount}次`:''}</div>
         ${isSuper?'<div style="font-size:10px;color:#ffd700;margin-top:2px">超级Boss</div>':''}
         ${p?'<div style="font-size:10px;color:#58a6ff;margin-top:3px">'+(isExpanded?'▼ 收起':'📖 查看详情')+'</div>':''}
       </div>`;
@@ -4895,20 +4895,20 @@ function showPediaMenu(initialTab){
             <div style="font-size:22px">${b.icon}</div>
             <div>
               <div style="font-size:16px;font-weight:bold;color:${b.color}">${b.name}</div>
-              <div style="font-size:11px;color:#8b949e">${b.desc}</div>
+              <div style="font-size:min(2.5vw,11px);color:#8b949e">${b.desc}</div>
             </div>
             ${isSuper?'<span style="margin-left:auto;font-size:10px;color:#ffd700;background:rgba(255,215,0,0.15);padding:2px 8px;border-radius:4px;border:1px solid #ffd700">超级Boss</span>':''}
             ${b.isFinalBoss?'<span style="margin-left:auto;font-size:10px;color:#ff4444;background:rgba(255,68,68,0.15);padding:2px 8px;border-radius:4px;border:1px solid #ff4444">最终Boss</span>':''}
           </div>
-          <div style="font-size:11px;color:#8b949e;margin-bottom:8px">📜 <b style="color:#d4c5a0">山海经·背景故事</b></div>
+          <div style="font-size:min(2.5vw,11px);color:#8b949e;margin-bottom:8px">📜 <b style="color:#d4c5a0">山海经·背景故事</b></div>
           <div style="font-size:12px;color:#c9d1d9;line-height:1.8;margin-bottom:12px;padding:8px 12px;background:rgba(212,197,160,0.05);border-left:2px solid #d4c5a0;border-radius:0 4px 4px 0">${lore.story}</div>
-          <div style="font-size:11px;color:#ff6347;margin-bottom:6px">⚔️ <b style="color:#ff6347">弱点提示</b></div>
+          <div style="font-size:min(2.5vw,11px);color:#ff6347;margin-bottom:6px">⚔️ <b style="color:#ff6347">弱点提示</b></div>
           <div style="font-size:12px;color:#ffa0a0;line-height:1.7;margin-bottom:12px;padding:8px 12px;background:rgba(255,99,71,0.08);border-left:2px solid #ff6347;border-radius:0 4px 4px 0">${lore.weakness}</div>
-          <div style="font-size:11px;color:#58a6ff;margin-bottom:6px">✨ <b style="color:#58a6ff">Boss技能</b></div>
+          <div style="font-size:min(2.5vw,11px);color:#58a6ff;margin-bottom:6px">✨ <b style="color:#58a6ff">Boss技能</b></div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
-            ${lore.skills.map((s,si)=>`<span style="font-size:11px;color:#c9d1d9;background:rgba(88,166,255,0.1);border:1px solid rgba(88,166,255,0.3);padding:3px 10px;border-radius:12px">${si+1}. ${s}</span>`).join('')}
+            ${lore.skills.map((s,si)=>`<span style="font-size:min(2.5vw,11px);color:#c9d1d9;background:rgba(88,166,255,0.1);border:1px solid rgba(88,166,255,0.3);padding:3px 10px;border-radius:12px">${si+1}. ${s}</span>`).join('')}
           </div>
-          ${petDef?`<div style="margin-top:10px;padding-top:8px;border-top:1px solid #30363d"><span style="font-size:11px;color:#daa520">🐾 宠物形态：</span><span style="font-size:11px;color:#c9d1d9">${petDef.desc}</span></div>`:''}
+          ${petDef?`<div style="margin-top:6px;padding-top:8px;border-top:1px solid #30363d"><span style="font-size:min(2.5vw,11px);color:#daa520">🐾 宠物形态：</span><span style="font-size:min(2.5vw,11px);color:#c9d1d9">${petDef.desc}</span></div>`:''}
         </div>`;
       }
     }
@@ -4928,8 +4928,8 @@ function showPediaMenu(initialTab){
       html+=`<div style="background:#161b22;border:2px solid ${u?'#ffd700':'#30363d'};border-radius:8px;padding:12px;text-align:center;${u?'':'opacity:0.6'}">
         <div style="font-size:24px">${u?a.icon:'🔒'}</div>
         <div style="font-size:13px;font-weight:bold;color:${u?'#ffd700':'#c9d1d9'}">${a.name}</div>
-        <div style="font-size:11px;color:#8b949e">${a.desc}</div>
-        <div style="font-size:11px;color:#3fb950;margin-top:4px">+${a.reward}积分</div>
+        <div style="font-size:min(2.5vw,11px);color:#8b949e">${a.desc}</div>
+        <div style="font-size:min(2.5vw,11px);color:#3fb950;margin-top:4px">+${a.reward}积分</div>
       </div>`;
     }
     html+=`</div>`;
