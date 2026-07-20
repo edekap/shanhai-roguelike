@@ -2953,8 +2953,7 @@ function showMainMenu(){
   const showcaseIdx=4;
   const showcaseBoss=BOSS_TYPES[showcaseIdx];
   const showcaseImg=BOSS_IMG_PATHS[showcaseIdx];
-  ov.innerHTML=`
-    <div class="bg-runes">
+  ov.innerHTML=`    <div class="bg-runes">
       <span class="bg-rune">龙</span><span class="bg-rune">虎</span><span class="bg-rune">雀</span>
       <span class="bg-rune">武</span><span class="bg-rune">鳞</span><span class="bg-rune">凤</span>
       <span class="bg-rune">龟</span><span class="bg-rune">蛇</span>
@@ -2962,131 +2961,52 @@ function showMainMenu(){
     <div class="sj-layer-sky"></div>
     <div class="sj-layer-mountains">
       <svg viewBox="0 0 1600 600" preserveAspectRatio="none">
-        <!-- 远山 青色 -->
         <path d="M0,600 L0,420 L120,360 L240,400 L380,300 L520,380 L680,280 L820,360 L960,300 L1120,380 L1280,320 L1440,380 L1600,340 L1600,600 Z" fill="rgba(74,155,142,0.35)"/>
-        <!-- 中山 深青 -->
         <path d="M0,600 L0,480 L100,440 L220,470 L360,400 L500,460 L640,390 L780,450 L900,400 L1060,460 L1200,410 L1360,460 L1500,420 L1600,450 L1600,600 Z" fill="rgba(40,80,75,0.5)"/>
-        <!-- 近山 大荒暗褐 -->
         <path d="M0,600 L0,540 L160,500 L320,540 L480,490 L640,530 L800,480 L960,520 L1120,490 L1280,530 L1440,495 L1600,525 L1600,600 Z" fill="rgba(45,32,20,0.65)"/>
       </svg>
     </div>
     <div class="sj-cloud-deco tl">山</div>
     <div class="sj-cloud-deco br">海</div>
-    <div class="sj-main" style="position:relative;z-index:1;width:100%;margin:auto 0;padding:8px 0">
-     <div style="position:absolute;top:8px;left:8px;z-index:10;background:rgba(13,17,23,0.75);border-radius:8px;border:1px solid rgba(255,215,0,0.25);padding:4px 8px;font-size:10px;max-width:150px">
-      <div style="text-align:center;margin:4px 0"><h1 class="title-shimmer" style="animation:titleFloat 3s ease-in-out infinite, shimmer 4s linear infinite;font-size:min(8vw,34px);margin:4px 0;letter-spacing:4px">痛扁山海</h1></div>
-      
-
-      <div class="sj-boss-showcase" id="bossShowcase">
-        <div class="sj-boss-orbit2"></div>
-        <div class="sj-boss-orbit"></div>
-        <div class="sj-avatar-inner">
-          ${showcaseImg?`<img src="${showcaseImg}" alt="${showcaseBoss.name}" onerror="this.style.display='none'">`:`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:70px">${showcaseBoss.icon}</div>`}
+    <div class="sj-main" style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px">
+      <h1 class="title-shimmer" style="animation:titleFloat 3s ease-in-out infinite, shimmer 4s linear infinite;font-size:min(8vw,30px);margin:0;letter-spacing:4px">痛扁山海</h1>
+      <div class="sj-boss-showcase" id="bossShowcase" style="width:90px;height:90px;margin:0 auto">
+        <div class="sj-avatar-inner" style="width:90px;height:90px">
+          ${showcaseImg?`<img src="${showcaseImg}" alt="${showcaseBoss.name}">`:`<div style="font-size:40px">${showcaseBoss.icon}</div>`}
         </div>
-        <div class="sj-corner-seal tl"></div><div class="sj-corner-seal tr"></div>
-        <div class="sj-corner-seal bl"></div><div class="sj-corner-seal br"></div>
-        <div class="sj-boss-label">烛龙 · 镇守</div>
+        <div class="sj-boss-label" style="font-size:9px">烛龙·镇守</div>
       </div>
-
-      <p class="subtitle" style="font-family:'STKaiti','KaiTi',serif;letter-spacing:2px;margin-top:4px;line-height:1.6;font-size:12px">
-        ⚔️ 九大异兽 · 最终Boss<b style="color:#8b0000">刑天</b>
-      </p>
-
-      <div class="sj-scroll-frame" style="padding:6px 12px">
-        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:4px 0">
-          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px;border-color:#ffd700;box-shadow:0 0 10px rgba(255,215,0,0.4)"><span class="pill-icon">🎖️</span><span class="pill-value" style="color:#ffd700">${playerLvl.level}</span><span class="pill-label">等级</span></div>
-          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🪙</span><span class="pill-value">${saveData.totalScore}</span><span class="pill-label">积分</span></div>
-          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints}</span><span class="pill-label">天赋</span></div>
-          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🐉</span><span class="pill-value">${petCount}</span><span class="pill-label">宠物</span></div>
-          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🎽</span><span class="pill-value">${gearCount}</span><span class="pill-label">装备</span></div>
-          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">📖</span><span class="pill-value">${pediaCount}/${BOSS_TYPES.length}</span><span class="pill-label">图鉴</span></div>
-          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🔮</span><span class="pill-value">${artCount}/${SOUL_ARTIFACTS.length}</span><span class="pill-label">魂器</span></div>
-          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🏆</span><span class="pill-value">${achCount}</span><span class="pill-label">成就</span></div>
-        </div>
-        <div style="max-width:460px;margin:4px auto 2px;padding:0 6px">
-          <div style="display:flex;justify-content:space-between;font-size:min(2.5vw,11px);margin-bottom:3px">
-            <span style="color:#ffd700;font-weight:bold;text-shadow:0 0 4px rgba(255,215,0,0.6)">🎖️ 训练等级 Lv.${playerLvl.level}</span>
-            <span style="color:#8b949e">${playerLvl.inLevel}/${playerLvl.needed} XP</span>
-          </div>
-          <div style="height:7px;background:#1a1f2e;border-radius:4px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.6);position:relative">
-            <div style="height:100%;width:${playerLvl.inLevel/playerLvl.needed*100}%;background:linear-gradient(90deg,#ffd700,#ff8c42);transition:width 0.5s;border-radius:4px;box-shadow:0 0 8px rgba(255,215,0,0.6)"></div>
-          </div>
-          <div style="text-align:center;font-size:10px;color:#8b949e;margin-top:2px">距下个天赋点：还差 ${1000-(saveData.totalXp%1000)} XP</div>
-        </div>
+      <button class="action-btn" id="startBtn" style="width:75%;max-width:340px;padding:16px;font-size:20px;letter-spacing:4px;background:linear-gradient(135deg,#ffd700,#ff8c42);border:2px solid #ffd700;box-shadow:0 0 20px rgba(255,215,0,0.4);border-radius:12px;margin:4px 0">⚔️ 开始冒险</button>
+      <div class="diff-pills" style="margin:2px 0">
+        ${Object.entries(DIFFICULTIES).map(([k,d])=>{
+          const unlocked=isDifficultyUnlocked(k); const sel=saveData.difficulty===k;
+          if(unlocked){
+            return '<button class="diff-pill '+(sel?'active':'')+'" data-diff="'+k+'" style="'+(sel?'border-color:'+d.color+';color:'+d.color:'')+'">'+d.icon+' '+d.name+'</button>';
+          }else{
+            return '<button class="diff-pill" style="opacity:0.35;border-color:#555;color:#666;cursor:not-allowed" title="通关前一难度">🔒 '+d.name+'</button>';
+          }
+        }).join("")}
       </div>
-      <div class="menu-section">
-        ${_renderDailyCheckIn()}
-        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-          <div class="sj-boss-showcase" id="bossShowcase" style="width:100px;height:100px;margin:4px auto"><div class="sj-avatar-inner" style="width:100px;height:100px">${showcaseImg?`<img src="${showcaseImg}" alt="${showcaseBoss.name}" onerror="this.style.display=none">`:`<div style="font-size:50px">${showcaseBoss.icon}</div>`}</div><div class="sj-boss-label" style="font-size:10px;bottom:0">烛龙·镇守</div></div>
-      <button class="action-btn" id="startBtn" style="width:100%;max-width:360px;padding:18px;font-size:22px;letter-spacing:4px;background:linear-gradient(135deg,#ffd700,#ff8c42);border:2px solid #ffd700;box-shadow:0 0 24px rgba(255,215,0,0.5);border-radius:12px;margin:8px auto;display:block">⚔️ 开始冒险</button>
-        </div></div>
-        ${(saveData.pendingChests&&saveData.pendingChests.length>0)?`
-        <div style="margin-top:4px;display:flex;justify-content:center">
-          <button class="action-btn" id="chestBtn" style="background:linear-gradient(135deg,#cd7f32,#ffd700);font-size:15px;padding:12px 28px;min-height:44px;border:2px solid #ffd700;box-shadow:0 0 16px rgba(255,215,0,0.5);animation:pulseGlow 1.5s ease-in-out infinite">
-            📦 开箱领奖 <span style="display:inline-block;background:#ff4444;color:#fff;border-radius:10px;padding:1px 8px;font-size:12px;margin-left:6px;box-shadow:0 0 6px rgba(255,68,68,0.8)">${saveData.pendingChests.length}</span>
-          </button>
-        </div>`:''}
-        ${_renderDailyGoals()}
+      <div class="btn-grid" style="max-width:400px;margin:4px 0">
+        <button class="feature-btn fb-gold" id="talentBtn"><div class="fb-icon">🌟</div><div class="fb-name">天赋</div></button>
+        <button class="feature-btn fb-gold" id="bagBtn"><div class="fb-icon">🎒</div><div class="fb-name">背包</div></button>
+        <button class="feature-btn fb-green" id="ranchBtn"><div class="fb-icon">🐔</div><div class="fb-name">牧场</div></button>
+        <button class="feature-btn fb-purple" id="bondBtn"><div class="fb-icon">🔗</div><div class="fb-name">羁绊</div></button>
+        <button class="feature-btn fb-blue" id="pediaBtn"><div class="fb-icon">📖</div><div class="fb-name">图鉴</div></button>
+        ${saveData.hasShanHaiBook?'<button class="feature-btn fb-gold" id="bookBtn" style="background:linear-gradient(135deg,#8b0000,#ffd700);border-color:#ffd700"><div class="fb-icon">📖</div><div class="fb-name" style="color:#ffd970">故事</div></button>':''}
       </div>
-
-      <div class="menu-section" style="margin-top:4px">
-        <div class="btn-grid">
-          <button class="feature-btn fb-gold ${_prog.talent.cur>=_prog.talent.total?'fb-complete':''}" id="talentBtn"><div class="fb-icon">🌟</div><div class="fb-name">天赋</div><div class="fb-tag">${_progressTag(_prog.talent.cur, _prog.talent.total, '强化属性')}</div></button>
-          <button class="feature-btn fb-gold ${_prog.bag.cur>=_prog.bag.total?'fb-complete':''}" id="bagBtn" title="${_prog.bag.subs.map(s=>`${s.name}:${s.cur}/${s.total}`).join(' · ')}"><div class="fb-icon">🎒</div><div class="fb-name">背包</div><div class="fb-tag">${_progressTag(_prog.bag.cur, _prog.bag.total, '装备/武器/宠物')}</div></button>
-          <button class="feature-btn fb-green ${_prog.ranch.cur>=_prog.ranch.total?'fb-complete':''}" id="ranchBtn"><div class="fb-icon">🐔</div><div class="fb-name">牧场</div><div class="fb-tag">${_progressTag(_prog.ranch.cur, _prog.ranch.total, '放养·产蛋')}</div></button>
-          <button class="feature-btn fb-purple ${_prog.bond.cur>=_prog.bond.total?'fb-complete':''}" id="bondBtn"><div class="fb-icon">🔗</div><div class="fb-name">羁绊</div><div class="fb-tag">${_progressTag(_prog.bond.cur, _prog.bond.total, '被动加成')}</div></button>
-          <button class="feature-btn fb-blue ${_prog.pedia.cur>=_prog.pedia.total?'fb-complete':''}" id="pediaBtn" title="${_prog.pedia.subs.map(s=>`${s.name}:${s.cur}/${s.total}`).join(' · ')}"><div class="fb-icon">📖</div><div class="fb-name">图鉴</div><div class="fb-tag">${_progressTag(_prog.pedia.cur, _prog.pedia.total, '成就记录')}</div></button>
-        </div>
-      </div>
-
-      <div class="menu-section" style="margin-top:6px">
-        <div class="diff-pills">
-          ${Object.entries(DIFFICULTIES).map(([k,d])=>{
-            const unlocked=isDifficultyUnlocked(k);
-            const sel=saveData.difficulty===k;
-            if(true){ // show all
-              return `<button class="diff-pill ${sel?'active':''}" data-diff="${k}" style="${sel?`border-color:${d.color};color:${d.color}`:''}">${d.icon} ${d.name}</button>`;
-            }else{
-              return `<button class="diff-pill" data-diff-lock="${k}" style="opacity:0.5;cursor:not-allowed;border-color:#555;color:#888diff-pill" data-diff-lock="${k}" style="opacity:0.5;cursor:not-allowed;border-color:#555;color:#888" title="${getDifficultyUnlockHint(k)}">🔒 ${d.name}</button>`;
-            }
-          }).join('')}
-        </div>
-        ${(!saveData.difficultyCleared||!saveData.difficultyCleared.godslayer)?` `:''}
-        ${saveData.titleGodslayer?`<div style="text-align:center;font-size:min(2.5vw,11px);color:#ffd970;margin-top:4px;letter-spacing:2px;text-shadow:0 0 6px rgba(255,217,112,0.5);font-weight:bold">⚔️ 弑神者 ⚔️</div>`:''}
-      </div>
-
-      <div style="margin:4px 0;text-align:center">
-        <button class="sec-btn" id="bonusBtn" style="${bonusDisabled?'opacity:0.4;cursor:not-allowed':'border-color:#ffd700;color:#ffd700;animation:pulseGlow 2s ease-in-out infinite'}">🎁 新手礼包 +300积分 +1天赋点 (剩${saveData.bonusClicks}次)</button>
-      </div>
-     </div>
-
-     <div class="sj-col-bottom" style="display:none">
-      <div class="controls" style="margin:4px auto 2px">
-      </div>
-      <div class="home-diff-row" style="display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0;flex-wrap:wrap">
-        <span class="subtitle" style="font-size:min(2.5vw,11px);margin:0">难度：${diff.icon} ${diff.name}</span>
-        ${saveData.hasShanHaiBook?'<button id="bookBtn" style="margin:0;padding:4px 10px;font-size:min(2.5vw,11px);background:linear-gradient(135deg,#8b0000,#ffd700);color:#fff;border:1px solid #ffd700;border-radius:6px;cursor:pointer">📖 山海故事</button>':''}
-      </div>
-      <div class="home-author" style="margin:4px 0;font-family:'STKaiti','KaiTi',serif;font-size:min(2.5vw,11px);letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
-
-      <details class="home-guide" style="margin:4px auto 8px;max-width:680px;padding:6px 12px;border:1px solid rgba(212,160,23,0.3);border-radius:8px;background:rgba(22,27,34,0.7);font-size:10px;color:#8b949e;text-align:left;backdrop-filter:blur(8px)">
-        <summary style="cursor:pointer;color:#ffd970;font-size:min(2.5vw,11px);letter-spacing:1px">📖 新手指南（点击展开）</summary>
-        <div style="margin-top:6px;line-height:1.6;font-size:10px">
-          <div style="color:#f0883e">⚡ <b>核心</b>：WASD移动，鼠标瞄准射击。每关30秒（Boss关50秒），时间到自动进下一关。</div>
-          <div style="color:#8b0000">⚔️ <b>最终Boss·刑天</b>：击败超级Boss后50%几率触发，掉落山海故事书与「刑天干戚」。</div>
-          <div style="color:#bc8cff">🌟 <b>天赋</b>：升级获得天赋点，强化伤害/射速/生命等。🎒 <b>背包</b>：管理武器/宠物/装备/打造/抽奖。</div>
-          <div style="color:#a855f7">🔮 <b>魂器</b>：击败超级Boss掉落，释放技能时附带魂器技。</div>
-          <div style="color:#3fb950">🔫 <b>武器</b>：手枪→神臂弓→散弹→狙击→震天锤→连弩→雷神炮→虚空之弓，3阶段满阶。</div>
-          <div style="color:#ffd700">🐉 <b>宠物</b>：抽奖或击败Boss获得，9种Boss宝宝进化3阶段。🎽 <b>装备</b>：5稀有度，3件合成，4神话激活套装。</div>
-          <div style="color:#daa520">🔗 <b>羁绊</b>：收集Boss宝宝激活被动加成。🎰 <b>抽奖</b>：800积分/次。</div>
-          <div style="color:#ff6347">🔥 <b>半血机制</b>：Boss半血触发独有特殊机制。💥 <b>连击</b>：5连击+5%分数/击。</div>
-          <div style="color:#bc8cff">📊 <b>4大难度</b>：普通→困难→地狱→弑神，需通关前一难度Boss试炼解锁。</div>
-        </div>
-      </details>
-      <button class="home-guide-mobile" id="homeGuideMobileBtn" style="margin:4px auto 6px;padding:4px 16px;border:1px solid rgba(212,160,23,0.4);border-radius:6px;background:rgba(22,27,34,0.8);color:#ffd970;font-size:min(2.5vw,11px);letter-spacing:1px;cursor:pointer;">📖 新手指南</button>
-     </div>
+      ${(saveData.pendingChests&&saveData.pendingChests.length>0)?'<button class="action-btn" id="chestBtn" style="background:linear-gradient(135deg,#cd7f32,#ffd700);font-size:13px;padding:8px 18px;border:1.5px solid #ffd700">📦 开箱领奖 ('+saveData.pendingChests.length+')</button>':''}
+      ${saveData.bonusClicks>0?'<button class="sec-btn" id="bonusBtn" style="border-color:#ffd700;color:#ffd700">🎁 新手礼包 +300积分 +1天赋点 (剩'+saveData.bonusClicks+'次)</button>':''}
+      <div class="home-author" style="margin:4px 0;font-size:10px;letter-spacing:2px;color:#d4c5a0;opacity:0.7">✦ Edeka 制作 ✦</div>
     </div>
-  `;
+    <div style="position:absolute;top:8px;left:8px;z-index:10;background:rgba(13,17,23,0.75);border-radius:8px;border:1px solid rgba(255,215,0,0.2);padding:4px 6px;font-size:9px;display:flex;flex-wrap:wrap;gap:3px;max-width:180px">
+      <div class="stat-pill" style="font-size:9px;padding:2px 4px;margin:0;border-color:#ffd700"><span class="pill-icon">🎖️</span><span class="pill-value" style="color:#ffd700">${playerLvl.level}</span></div>
+      <div class="stat-pill" style="font-size:9px;padding:2px 4px;margin:0"><span class="pill-icon">🪙</span><span class="pill-value">${saveData.totalScore}</span></div>
+      <div class="stat-pill" style="font-size:9px;padding:2px 4px;margin:0"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints}</span></div>
+      <div class="stat-pill" style="font-size:9px;padding:2px 4px;margin:0"><span class="pill-icon">🐉</span><span class="pill-value">${petCount}</span></div>
+      <div class="stat-pill" style="font-size:9px;padding:2px 4px;margin:0"><span class="pill-icon">🎽</span><span class="pill-value">${gearCount}</span></div>
+    </div>
+`;
   _bindTap(document.getElementById("startBtn"),showModeSelect);
   
   
