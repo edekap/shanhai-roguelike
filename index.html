@@ -116,9 +116,10 @@
   /* 内容不足视口时居中：用min-height让内容块撑满，再内部居中。此处保留flex-start以支持滚动 */
   #overlay { background:
     linear-gradient(180deg, rgba(13,10,5,0.55) 0%, rgba(20,12,8,0.75) 45%, rgba(13,10,5,0.88) 100%),
-    url('https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Chinese%20ink%20wash%20painting%20shanshui%20Classic%20of%20Mountains%20and%20Seas%20panorama%20three%20layers%20top%20golden%20celestial%20palace%20clouds%20auspicious%20light%20middle%20vast%20great%20wilderness%20barren%20plains%20bottom%20layered%20green%20misty%20mountains%20ancient%20pine%20trees%20distant%20water%20vermillion%20red%20seal%20atmospheric%20ethereal%20mythical%20ancient%20scroll%20high%20detail%20no%20text%20no%20characters&image_size=landscape_16_9') center/cover no-repeat,
-    radial-gradient(ellipse at 30% 20%, rgba(212,160,23,0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 80%, rgba(188,140,255,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 30% 20%, rgba(212,160,23,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(188,140,255,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 30%, rgba(74,155,142,0.10) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 90%, rgba(165,40,56,0.10) 0%, transparent 50%),
     radial-gradient(ellipse at center, rgba(40,45,65,0.95) 0%, rgba(13,17,23,0.98) 100%);
   }
   /* 山海经三层意境：天庭/大荒/青山 - 远景山峦剪影 */
@@ -210,6 +211,11 @@
   #bossPediaBtn::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 1px solid rgba(255,215,0,0.25); animation: bossPediaPulse 2.4s ease-in-out infinite; pointer-events: none; }
   @keyframes bossPediaPulse { 0%,100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.18); opacity: 0; } }
   #bossName { font-size: 17px; color: #ff6b6b; margin-bottom: 5px; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 12px rgba(248,81,73,0.6); }
+  /* 狂暴倒计时徽章：仅显示数字+图标，不挤压血条；触发后改为"🔥狂暴中" */
+  #bossEnrageBadge { display: inline-block; font-size: 12px; color: #ffd970; font-weight: bold; padding: 2px 8px; margin-bottom: 4px; border-radius: 8px; background: rgba(220,20,60,0.25); border: 1px solid rgba(220,20,60,0.6); text-shadow: 0 1px 2px rgba(0,0,0,0.9); letter-spacing: 0.5px; }
+  #bossEnrageBadge.enraged { background: rgba(220,20,60,0.85); color: #fff; animation: bossEnragePulse 0.8s ease-in-out infinite; }
+  @keyframes bossEnragePulse { 0%,100%{ box-shadow: 0 0 8px rgba(220,20,60,0.7); } 50%{ box-shadow: 0 0 16px rgba(255,40,40,1); } }
+  #bossEnrageBadge.hidden { display: none; }
   #bossBarBg { position: relative; width: 320px; height: 14px; background: #1a1f2e; border-radius: 7px; overflow: hidden; border: 1px solid rgba(165,40,56,0.5); box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 12px rgba(165,40,56,0.3); }
   #bossBarFill { height: 100%; background: linear-gradient(90deg, #a52838, #f85149, #ff6b6b); transition: width 0.2s ease; border-radius: 7px; box-shadow: 0 0 14px rgba(248,81,73,0.7), inset 0 1px 0 rgba(255,255,255,0.35); }
   /* 分段血条：33%和66%处的金色分割线，标识Boss的3个阶段 */
@@ -1367,6 +1373,7 @@
   </div>
   <div id="bossHealthBar" class="hidden">
     <div id="bossName">BOSS</div>
+    <div id="bossEnrageBadge" class="hidden"></div>
     <div id="bossBarBg">
       <div id="bossBarFill" style="width:100%"></div>
       <div class="boss-seg-mark" style="left:33.33%"></div>
