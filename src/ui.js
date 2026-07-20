@@ -2973,11 +2973,8 @@ function showMainMenu(){
     <div class="sj-cloud-deco tl">山</div>
     <div class="sj-cloud-deco br">海</div>
     <div class="sj-main" style="position:relative;z-index:1;width:100%;margin:auto 0;padding:8px 0">
-     <div class="sj-col-left" style="position:absolute;top:8px;left:8px;z-index:5;text-align:left;padding:4px 8px;background:rgba(13,17,23,0.7);border-radius:8px;border:1px solid rgba(255,215,0,0.2);max-width:160px">
-      <div class="sj-title-wrap">
-        <h1 class="title-shimmer" style="animation:titleFloat 3s ease-in-out infinite, shimmer 4s linear infinite;">痛扁山海</h1>
-        
-      </div>
+     <div style="position:absolute;top:8px;left:8px;z-index:10;background:rgba(13,17,23,0.75);border-radius:8px;border:1px solid rgba(255,215,0,0.25);padding:4px 8px;font-size:10px;max-width:150px">
+      <div style="text-align:center;margin:4px 0"><h1 class="title-shimmer" style="animation:titleFloat 3s ease-in-out infinite, shimmer 4s linear infinite;font-size:min(8vw,34px);margin:4px 0;letter-spacing:4px">痛扁山海</h1></div>
       
 
       <div class="sj-boss-showcase" id="bossShowcase">
@@ -2997,14 +2994,14 @@ function showMainMenu(){
 
       <div class="sj-scroll-frame" style="padding:6px 12px">
         <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:4px 0">
-          <div class="stat-pill" style="border-color:#ffd700;box-shadow:0 0 10px rgba(255,215,0,0.4)"><span class="pill-icon">🎖️</span><span class="pill-value" style="color:#ffd700">${playerLvl.level}</span><span class="pill-label">等级</span></div>
-          <div class="stat-pill"><span class="pill-icon">🪙</span><span class="pill-value">${saveData.totalScore}</span><span class="pill-label">积分</span></div>
-          <div class="stat-pill"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints}</span><span class="pill-label">天赋</span></div>
-          <div class="stat-pill"><span class="pill-icon">🐉</span><span class="pill-value">${petCount}</span><span class="pill-label">宠物</span></div>
-          <div class="stat-pill"><span class="pill-icon">🎽</span><span class="pill-value">${gearCount}</span><span class="pill-label">装备</span></div>
-          <div class="stat-pill"><span class="pill-icon">📖</span><span class="pill-value">${pediaCount}/${BOSS_TYPES.length}</span><span class="pill-label">图鉴</span></div>
-          <div class="stat-pill"><span class="pill-icon">🔮</span><span class="pill-value">${artCount}/${SOUL_ARTIFACTS.length}</span><span class="pill-label">魂器</span></div>
-          <div class="stat-pill"><span class="pill-icon">🏆</span><span class="pill-value">${achCount}</span><span class="pill-label">成就</span></div>
+          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px" style="border-color:#ffd700;box-shadow:0 0 10px rgba(255,215,0,0.4)"><span class="pill-icon">🎖️</span><span class="pill-value" style="color:#ffd700">${playerLvl.level}</span><span class="pill-label">等级</span></div>
+          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🪙</span><span class="pill-value">${saveData.totalScore}</span><span class="pill-label">积分</span></div>
+          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">⭐</span><span class="pill-value">${saveData.talentPoints}</span><span class="pill-label">天赋</span></div>
+          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🐉</span><span class="pill-value">${petCount}</span><span class="pill-label">宠物</span></div>
+          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🎽</span><span class="pill-value">${gearCount}</span><span class="pill-label">装备</span></div>
+          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">📖</span><span class="pill-value">${pediaCount}/${BOSS_TYPES.length}</span><span class="pill-label">图鉴</span></div>
+          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🔮</span><span class="pill-value">${artCount}/${SOUL_ARTIFACTS.length}</span><span class="pill-label">魂器</span></div>
+          <div class="stat-pill" style="font-size:9px;padding:2px 5px;margin:1px"><span class="pill-icon">🏆</span><span class="pill-value">${achCount}</span><span class="pill-label">成就</span></div>
         </div>
         <div style="max-width:460px;margin:4px auto 2px;padding:0 6px">
           <div style="display:flex;justify-content:space-between;font-size:min(2.5vw,11px);margin-bottom:3px">
@@ -3019,12 +3016,12 @@ function showMainMenu(){
       </div>
      </div>
 
-     <div class="sj-col-right" style="display:flex;flex-direction:column;align-items:center;gap:4px">
+     <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0">
       <div class="menu-section">
         ${_renderDailyCheckIn()}
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-          <button class="action-btn" id="startBtn" style="width:100%;max-width:360px;padding:18px;font-size:22px;letter-spacing:4px;background:linear-gradient(135deg,#ffd700,#ff8c42);border:2px solid #ffd700;box-shadow:0 0 24px rgba(255,215,0,0.5);border-radius:12px;margin:8px auto;display:block">⚔️ 开始冒险</button>
-        </div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:60vh"><button class="action-btn" id="startBtn" style="width:100%;max-width:360px;padding:18px;font-size:22px;letter-spacing:4px;background:linear-gradient(135deg,#ffd700,#ff8c42);border:2px solid #ffd700;box-shadow:0 0 24px rgba(255,215,0,0.5);border-radius:12px;margin:8px auto;display:block">⚔️ 开始冒险</button>
+        </div></div>
         ${(saveData.pendingChests&&saveData.pendingChests.length>0)?`
         <div style="margin-top:4px;display:flex;justify-content:center">
           <button class="action-btn" id="chestBtn" style="background:linear-gradient(135deg,#cd7f32,#ffd700);font-size:15px;padding:12px 28px;min-height:44px;border:2px solid #ffd700;box-shadow:0 0 16px rgba(255,215,0,0.5);animation:pulseGlow 1.5s ease-in-out infinite">

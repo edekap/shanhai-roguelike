@@ -2863,6 +2863,21 @@ class Boss {
     }
     this.updateBeam(dt);
     this.updateTrackingBeams(dt);
+    // 相柳径向毒辐：每0.12秒依次射一道全屏毒束
+    if(this._radialAngles&&this._radialAngles.length>0){
+      this._radialTimer+=dt;
+      const next=this._radialAngles.find(a=>!a.fired);
+      if(next&&this._radialTimer>=0.12){
+        this._radialTimer=0;
+        next.fired=true;
+        for(let d=30;d<800;d+=25){
+          const bx=this.x+Math.cos(next.angle)*d, by=this.y+Math.sin(next.angle)*d;
+          enemyBullets.push(new EnemyBullet(bx,by,next.angle,0,5,'#7cfc00'));
+        }
+        spawnParticles(this.x+Math.cos(next.angle)*400,this.y+Math.sin(next.angle)*400,'#7cfc00',15);
+      }
+      if(this._radialAngles.every(a=>a.fired))this._radialAngles=null;
+    }
     this.attackTimer-=dt; this.specialCooldown-=dt; this.special2Cooldown-=dt; this.special3Cooldown-=dt; this.warningTime-=dt;
     // ===== 狂暴倒计时：60秒后进入狂暴状态 =====
     // 设计目的：避免玩家堆防御慢慢磨血战术无脑化，强迫玩家在限时内输出
@@ -3671,11 +3686,12 @@ class Boss {
         // 少量溅射弹（非弹幕海）
         const _nEvo=(this.characterStage>=2);for(let i=0;i<(_nEvo?5:3);i++){const a=(i/3)*Math.PI*2;enemyBullets.push(new EnemyBullet(p.x,p.y,a,120,7,this.color));}
       }
-    }else if(sp==='radialPoison'||sp==='poisonSpray'){
-      // 相柳毒液喷射：3条扇形光波
-      this._beamActive=true; this._beamData={...data,duration:0.7,timer:0};
-      spawnParticles(this.x,this.y,this.color,35);
-    }else if(sp==='trackingStomp'||sp==='rockBarrage'){
+    }else if(sp==='radialPoison'){
+      // 相柳：12道毒辐从Boss中心依次发出，间隔0.15秒，扫全图
+      this._radialAngles=[]; this._radialTimer=0;
+      for(let i=0;i<12;i++)this._radialAngles.push({angle:(i/12)*Math.PI*2, fired:false});
+      spawnParticles(this.x,this.y,'#7cfc00',40);
+    }else if(sp==='poisonSpray'){this._beamActive=true; this._beamData={...data,duration:0.7,timer:0};spawnParticles(this.x,this.y,this.color,35);}else if(sp==='trackingStomp'||sp==='rockBarrage'){
       // 朱厌巨石弹幕：同时打击所有预警区域
       if(data&&data.positions)for(const p of data.positions){
         spawnParticles(p.x,p.y,'#daa520',30);

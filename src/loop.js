@@ -58,14 +58,6 @@ function gameLoop(timestamp){
 
     // 清屏
     drawBackground(dt);
-    // 相机跟随玩家 (地图480x800，视口同样大小，玩家居中除非碰边)
-    let camX=0, camY=0;
-    if(player&&player.alive&&(gameState==='fighting'||gameState==='boss')){
-      const vw=CONFIG.WIDTH, vh=CONFIG.HEIGHT;
-      camX=clamp(Math.floor(player.x-vw/2), -160, 160);
-      camY=clamp(Math.floor(player.y-vh/2), -200, 200);
-    }
-    ctx.save(); ctx.translate(-camX, -camY);
 
     if(gameState==='fighting'){
       // 关卡倒计时
@@ -266,7 +258,6 @@ function gameLoop(timestamp){
         updateParticles(dt); drawParticles();
       }
     }
-    ctx.restore(); // 恢复相机变换
   }catch(e){
     console.error('gameLoop error:',e);
   }
@@ -486,8 +477,9 @@ document.addEventListener('webkitfullscreenchange', () => {
 // 首次任意触摸/点击自动进入全屏（仅 Android Chrome 等支持 Fullscreen API 的浏览器生效）
 // iOS Safari 不支持 requestFullscreen API，跳过自动全屏调用，由首页提示语引导用户「添加到主屏幕」
 (function(){
-  if(!isTouchDevice) return; // 电脑端不强制
-  if(isInTapTap) return; // TapTap 容器自动全屏，不需要自动进入
+  if(!isTouchDevice) return;
+  if(isInTapTap) return;
+  return; // APK版本不需要全屏
   const _isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || _isiPadOS;
   if(_isiOS) return; // iOS Safari 无 Fullscreen API，跳过避免静默失败
   let _firstGestureDone = false;
