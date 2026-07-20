@@ -523,17 +523,17 @@ const CONFIG = {
   WAVES_PER_LEVEL: 5,
   LEVEL_TIME: 30, BOSS_TIME: 50,
   ENEMY_TYPES: {
-    grunt:     { size: 16, speed: 140, health: 2, score: 6,  xp: 2, color: '#7fb069', shape: 'blob',     tier: 1 },  // 小妖：绿色史莱姆
-    runner:    { size: 13, speed: 260, health: 2, score: 9,  xp: 2, color: '#f97316', shape: 'imp',      tier: 1 },  // 魍魉：橙色小鬼
-    tank:      { size: 24, speed: 90,  health: 6, score: 18, xp: 4, color: '#5c5c5c', shape: 'golem',    tier: 2 },  // 石灵：深灰石头人
-    shooter:   { size: 18, speed: 105, health: 3, score: 15, xp: 3, color: '#7b3ff2', shape: 'shaman',   tier: 2, shoots: true, shootCooldown: 2.2 }, // 巫祝
-    giant:     { size: 32, speed: 70,  health: 12,score: 38, xp: 8, color: '#a52838', shape: 'oni',      tier: 3 },  // 巨灵：红色鬼
-    spiky:     { size: 20, speed: 190, health: 3, score: 14, xp: 3, color: '#ff6b9d', shape: 'spider',   tier: 2 },  // 蝎精
-    invincible:{ size: 19, speed: 125, health: 5, score: 18, xp: 3, color: '#4fc3f7', shape: 'turtle',   tier: 2, invincibleTime: 3 }, // 玄龟
-    taunt:     { size: 28, speed: 65,  health: 16,score: 34, xp: 8, color: '#8a7560', shape: 'troll',    tier: 3, taunt: true },  // 山魈
-    bomber:    { size: 17, speed: 310, health: 2, score: 14, xp: 3, color: '#ff9248', shape: 'firechild',tier: 2, suicidal: true },  // 烈火童
-    splitter:  { size: 38, speed: 60,  health: 30,score: 60, xp: 12,color: '#1a8a5c', shape: 'slime',    tier: 3, splits: 2, splitInto: 'splitterSmall' }, // 裂变巨怪
-    splitterSmall: { size: 22, speed: 115, health: 8, score: 18, xp: 3, color: '#3cb371', shape: 'slime', tier: 2, splits: 2, splitInto: 'grunt' } // 分裂小怪
+    grunt:     { size: 16, speed: 140, health: 2, score: 3,  xp: 2, color: '#7fb069', shape: 'blob',     tier: 1 },
+    runner:    { size: 13, speed: 260, health: 2, score: 5,  xp: 2, color: '#f97316', shape: 'imp',      tier: 1 },
+    tank:      { size: 24, speed: 90,  health: 6, score: 10, xp: 4, color: '#5c5c5c', shape: 'golem',    tier: 2 },
+    shooter:   { size: 18, speed: 105, health: 3, score: 8,  xp: 3, color: '#7b3ff2', shape: 'shaman',   tier: 2, shoots: true, shootCooldown: 2.2 },
+    giant:     { size: 32, speed: 70,  health: 12,score: 20, xp: 8, color: '#a52838', shape: 'oni',      tier: 3 },
+    spiky:     { size: 20, speed: 190, health: 3, score: 7,  xp: 3, color: '#ff6b9d', shape: 'spider',   tier: 2 },
+    invincible:{ size: 19, speed: 125, health: 5, score: 10, xp: 3, color: '#4fc3f7', shape: 'turtle',   tier: 2, invincibleTime: 3 },
+    taunt:     { size: 28, speed: 65,  health: 16,score: 18, xp: 8, color: '#8a7560', shape: 'troll',    tier: 3, taunt: true },
+    bomber:    { size: 17, speed: 310, health: 2, score: 7,  xp: 3, color: '#ff9248', shape: 'firechild',tier: 2, suicidal: true },
+    splitter:  { size: 38, speed: 60,  health: 30,score: 30, xp: 12,color: '#1a8a5c', shape: 'slime',    tier: 3, splits: 2, splitInto: 'splitterSmall' },
+    splitterSmall: { size: 22, speed: 115, health: 8, score: 10, xp: 3, color: '#3cb371', shape: 'slime', tier: 2, splits: 2, splitInto: 'grunt' }
   }
 };
 

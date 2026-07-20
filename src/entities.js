@@ -2182,7 +2182,7 @@ class Enemy {
     this.alive=false;
     // 连击系统：连续击杀获得分数加成
     comboCount++; comboTimer=2.0; if(comboCount>comboMax)comboMax=comboCount;
-    const comboBonus=comboCount>=5?Math.floor(this.score*(1+comboCount*0.05)):this.score;
+    const comboBonus=comboCount>=5?Math.floor(this.score*(1+Math.min(comboCount*0.03,0.5))):this.score;
     score+=comboBonus;
     // 连击里程碑特效爆发：10/30/50时全屏震感+特殊提示
     if(comboCount===10){
@@ -3998,7 +3998,7 @@ class Boss {
     // 根因：die()被多次调用会导致onBossDefeated多次执行，bossTrialIndex多次递增，
     //       bossTrialMode被提前重置为false后走非试炼分支调用proceedToNextLevel()跳关
     if(!this.alive)return;
-    this.alive=false; const bonus=this.isSuper?600:200; score+=bonus*this.level;
+    this.alive=false; const bonus=this.isSuper?300:100; score+=bonus*this.level;
     // 触发Boss死亡戏剧化动画（缩小+变白+光柱+金色碎片），独立于die()后续逻辑
     if(typeof startBossDeathFx==='function')startBossDeathFx(this);
     // 死亡复盘：Boss击杀统计
