@@ -58,6 +58,14 @@ function gameLoop(timestamp){
 
     // 清屏
     drawBackground(dt);
+    // 相机跟随：玩家居中，地图比视口大，碰边才偏移
+    let camX=0, camY=0;
+    if(player&&player.alive&&(gameState==='fighting'||gameState==='boss')){
+      const zoom=1.18;
+      camX=clamp((player.x-CONFIG.WIDTH/2)*zoom, -CONFIG.WIDTH*(zoom-1)/2, CONFIG.WIDTH*(zoom-1)/2);
+      camY=clamp((player.y-CONFIG.HEIGHT/2)*zoom, -CONFIG.HEIGHT*(zoom-1)/2, CONFIG.HEIGHT*(zoom-1)/2);
+      ctx.save(); ctx.scale(zoom,zoom); ctx.translate(-camX, -camY);
+    }
 
     if(gameState==='fighting'){
       // 关卡倒计时
@@ -258,6 +266,7 @@ function gameLoop(timestamp){
         updateParticles(dt); drawParticles();
       }
     }
+    if(player&&player.alive&&(gameState==='fighting'||gameState==='boss'))ctx.restore();
   }catch(e){
     console.error('gameLoop error:',e);
   }
