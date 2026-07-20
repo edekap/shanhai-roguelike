@@ -411,7 +411,7 @@ function showOpeningStory(){
   };
   let html = `<div id="storyOverlay" style="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:12px;transition:background 0.6s">`;
   html += `<div style="max-width:480px;width:100%;height:100%;max-height:100vh;display:flex;flex-direction:column;text-align:center;padding:8px 10px;box-sizing:border-box">`;
-  html += `<div id="storyContent" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden"></div>`;
+  html += `<div id="storyContent" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>`;
   // 翻页按钮
   html += `<div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 0;flex-shrink:0">`;
   html += `<button id="storyPrevBtn" style="padding:6px 12px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:6px;cursor:pointer;font-size:11px;font-family:'STKaiti',KaiTi,serif">◀ 上一页</button>`;
@@ -492,7 +492,7 @@ function showUpdateNotice() {
   html += `<div style="background:linear-gradient(180deg,#1a1408,#2a1f10);border:2px solid #ffd700;border-radius:14px;max-width:520px;width:100%;max-height:90vh;padding:18px 20px;box-shadow:0 0 40px rgba(255,215,0,0.3);font-family:STKaiti,KaiTi,serif;display:flex;flex-direction:column">`;
   html += `<h2 style="color:#ffd700;text-align:center;letter-spacing:3px;margin:0 0 4px">📜 更新公告</h2>`;
   html += `<div style="text-align:center;color:#bc8cff;font-size:12px;margin-bottom:12px">版本 ${LATEST_NOTICE_VERSION} · 山海经·roug</div>`;
-  html += `<div id="noticeContent" style="display:flex;flex-direction:column;gap:8px;flex:1;overflow:hidden"></div>`;
+  html += `<div id="noticeContent" style="display:flex;flex-direction:column;gap:8px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>`;
   // 翻页导航
   html += `<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px">`;
   html += `<button id="noticePrevBtn" class="pg-btn" style="min-width:80px;padding:8px 14px;font-size:13px;border-radius:8px;background:linear-gradient(180deg,#2a3142,#1a1f2e);border:1px solid rgba(212,160,23,0.5);color:#ffd970;cursor:pointer">◀ 上一页</button>`;
