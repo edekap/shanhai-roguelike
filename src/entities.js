@@ -1856,7 +1856,7 @@ class Drop {
     this.size= this.type==='xp'?10:(this.type==='gear'?14:12); this.alive=true;this.lifetime=10;
     this.wobble=rand(0,Math.PI*2);this.bobOffset=0;
     // 经验球被吸引但不会被立即拾取，给玩家主动拾取的体验
-    this.xpPullRange=160; // 经验球吸引范围（小于磁铁范围，避免全屏吸）
+    this.xpPullRange=280; // 经验球吸引范围
   }
   update(dt){
     this.wobble+=dt*3;this.bobOffset=Math.sin(this.wobble)*3;
@@ -1873,7 +1873,7 @@ class Drop {
       if(d<player.size+this.size){ this.pickup(); }
     }else{
       // 其他掉落物：磁铁范围内立即拾取
-      const range=(player?.magnetRange||120);
+      const range=(player?.magnetRange||200);
       if(d<range)this.pickup();
     }
   }
@@ -2836,9 +2836,9 @@ class Boss {
     if(this.halfHealthTriggered&&this.bossIndex===0&&!this.invulnerable){
       this._foxInvulnCD=(this._foxInvulnCD||5)-dt;
       if(this._foxInvulnCD<=0){
-        this._foxInvulnCD=5;
+        this._foxInvulnCD=3;
         this.invulnerable=true;
-        this.invulnerableTimer=1.2;
+        this.invulnerableTimer=1.5;
         spawnParticles(this.x,this.y,'#ff69b4',25);
         pushFloatingText(this.x,this.y-40,'魅影闪避!','#ff69b4',1.5);
       }
@@ -3113,8 +3113,8 @@ class Boss {
     spawnParticles(this.x,this.y,this.color,60);
     if(idx===0){
       // 九尾狐：魅影闪避 — 进入无敌1.2秒，之后每5秒触发一次
-      this.invulnerable=true; this.invulnerableTimer=1.2;
-      this._foxInvulnCD=5;
+      this.invulnerable=true; this.invulnerableTimer=1.5;
+      this._foxInvulnCD=3;
       showWaveAnnounce('半血机制！','九尾狐：魅影闪避！',true);
       pushFloatingText(this.x,this.y-50,'🦊 魅影闪避!','#ff69b4',2);
     }else if(idx===1){
@@ -3216,13 +3216,12 @@ class Boss {
     this.specialCooldown=Math.min(this.specialCooldown,1.5);
     this.special2Cooldown=Math.min(this.special2Cooldown,2.5);
     if(idx===0){
-      // 九尾狐：魅影分身 — 创建2个分身持续10秒，分身射出幻影子弹
-      // 注意：clones属性结构必须与executeSpecialAttack中phantomClone一致（timer/size/color），否则update/draw会失败
+      // 九尾狐：魅影分身 — 创建3个分身持续12秒，分身射出幻影子弹
       this.clones=[];
-      for(let i=0;i<2;i++){
-        const a=(i/2)*Math.PI*2;
+      for(let i=0;i<3;i++){
+        const a=(i/3)*Math.PI*2;
         const cx=this.x+Math.cos(a)*80, cy=this.y+Math.sin(a)*80;
-        this.clones.push({x:cx,y:cy,size:this.size*0.6,timer:10,angle:a,color:i===0?'#ff69b4':'#daa520'});
+        this.clones.push({x:cx,y:cy,size:this.size*0.6,timer:12,angle:a,color:i===0?'#ff69b4':(i===1?'#daa520':'#ff4500')});
       }
       showWaveAnnounce('二阶段！','九尾狐：魅影分身！分身射出幻影子弹',true);
       pushFloatingText(this.x,this.y-50,'✨ 魅影分身!','#ff69b4',2.5);
@@ -3463,10 +3462,10 @@ class Boss {
   executeSpecialAttack(){
     const sp=this.warningType,data=this.warningData; this.warningType=null; this.warningData=null;
     if(sp==='phantomClone'){
-      // 九尾狐幻影分身：创建2个分身同时射击
+      // 九尾狐幻影分身：创建3个分身同时射击
       spawnParticles(this.x,this.y,this.color,35);
       this.clones=[];
-      for(let i=0;i<2;i++){const a=(i/2)*Math.PI*2;this.clones.push({x:this.x+Math.cos(a)*80,y:this.y+Math.sin(a)*80,size:this.size*0.6,timer:6,angle:a,color:this.color});}
+      for(let i=0;i<3;i++){const a=(i/3)*Math.PI*2;this.clones.push({x:this.x+Math.cos(a)*80,y:this.y+Math.sin(a)*80,size:this.size*0.6,timer:6,angle:a,color:this.color});}
       // 分身+本体同时发射弹幕（减少弹数）
       const shooters=[{x:this.x,y:this.y},...this.clones];
       for(const sh of shooters){for(let i=0;i<4;i++){const a=(i/4)*Math.PI*2;enemyBullets.push(new EnemyBullet(sh.x,sh.y,a,170,7,this.color));}}
@@ -4044,8 +4043,10 @@ class Boss {
     this.earthCrackActive=false; this.earthCrackData=null;
     this.wrathClonesActive=false; this.wrathClones=[];
     pushFloatingText(this.x,this.y,`+${bonus*this.level} ${this.isSuper?'超级BOSS!':'BOSS!'}`,'#ffd700',2);
-    drops.push(new Drop(this.x-30,this.y,'health')); drops.push(new Drop(this.x+30,this.y,'shield')); drops.push(new Drop(this.x,this.y+30,'coin')); drops.push(new Drop(this.x,this.y-30,'coin'));
-    if(this.isSuper){drops.push(new Drop(this.x,this.y,'coin'));drops.push(new Drop(this.x-40,this.y-40,'coin'));drops.push(new Drop(this.x+40,this.y-40,'coin'));}
+    drops.push(new Drop(this.x-80,this.y-50,'health')); drops.push(new Drop(this.x+80,this.y-50,'shield'));
+    drops.push(new Drop(this.x-50,this.y+50,'coin')); drops.push(new Drop(this.x+50,this.y+50,'coin'));
+    drops.push(new Drop(this.x,this.y-80,'coin'));
+    if(this.isSuper){drops.push(new Drop(this.x-90,this.y,'coin'));drops.push(new Drop(this.x+90,this.y,'coin'));}
     enemyBullets=[];
     this.clones=[];
     // 变异Boss掉落更好：Boss宝宝概率+30%，装备掉落率+20%

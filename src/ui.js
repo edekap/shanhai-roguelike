@@ -265,6 +265,7 @@ function _initUICache(){
   _ui.bossBarFill=document.getElementById('bossBarFill');
   _ui.timerBar=document.getElementById('timerBar');
   _ui.trialProgress=document.getElementById('trialProgress');
+  _ui._lastHpPct=-1; _ui._lastShieldPct=-1; _ui._lastXpPct=-1; _ui._lastTimerPct=-1; _ui._lastBossHp=-1;
   _ui._initDone=true;
 }
 function updateUI(){
