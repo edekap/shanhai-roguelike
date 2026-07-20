@@ -2910,6 +2910,8 @@ function showMainMenu(){
   // 主菜单BGM（先初始化音频）
   if(typeof initAudio==='function')initAudio();
   if(typeof startBGM==='function')startBGM('menu');
+  // 清理Boss名残留
+  try{ const bn=document.getElementById('bossName'); if(bn)bn.textContent=''; }catch(e){}
   // 清理 #trialProgress（防止从 Boss 战暂停→返回主菜单时残留）
   const _tp=document.getElementById('trialProgress');
   if(_tp){_tp.style.display='none';_tp.textContent='';}

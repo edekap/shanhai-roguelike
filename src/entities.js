@@ -1630,16 +1630,16 @@ class Bullet {
           if(player)this.angle=Math.atan2(player.y-this.y,player.x-this.x);
         }
       }else{
-        // 返回阶段：追踪玩家
+        // 返回阶段：直奔玩家，靠近即回收
         if(player){
           const ta=Math.atan2(player.y-this.y,player.x-this.x);
           let diff=ta-this.angle; while(diff>Math.PI)diff-=Math.PI*2; while(diff<-Math.PI)diff+=Math.PI*2;
-          this.angle+=diff*5*dt; // 较强的追踪
+          this.angle+=diff*8*dt; // 更强追踪确保回收
         }
-        this.x+=Math.cos(this.angle)*this.speed*1.2*dt;
-        this.y+=Math.sin(this.angle)*this.speed*1.2*dt;
-        // 回到玩家附近时消失
-        if(player&&dist(this.x,this.y,player.x,player.y)<player.size+10){
+        this.x+=Math.cos(this.angle)*this.speed*1.3*dt;
+        this.y+=Math.sin(this.angle)*this.speed*1.3*dt;
+        // 回到玩家附近时消失（扩大回收半径）
+        if(player&&dist(this.x,this.y,player.x,player.y)<player.size+30){
           this.alive=false;
           spawnParticles(this.x,this.y,'#ff4500',10);
         }
