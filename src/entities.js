@@ -1743,41 +1743,29 @@ class Bullet {
       ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();
       ctx.shadowBlur=0;
     }else if(this.weaponId==='xingtiangeqi'){
-      // 刑天干戚：旋转的战斧(双刃斧头+红色火焰拖尾) — spin由update()递增，这里只读取
+      // 刑天干戚：半透明小斧不挡视野
       ctx.save();ctx.translate(this.x,this.y);ctx.rotate(this.spin);
-      const s=this.size;
-      // 外层红色火焰光晕
-      ctx.shadowColor='#ff4500'; ctx.shadowBlur=18;
-      ctx.fillStyle='rgba(255,69,0,0.5)';
-      ctx.beginPath();ctx.arc(0,0,s*1.6,0,Math.PI*2);ctx.fill();
-      ctx.shadowBlur=0;
-      // 斧柄：暗灰色长杆
-      ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=3;
+      const s=Math.max(4,this.size*0.7); // 缩小到70%
+      ctx.globalAlpha=0.55;
+      // 斧柄
+      ctx.strokeStyle='#4a3a2a'; ctx.lineWidth=2;
       ctx.beginPath();ctx.moveTo(0,-s*1.2);ctx.lineTo(0,s*1.2);ctx.stroke();
-      // 上斧刃：银白色月牙(带红色镶边)
-      ctx.fillStyle='#e8e8e8'; ctx.strokeStyle='#ff4500'; ctx.lineWidth=1.5;
+      // 斧刃
+      ctx.fillStyle='#d0c8c0'; ctx.strokeStyle='#ff4500'; ctx.lineWidth=1;
       ctx.beginPath();
       ctx.moveTo(0,-s*1.2);
-      ctx.quadraticCurveTo(s*1.3,-s*1.0, s*0.9,-s*0.5);
-      ctx.quadraticCurveTo(s*0.4,-s*0.85, 0,-s*0.6);
+      ctx.quadraticCurveTo(s*1.0,-s*0.8, s*0.7,-s*0.4);
+      ctx.quadraticCurveTo(s*0.3,-s*0.7, 0,-s*0.5);
       ctx.closePath(); ctx.fill(); ctx.stroke();
-      // 下斧刃：对称
       ctx.beginPath();
       ctx.moveTo(0,s*1.2);
-      ctx.quadraticCurveTo(s*1.3,s*1.0, s*0.9,s*0.5);
-      ctx.quadraticCurveTo(s*0.4,s*0.85, 0,s*0.6);
+      ctx.quadraticCurveTo(s*1.0,s*0.8, s*0.7,s*0.4);
+      ctx.quadraticCurveTo(s*0.3,s*0.7, 0,s*0.5);
       ctx.closePath(); ctx.fill(); ctx.stroke();
-      // 中心装饰：血红宝石
-      ctx.fillStyle='#8b0000';
-      ctx.beginPath();ctx.arc(0,0,s*0.3,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#ff4500';
-      ctx.beginPath();ctx.arc(0,0,s*0.15,0,Math.PI*2);ctx.fill();
+      // 中心点
+      ctx.fillStyle='#8b0000';ctx.beginPath();ctx.arc(0,0,s*0.2,0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=1;
       ctx.restore();
-      // 回旋阶段标记：返回时拖尾更激烈
-      if(this.boomerangPhase===1){
-        ctx.fillStyle='rgba(255,69,0,0.3)';
-        ctx.beginPath();ctx.arc(this.x,this.y,s*2.0,0,Math.PI*2);ctx.fill();
-      }
     }else{
       // 默认：圆形子弹
       ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();
@@ -3514,25 +3502,22 @@ class Boss {
         });
       }
     }else if(sp==='lavaFist'){
-      // 烛龙熔岩巨拳：连续追击玩家（有预警，可躲避）
-      this.fistTimer=4;
-      const fistInterval=0.7;
+      // 烛龙熔岩巨拳：连续追击玩家（预警延长，间隔加大）
+      this.fistTimer=3;
+      const fistInterval=1.3;
       const doFist=()=>{
         if(!this.alive||this.fistTimer<=0||gameState!=='boss')return;
         if(player){
-          // 记录拳头落点（玩家当前位置），延迟0.5s后判定伤害，给玩家躲避机会
           const fx=player.x,fy=player.y;
-          // 预警标记（0.5秒预警，更明显）
-          bossWarnings.push({boss:this,x:fx,y:fy,radius:90,timer:0.5,maxTimer:0.5,color:'rgba(255,102,0'});
+          // 预警标记（1秒预警，给足反应时间）
+          bossWarnings.push({boss:this,x:fx,y:fy,radius:90,timer:1.0,maxTimer:1.0,color:'rgba(255,102,0'});
           gameTimeout(()=>{
             if(!this.alive||gameState!=='boss')return;
             spawnParticles(fx,fy,this.color,50);
-            // 落地爆炸效果
             fireEffects.push({x:fx,y:fy,radius:90,damage:0,life:1.0,maxLife:1.0,burnDmg:0,tick:0,chain:0,hammerBlast:true});
-            // 判定时用玩家当前位置与落点比较，玩家移开则免伤
             if(player&&player.alive&&dist(fx,fy,player.x,player.y)<90)applyDirectDamage(player,3,'💥爆炸!','#ff4500');
             for(let i=0;i<4;i++){const a=(i/4)*Math.PI*2;enemyBullets.push(new EnemyBullet(fx,fy,a,180,9,this.color));}
-          },500);
+          },1000);
         }
         this.fistTimer-=fistInterval;
         if(this.fistTimer>0)gameTimeout(doFist,fistInterval*1000);
