@@ -80,7 +80,7 @@ function gameLoop(timestamp){
       // 敌人生成
       if(enemiesToSpawn>0){
         spawnTimer-=dt;
-        if(spawnTimer<=0){spawnWaveEnemy(); enemiesToSpawn--; const diff=getDifficulty(); const baseInterval=Math.max(0.25,1.2-currentWave*0.05-currentLevel*0.03); spawnTimer=baseInterval*(diff.spawnIntervalMul||1);}
+        if(spawnTimer<=0){spawnWaveEnemy(); enemiesToSpawn--; const diff=getDifficulty(); const baseInterval=Math.max(0.15,0.6-currentWave*0.06-currentLevel*0.04); spawnTimer=baseInterval*(diff.spawnIntervalMul||1);}
       }
       // 更新
       syncTouchToKeys(); updateTouchAim(); updateSkillBtnCD();

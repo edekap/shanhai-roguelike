@@ -57,18 +57,11 @@ function _confirmDialog(message, onYes, onNo, opts){
   const noBtn = document.getElementById('_confirmNo');
   const cleanup = ()=>{
     _hideGearModal();
-    yesBtn.removeEventListener('click', yesHandler);
-    noBtn.removeEventListener('click', noHandler);
   };
   const yesHandler = ()=>{ cleanup(); if(onYes)onYes(); };
   const noHandler = ()=>{ cleanup(); if(onNo)onNo(); };
-  yesBtn.addEventListener('click', yesHandler);
-  noBtn.addEventListener('click', noHandler);
-  // 触屏防双触发
-  if(typeof _bindTap==='function'){
-    _bindTap(yesBtn, ()=>{});
-    _bindTap(noBtn, ()=>{});
-  }
+  _bindTap(yesBtn, yesHandler);
+  _bindTap(noBtn, noHandler);
   return modal;
 }
 // ==================== 战斗中Boss图鉴快捷按钮 ====================

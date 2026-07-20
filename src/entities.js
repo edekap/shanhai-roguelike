@@ -541,11 +541,11 @@ function drawParticles(){
 // ==================== 浮动文字 ====================
 const MAX_FLOATING_TEXTS=12;
 const MAX_PARTICLES=250;      // 粒子上限（防止卡顿）
-const MAX_BULLETS=300;        // 玩家子弹上限
-const MAX_ENEMY_BULLETS=150;  // 敌方子弹上限
+const MAX_BULLETS=400;        // 玩家子弹上限
+const MAX_ENEMY_BULLETS=250;  // 敌方子弹上限
 const MAX_FIRE_EFFECTS=80;    // 火焰/范围特效上限（虚空裂缝需要较大配额）
 const MAX_DROPS=120;           // 掉落物上限（防止堆积卡顿，不再自动消失）
-const MAX_ENEMIES=80;         // 敌人上限（防止弑神难度敌人堆积卡顿）
+const MAX_ENEMIES=120;         // 敌人上限（防止弑神难度敌人堆积卡顿）
 // 移动端性能优化：触摸设备降低粒子上限
 const MAX_PARTICLES_EFFECTIVE = IS_TOUCH_DEVICE ? 150 : 250;
 function pushFloatingText(x,y,text,color,life=1,size,type='normal'){
