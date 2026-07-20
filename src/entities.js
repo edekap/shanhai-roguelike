@@ -3288,16 +3288,20 @@ class Boss {
       showWaveAnnounce('二阶段！','朱厌：巨猿践踏！远离Boss！',true);
       pushFloatingText(this.x,this.y-50,'🦍 巨猿践踏!','#8b6c5c',2.5);
     }else if(idx===4){
-      // 烛龙：光暗寂灭 — 5秒内随机落雷+全屏熔岩
-      // 注意：lightningStrikes属性必须使用life/dmg（与updateLightningStrikes一致），并加isBossLightning标记对玩家造成伤害
+      // 烛龙：光暗寂灭 — 5秒内随机落雷+全屏熔岩（先预警后落雷）
+      const zlSpots=[];
       for(let i=0;i<10;i++){
+        const fx=rand(100,CONFIG.WIDTH-100), fy=rand(100,CONFIG.HEIGHT-150);
+        zlSpots.push({x:fx,y:fy});
+        bossWarnings.push({type:'meteor',data:{positions:[{x:fx,y:fy,radius:70}]},time:0.7,maxTime:0.7,boss:this,color:'rgba(255,99,71'});
+      }
+      for(let i=0;i<zlSpots.length;i++){
+        const spot=zlSpots[i];
         gameTimeout(()=>{
-          if(!this.alive||gameState!=='boss')return; // 暂停期间推迟，跨局丢弃
-          const fx=rand(100,CONFIG.WIDTH-100), fy=rand(100,CONFIG.HEIGHT-150);
-          lightningStrikes.push({x:fx,y:fy,life:0.8,maxLife:0.8,dmg:3,radius:70,isBossLightning:true,struck:false});
-          // playerHazard让熔岩池对玩家造成持续伤害
-          fireEffects.push({x:fx,y:fy,radius:80,damage:1.0,life:4,maxLife:4,burnDmg:1.0,tick:0,chain:0,lavaPool:true,playerHazard:true});
-        }, i*500);
+          if(!this.alive||gameState!=='boss')return;
+          lightningStrikes.push({x:spot.x,y:spot.y,life:0.8,maxLife:0.8,dmg:3,radius:70,isBossLightning:true,struck:false});
+          fireEffects.push({x:spot.x,y:spot.y,radius:80,damage:1.0,life:4,maxLife:4,burnDmg:1.0,tick:0,chain:0,lavaPool:true,playerHazard:true});
+        }, 700+i*500);
       }
       showWaveAnnounce('二阶段！','烛龙：光暗寂灭！连续落雷+熔岩',true);
       pushFloatingText(this.x,this.y-50,'🌋 光暗寂灭!','#ff6347',2.5);
@@ -3341,14 +3345,21 @@ class Boss {
       showWaveAnnounce('二阶段！','英招：疾风冲刺！连续向玩家冲刺',true);
       pushFloatingText(this.x,this.y-50,'💨 疾风冲刺!','#58a6ff',2.5);
     }else if(idx===7){
-      // 计蒙：暴雨降临 — 持续8秒全屏随机落雷
-      // 注意：lightningStrikes属性必须使用life/dmg（与updateLightningStrikes一致），并加isBossLightning标记对玩家造成伤害
+      // 计蒙：暴雨降临 — 持续8秒全屏随机落雷（先预警后落雷）
+      const lightningSpots=[];
       for(let i=0;i<12;i++){
+        const fx=rand(100,CONFIG.WIDTH-100), fy=rand(100,CONFIG.HEIGHT-150);
+        lightningSpots.push({x:fx,y:fy});
+        // 推预警圈（0.8秒预警）
+        bossWarnings.push({type:'meteor',data:{positions:[{x:fx,y:fy,radius:80}]},time:0.8,maxTime:0.8,boss:this,color:'rgba(70,130,180'});
+      }
+      // 延迟0.8秒后依次落雷
+      for(let i=0;i<lightningSpots.length;i++){
+        const spot=lightningSpots[i];
         gameTimeout(()=>{
-          if(!this.alive||gameState!=='boss')return; // 暂停期间推迟，跨局丢弃
-          const fx=rand(100,CONFIG.WIDTH-100), fy=rand(100,CONFIG.HEIGHT-150);
-          lightningStrikes.push({x:fx,y:fy,life:0.7,maxLife:0.7,dmg:2.5,radius:80,isBossLightning:true,struck:false});
-        }, i*650);
+          if(!this.alive||gameState!=='boss')return;
+          lightningStrikes.push({x:spot.x,y:spot.y,life:0.7,maxLife:0.7,dmg:2.5,radius:80,isBossLightning:true,struck:false});
+        }, 800+i*650);
       }
       this.invulnerable=true; this.invulnerableTimer=1.5;
       showWaveAnnounce('二阶段！','计蒙：暴雨降临！8秒全屏落雷',true);
