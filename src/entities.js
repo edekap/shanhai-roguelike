@@ -1672,6 +1672,7 @@ class Bullet {
     if(this.weaponId==='hammer')return '#fb923c';
     if(this.weaponId==='shotgun')return '#fbbf24';
     if(this.weaponId==='bow')return '#34d399';
+    if(this.weaponId==='pistol')return '#79c0ff';
     return '#ffd700';
   }
   draw(){
@@ -2087,6 +2088,13 @@ class Enemy {
     // 难度护甲减伤（弑神难度小怪更硬）
     if(this.armor>0)dmg=dmg*(1-this.armor);
     this.health-=dmg; this.hitFlash=0.1; spawnParticles(this.x,this.y,this.color,3);
+    // 击退效果：受击时轻微推开（Boss不受击退）
+    if(player&&!this.taunt&&this.size<28){
+      const ka=Math.atan2(this.y-player.y,this.x-player.x);
+      this.x+=Math.cos(ka)*8; this.y+=Math.sin(ka)*8;
+      this.x=clamp(this.x,this.size,CONFIG.WIDTH-this.size);
+      this.y=clamp(this.y,this.size,CONFIG.HEIGHT-this.size);
+    }
     // 死亡复盘：统计伤害输出（仅子弹造成的）
     if(typeof runStats!=='undefined' && dmg>0)runStats.damageDealt+=dmg;
     // 伤害飘字：暴击红字/穿透紫字/普通白字（元素伤害保留原有元素浮字）

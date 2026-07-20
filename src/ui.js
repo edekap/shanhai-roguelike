@@ -1109,6 +1109,10 @@ function _showAimTipModal(){
     <button id="aimTipCloseBtn" style="width:100%;padding:12px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">✦ 知道了，开始战斗 ✦</button>
   </div>`;
   const modal = _showGearModal(html);
+  // 弹出时自动暂停，防止玩家挨打
+  if(typeof togglePause==='function' && typeof isPaused!=='undefined' && !isPaused && (gameState==='fighting'||gameState==='boss')){
+    togglePause();
+  }
   const closeBtn = document.getElementById('aimTipCloseBtn');
   if(closeBtn){
     _bindTap(closeBtn, ()=>{ _hideGearModal(modal); });

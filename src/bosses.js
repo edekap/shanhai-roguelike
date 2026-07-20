@@ -350,7 +350,7 @@ function spawnWaveEnemy(){
   // 精英化机制：5%概率生成精英怪（紫光特效），HP×2.5、伤害×1.5、移速+20%
   // 击杀掉落保底经验球×3 + 50%概率掉装备，打破"无脑清屏"循环，玩家须优先处理
   // 概率随波次微增：第5波后6%、第8波后7%（高波次增加压力）
-  const _eliteBaseRate = wave>=8 ? 0.07 : (wave>=5 ? 0.06 : 0.05);
+  const _eliteBaseRate = wave>=8 ? 0.18 : (wave>=5 ? 0.15 : 0.12);
   if(Math.random()<_eliteBaseRate){
     e.elite=true;
     e.maxHealth=Math.ceil(e.maxHealth*2.5); e.health=e.maxHealth;
@@ -381,8 +381,8 @@ function checkWaveComplete(){
       // 进入下一波（不触发升级面板）
       currentWave++;
       showWaveAnnounce(`第 ${currentWave} 波`,'准备战斗！');
-      enemies=[];enemyBullets=[];bullets=[];minions=minions.filter(m=>m.permanent&&m.alive);fireEffects=[];lightningStrikes=[];tornadoes=[];
-      // 注意：不清空 drops，让玩家拾取遗留的经验球
+      bullets=[];minions=minions.filter(m=>m.permanent&&m.alive);fireEffects=[];lightningStrikes=[];tornadoes=[];
+      // 不清空 enemies 和 enemyBullets — 没打完的怪继续战斗
       gameState='wavePrepare';
       gameTimeout(()=>{if(gameState!=='wavePrepare')return;startWave();},1500);
     }

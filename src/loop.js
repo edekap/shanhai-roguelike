@@ -71,8 +71,7 @@ function gameLoop(timestamp){
           // 进入下一波
           currentWave++;
           showWaveAnnounce(`第 ${currentWave} 波`,'准备战斗！');
-          enemies=[];enemyBullets=[];bullets=[];minions=minions.filter(m=>m.permanent&&m.alive);fireEffects=[];lightningStrikes=[];tornadoes=[];
-          // 注意：不清空 drops，让玩家拾取遗留的经验球
+          bullets=[];minions=minions.filter(m=>m.permanent&&m.alive);fireEffects=[];lightningStrikes=[];tornadoes=[];
           gameState='wavePrepare';
           gameTimeout(()=>{if(gameState!=='wavePrepare')return;startWave();},1500);
         }
