@@ -1991,7 +1991,7 @@ function gameOver(){
   // 隐藏所有可能打开的overlay，防止死亡界面被遮挡
   ['bossHealthBar','upgradeOverlay','adventureOverlay','bossCaptureOverlay','talentOverlay','charOverlay','weaponOverlay','petOverlay','rouletteOverlay','craftOverlay','gearOverlay','bondOverlay','pediaOverlay','relicOverlay','bagOverlay']
     .forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('hidden');});
-  // 清理Boss状态：防止二阶段setTimeout在死亡界面期间继续执行（如毕方火墙、相柳毒弹等）
+  // 清理Boss状态：防止二阶段setTimeout在死亡界面期间继续执行（如毕方太阳球、相柳毒辐等）
   if(boss)boss.alive=false;
   bossWarnings=[];
   comboCount=0; comboTimer=0; // 重置连击
