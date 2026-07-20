@@ -2912,8 +2912,9 @@ function showMainMenu(){
   if(typeof deathTimeout!=='undefined' && deathTimeout){clearTimeout(deathTimeout); deathTimeout=null;}
   if(typeof deathAnimation!=='undefined')deathAnimation=null;
   if(typeof resetTouchState==='function')resetTouchState();
-  // 主菜单BGM
-  if(typeof startBGM==='function' && typeof bgmMode!=='undefined' && bgmMode!=='menu')startBGM('menu');
+  // 主菜单BGM（先初始化音频）
+  if(typeof initAudio==='function')initAudio();
+  if(typeof startBGM==='function')startBGM('menu');
   // 清理 #trialProgress（防止从 Boss 战暂停→返回主菜单时残留）
   const _tp=document.getElementById('trialProgress');
   if(_tp){_tp.style.display='none';_tp.textContent='';}
