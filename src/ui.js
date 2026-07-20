@@ -2267,7 +2267,7 @@ function shareRunResult(finalScore, wasTrial, recapHtml){
 }
 // 弑神称号解锁弹窗（仅在弑神难度试炼首次通关后显示）
 function showTitleRevealModal(){
-  const html=`<div id="titleRevealOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)">
+  const html=`<div id="titleRevealOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:16px;backdrop-filter:blur(8px);overflow-y:auto;-webkit-overflow-scrolling:touch">
     <div style="background:linear-gradient(180deg,#1a0a2a,#2a1040);border:2px solid #ffd970;border-radius:14px;max-width:480px;width:100%;padding:24px 22px;box-shadow:0 0 50px rgba(255,217,112,0.5);font-family:STKaiti,KaiTi,serif;text-align:center">
       <div style="font-size:48px;margin-bottom:8px">⚔️✨</div>
       <h2 style="color:#ffd970;letter-spacing:4px;margin:0 0 8px;font-size:22px">弑神封印·称号解锁</h2>
@@ -2883,17 +2883,17 @@ function showTutorial(force){
     if(nextBtn) nextBtn.style.display = (currentPage < totalPages - 1) ? 'inline-block' : 'none';
     if(doneBtn) doneBtn.style.display = (currentPage === totalPages - 1) ? 'block' : 'none';
   };
-  let html = `<div id="tutorialOverlay" style="position:fixed;inset:0;z-index:99997;display:flex;align-items:center;justify-content:center;padding:16px;transition:background 0.6s">`;
-  html += `<div style="max-width:480px;width:100%;text-align:center;padding:24px 20px">`;
-  html += `<div style="color:#ffd700;font-size:14px;letter-spacing:6px;margin-bottom:18px;font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ 新手引导 ✦</div>`;
-  html += `<div id="tutorialContent" style="min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start"></div>`;
-  html += `<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:24px">`;
-  html += `<button id="tutorialPrevBtn" style="padding:8px 18px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:13px;font-family:'STKaiti',KaiTi,serif">◀ 上一步</button>`;
-  html += `<span id="tutorialPageInfo" style="color:#ffd970;font-size:12px;min-width:50px"></span>`;
-  html += `<button id="tutorialNextBtn" style="padding:8px 18px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:13px;font-family:'STKaiti',KaiTi,serif">下一步 ▶</button>`;
+  let html = `<div id="tutorialOverlay" style="position:fixed;inset:0;z-index:99997;display:flex;align-items:flex-start;justify-content:center;padding:16px;transition:background 0.6s;overflow-y:auto;-webkit-overflow-scrolling:touch">`;
+  html += `<div style="max-width:480px;width:100%;text-align:center;padding:16px 12px 24px">`;
+  html += `<div style="color:#ffd700;font-size:13px;letter-spacing:4px;margin-bottom:12px;font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ 新手引导 ✦</div>`;
+  html += `<div id="tutorialContent" style="min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start"></div>`;
+  html += `<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px">`;
+  html += `<button id="tutorialPrevBtn" style="padding:8px 14px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:12px;font-family:'STKaiti',KaiTi,serif">◀ 上一步</button>`;
+  html += `<span id="tutorialPageInfo" style="color:#ffd970;font-size:11px;min-width:40px"></span>`;
+  html += `<button id="tutorialNextBtn" style="padding:8px 14px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:12px;font-family:'STKaiti',KaiTi,serif">下一步 ▶</button>`;
   html += `</div>`;
-  html += `<button id="tutorialDoneBtn" style="display:none;margin-top:14px;width:100%;padding:14px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:10px;font-size:16px;font-weight:bold;letter-spacing:3px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;box-shadow:0 0 20px rgba(255,215,0,0.5)">⚔️ 开始游戏</button>`;
-  html += `<button id="tutorialSkipBtn" style="margin-top:10px;padding:6px 16px;background:transparent;color:#8b949e;border:none;font-size:11px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">跳过 ⏭</button>`;
+  html += `<button id="tutorialDoneBtn" style="display:none;margin-top:12px;width:100%;padding:12px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:10px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;box-shadow:0 0 20px rgba(255,215,0,0.5)">⚔️ 开始游戏</button>`;
+  html += `<button id="tutorialSkipBtn" style="margin-top:8px;padding:6px 16px;background:transparent;color:#8b949e;border:none;font-size:11px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">跳过 ⏭</button>`;
   html += `</div></div>`;
   document.body.insertAdjacentHTML('beforeend', html);
   renderPage();
