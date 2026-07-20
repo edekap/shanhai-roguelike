@@ -2703,7 +2703,7 @@ class Boss {
     this.name=this.bossType.name; this.color=this.bossType.color;
     this.size=(isSuper?62:50)+level*6;
     const diff=getDifficulty();
-    let baseHp=(120+level*55)*bossHpMul*diff.bossHpMul;
+    let baseHp=(250+level*80)*bossHpMul*diff.bossHpMul;
     if(isSuper) baseHp*=3; // 超级Boss血量3倍
     this.maxHealth=baseHp; this.health=this.maxHealth;
     this.armor=(diff.enemyArmor||0)*0.5; // Boss护甲为小怪的一半
