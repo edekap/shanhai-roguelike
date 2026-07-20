@@ -1681,16 +1681,18 @@ const ADVENTURE_EVENTS = [
 
 // ==================== 武器打造词条 ====================
 const CRAFT_MODIFIERS = [
-  { id:'dmg',  name:'伤害', icon:'⚔️', rarities:[{r:'common',v:1},{r:'rare',v:2},{r:'epic',v:3}] },
-  { id:'cd',   name:'射速', icon:'⚡', rarities:[{r:'common',v:0.04},{r:'rare',v:0.08},{r:'epic',v:0.12}] },
-  { id:'size', name:'子弹大小', icon:'🔵', rarities:[{r:'common',v:1.5},{r:'rare',v:3},{r:'epic',v:5}] },
-  { id:'crit', name:'暴击率', icon:'💥', rarities:[{r:'common',v:0.04},{r:'rare',v:0.08},{r:'epic',v:0.12}] },
-  { id:'pierce',name:'穿透', icon:'🏹', rarities:[{r:'rare',v:1},{r:'epic',v:1}] },
-  { id:'count',name:'子弹数', icon:'🎯', rarities:[{r:'epic',v:1}] }
+  { id:'dmg',  name:'伤害', icon:'⚔️', rarities:[{r:'common',v:1},{r:'rare',v:2},{r:'epic',v:3},{r:'mythic',v:5}] },
+  { id:'cd',   name:'射速', icon:'⚡', rarities:[{r:'common',v:0.04},{r:'rare',v:0.08},{r:'epic',v:0.12},{r:'mythic',v:0.18}] },
+  { id:'size', name:'子弹大小', icon:'🔵', rarities:[{r:'common',v:1.5},{r:'rare',v:3},{r:'epic',v:5},{r:'mythic',v:8}] },
+  { id:'crit', name:'暴击率', icon:'💥', rarities:[{r:'common',v:0.04},{r:'rare',v:0.08},{r:'epic',v:0.12},{r:'mythic',v:0.18}] },
+  { id:'pierce',name:'穿透', icon:'🏹', rarities:[{r:'rare',v:1},{r:'epic',v:1},{r:'mythic',v:2}] },
+  { id:'count',name:'子弹数', icon:'🎯', rarities:[{r:'epic',v:1},{r:'mythic',v:2}] }
 ];
 function rollCraft(){
   const mod=CRAFT_MODIFIERS[randInt(0,CRAFT_MODIFIERS.length-1)];
-  const rIdx=Math.random()<0.5?0:(Math.random()<0.7?1:2);
+  // 品质：40% common, 30% rare, 25% epic, 5% mythic
+  const roll=Math.random();
+  const rIdx=roll<0.40?0:(roll<0.70?1:(roll<0.95?2:3));
   const r=mod.rarities[Math.min(rIdx,mod.rarities.length-1)];
   return { ...mod, rarity:r.r, value:r.v };
 }
