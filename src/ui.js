@@ -1016,6 +1016,22 @@ function drawWarnings(dt){
 }
 
 // ==================== 游戏状态管理 ====================
+function showModeSelect(){
+  const diff=getDifficulty();
+  const h='<div style="text-align:center;padding:12px;font-family:PingFang SC,Microsoft YaHei,sans-serif">'+
+    '<h2 style="color:#ffd700;letter-spacing:3px;margin-bottom:8px">⚔️ 选择模式</h2>'+
+    '<p style="color:#8b949e;margin-bottom:12px">难度：<span style="color:'+diff.color+'">'+diff.icon+' '+diff.name+'</span></p>'+
+    '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0">'+
+      '<button class="action-btn" id="modeAdventure" style="flex:1;min-width:95px;max-width:140px;font-size:14px;flex-direction:column;gap:4px;padding:14px 8px"><span style="font-size:32px">🗺️</span>冒险模式<span style="font-size:10px;color:#ffd700;display:block">新手推荐</span></button>'+
+      '<button class="action-btn" id="modeTrial" style="flex:1;min-width:95px;max-width:140px;font-size:14px;flex-direction:column;gap:4px;padding:14px 8px;background:linear-gradient(135deg,rgba(240,136,62,0.3),rgba(240,136,62,0.1));border-color:#f0883e"><span style="font-size:32px">🐉</span>Boss试炼<span style="font-size:10px;color:#f0883e;display:block">挑战自我</span></button>'+
+      '<button class="action-btn" id="modeEndless" style="flex:1;min-width:95px;max-width:140px;font-size:14px;flex-direction:column;gap:4px;padding:14px 8px;background:linear-gradient(135deg,rgba(188,140,255,0.3),rgba(188,140,255,0.1));border-color:#bc8cff"><span style="font-size:32px">♾️</span>无尽模式<span style="font-size:10px;color:#bc8cff;display:block">打到爽</span></button>'+
+    '</div></div>';
+  const modal=_showGearModal(h);
+  _bindTap(document.getElementById('modeAdventure'),()=>{_hideGearModal(modal);startGame();});
+  _bindTap(document.getElementById('modeTrial'),()=>{_hideGearModal(modal);startBossTrial();});
+  _bindTap(document.getElementById('modeEndless'),()=>{_hideGearModal(modal);startEndlessMode();});
+}
+
 function startGame(){
   _runToken++; // 跨局竞态防护：丢弃上一局残留的 gameTimeout 回调
   // 清空摇杆/触摸/按键状态：防止玩家手指仍按在摇杆上时死亡/返回主菜单，
@@ -2219,7 +2235,7 @@ function shareRunResult(finalScore, wasTrial, recapHtml){
   // 底部品牌
   ctx.textAlign='center';
   ctx.fillStyle='#d4a017'; ctx.font='28px STKaiti,KaiTi,serif';
-  ctx.fillText('山海经·揍异兽',360,1080);
+  ctx.fillText('痛扁山海',360,1080);
   ctx.fillStyle='#8b949e'; ctx.font='18px STKaiti,KaiTi,serif';
   ctx.fillText('九大异兽·刑天战神·肉鸽冒险',360,1115);
   // 底部装饰
@@ -2959,10 +2975,10 @@ function showMainMenu(){
     <div class="sj-main" style="position:relative;z-index:1;width:100%;margin:auto 0;padding:8px 0">
      <div class="sj-col-left" style="text-align:center">
       <div class="sj-title-wrap">
-        <h1 class="title-shimmer" style="animation:titleFloat 3s ease-in-out infinite, shimmer 4s linear infinite;">山海经·揍异兽</h1>
-        <div class="sj-title-seal">异兽讨伐录</div>
+        <h1 class="title-shimmer" style="animation:titleFloat 3s ease-in-out infinite, shimmer 4s linear infinite;">痛扁山海</h1>
+        
       </div>
-      <div class="deco-line"><span>✦ 天庭 · 大荒 · 青山 ✦</span></div>
+      
 
       <div class="sj-boss-showcase" id="bossShowcase">
         <div class="sj-boss-orbit2"></div>
@@ -3007,9 +3023,7 @@ function showMainMenu(){
       <div class="menu-section">
         ${_renderDailyCheckIn()}
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-          <button class="action-btn" id="startBtn">⚔️ 开始冒险</button>
-          <button class="action-btn trial" id="trialBtn">🐉 Boss试炼</button>
-          <button class="action-btn endless" id="endlessBtn">♾️ 无尽模式 ${saveData.bestEndlessWave>0?`<span style="font-size:12px;opacity:0.9">最佳${saveData.bestEndlessWave}波</span>`:''}</button>
+          <button class="action-btn" id="startBtn" style="width:100%;max-width:360px;padding:18px;font-size:22px;letter-spacing:4px;background:linear-gradient(135deg,#ffd700,#ff8c42);border:2px solid #ffd700;box-shadow:0 0 24px rgba(255,215,0,0.5);border-radius:12px;margin:8px auto;display:block">⚔️ 开始冒险</button>
         </div>
         ${(saveData.pendingChests&&saveData.pendingChests.length>0)?`
         <div style="margin-top:4px;display:flex;justify-content:center">
@@ -3053,20 +3067,11 @@ function showMainMenu(){
 
      <div class="sj-col-bottom" style="text-align:center">
       <div class="controls" style="margin:4px auto 2px">
-        <div class="ctrl-item"><span class="key">WASD</span><span class="desc">移动</span></div>
-        <div class="ctrl-item"><span class="key">鼠标</span><span class="desc">瞄准</span></div>
-        <div class="ctrl-item"><span class="key">左键/空格</span><span class="desc">射击</span></div>
-        <div class="ctrl-item"><span class="key">F</span><span class="desc">技能</span></div>
-        <div class="ctrl-item"><span class="key">R</span><span class="desc">重开</span></div>
-        <div class="ctrl-item"><span class="key">📱摇杆</span><span class="desc">手机端</span></div>
       </div>
       <div class="home-diff-row" style="display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0;flex-wrap:wrap">
         <span class="subtitle" style="font-size:min(2.5vw,11px);margin:0">难度：${diff.icon} ${diff.name}</span>
-        <button id="fullscreenBtn">⛶ 点我全屏</button>
         ${saveData.hasShanHaiBook?'<button id="bookBtn" style="margin:0;padding:4px 10px;font-size:min(2.5vw,11px);background:linear-gradient(135deg,#8b0000,#ffd700);color:#fff;border:1px solid #ffd700;border-radius:6px;cursor:pointer">📖 山海故事</button>':''}
       </div>
-      <button id="homeFullscreenBigBtn">⛶ 点我全屏播放</button>
-      <div id="homeFullscreenTip"></div>
       <div class="home-author" style="margin:4px 0;font-family:'STKaiti','KaiTi',serif;font-size:min(2.5vw,11px);letter-spacing:3px;color:#d4c5a0;opacity:0.85;text-shadow:0 0 8px rgba(255,215,0,0.4)">✦ <span style="color:#ffd970">Edeka</span> 制作 ✦</div>
 
       <details class="home-guide" style="margin:4px auto 8px;max-width:680px;padding:6px 12px;border:1px solid rgba(212,160,23,0.3);border-radius:8px;background:rgba(22,27,34,0.7);font-size:10px;color:#8b949e;text-align:left;backdrop-filter:blur(8px)">
@@ -3087,9 +3092,9 @@ function showMainMenu(){
      </div>
     </div>
   `;
-  _bindTap(document.getElementById('startBtn'),startGame);
-  _bindTap(document.getElementById('trialBtn'),startBossTrial);
-  _bindTap(document.getElementById('endlessBtn'),startEndlessMode);
+  _bindTap(document.getElementById("startBtn"),showModeSelect);
+  
+  
   const _chestBtnEl=document.getElementById('chestBtn');
   if(_chestBtnEl)_bindTap(_chestBtnEl,openChestOverlay);
   _bindDailyGoalButtons();
