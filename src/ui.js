@@ -2004,23 +2004,18 @@ function gameOver(){
   let firstRunBonus=null;
   if(af.totalRuns===1 && !af.firstRunBonusClaimed){
     af.firstRunBonusClaimed=true;
-    saveData.talentPoints=(saveData.talentPoints||0)+5;
-    // 生成1件史诗装备放进背包
+    saveData.talentPoints=(saveData.talentPoints||0)+3;
     let bonusGear=null;
     try{
-      if(typeof generateRandomGear==='function'){
-        bonusGear=generateRandomGear('epic');
-      }else if(typeof generateGear==='function'){
-        bonusGear=generateGear({rarity:'epic'});
-      }
+      if(typeof generateRandomGear==='function'){bonusGear=generateRandomGear('epic');}
+      else if(typeof generateGear==='function'){bonusGear=generateGear({rarity:'epic'});}
     }catch(e){ bonusGear=null; }
     if(bonusGear){
       saveData.gearBag.push(bonusGear);
-      firstRunBonus={talents:5, gear:bonusGear};
+      firstRunBonus={talents:3, gear:bonusGear};
     }else{
-      // 装备生成失败兜底：多送5天赋点
-      saveData.talentPoints=(saveData.talentPoints||0)+5;
-      firstRunBonus={talents:10, gear:null};
+      score+=1000;
+      firstRunBonus={talents:3, score:1000, gear:null};
     }
     saveSave();
   }
@@ -2118,7 +2113,7 @@ function gameOver(){
   // 首局保底奖励提示（紧凑单行）
   const firstBonusHtml = firstRunBonus ? `
     <div style="background:linear-gradient(135deg,rgba(212,160,23,0.2),rgba(165,40,56,0.15));border:1px solid #ffd700;border-radius:4px;padding:4px 8px;margin:3px auto;max-width:520px;font-size:10px;color:#ffd700;animation:cardEnter 0.5s">
-      🎁 新手礼包: +${firstRunBonus.talents}天赋${firstRunBonus.gear?` · +1史诗装备(${firstRunBonus.gear.name||''})`:''}
+      🎁 新手礼包: +${firstRunBonus.talents}天赋${firstRunBonus.gear?` · +1史诗装备(${firstRunBonus.gear.name||''})`:''}${firstRunBonus.score?` · +${firstRunBonus.score}积分`:''}
     </div>` : '';
   // 宝箱获得提示（紧凑单行）
   let chestNoticeHtml = '';
