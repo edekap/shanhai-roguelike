@@ -395,9 +395,9 @@ function showOpeningStory(){
     const contentEl = document.getElementById('storyContent');
     if(contentEl){
       contentEl.innerHTML = `
-        <div style="font-size:48px;margin-bottom:12px;text-shadow:0 0 20px rgba(255,215,0,0.5)">${ch.icon}</div>
-        <h2 style="color:#ffd700;letter-spacing:3px;margin:0 0 18px;font-size:18px;font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 10px rgba(255,215,0,0.4)">${ch.title}</h2>
-        <div style="color:#e0d8c8;font-size:13px;line-height:2;text-align:center;font-family:'STKaiti',KaiTi,serif;letter-spacing:1px">${ch.text}</div>
+        <div style="font-size:36px;margin-bottom:8px;text-shadow:0 0 20px rgba(255,215,0,0.5)">${ch.icon}</div>
+        <h2 style="color:#ffd700;letter-spacing:2px;margin:0 0 12px;font-size:16px;font-family:'STKaiti',KaiTi,serif;text-shadow:0 0 10px rgba(255,215,0,0.4)">${ch.title}</h2>
+        <div style="color:#e0d8c8;font-size:12px;line-height:1.8;text-align:center;font-family:'STKaiti',KaiTi,serif;letter-spacing:1px">${ch.text}</div>
       `;
     }
     const infoEl = document.getElementById('storyPageInfo');
@@ -409,18 +409,18 @@ function showOpeningStory(){
     if(nextBtn) nextBtn.style.display = (currentPage < totalPages - 1) ? 'inline-block' : 'none';
     if(startBtn) startBtn.style.display = (currentPage === totalPages - 1) ? 'block' : 'none';
   };
-  let html = `<div id="storyOverlay" style="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;transition:background 0.6s">`;
-  html += `<div style="max-width:480px;width:100%;text-align:center;padding:24px 20px">`;
-  html += `<div id="storyContent" style="min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center"></div>`;
+  let html = `<div id="storyOverlay" style="position:fixed;inset:0;z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:16px;transition:background 0.6s;overflow-y:auto;-webkit-overflow-scrolling:touch">`;
+  html += `<div style="max-width:480px;width:100%;text-align:center;padding:16px 12px 24px">`;
+  html += `<div id="storyContent" style="min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center"></div>`;
   // 翻页按钮
-  html += `<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:24px">`;
-  html += `<button id="storyPrevBtn" style="padding:8px 18px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:13px;font-family:'STKaiti',KaiTi,serif">◀ 上一页</button>`;
-  html += `<span id="storyPageInfo" style="color:#ffd970;font-size:12px;min-width:50px"></span>`;
-  html += `<button id="storyNextBtn" style="padding:8px 18px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:13px;font-family:'STKaiti',KaiTi,serif">下一页 ▶</button>`;
+  html += `<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px">`;
+  html += `<button id="storyPrevBtn" style="padding:8px 14px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:12px;font-family:'STKaiti',KaiTi,serif">◀ 上一页</button>`;
+  html += `<span id="storyPageInfo" style="color:#ffd970;font-size:11px;min-width:40px"></span>`;
+  html += `<button id="storyNextBtn" style="padding:8px 14px;background:rgba(22,27,34,0.7);color:#ffd970;border:1px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:12px;font-family:'STKaiti',KaiTi,serif">下一页 ▶</button>`;
   html += `</div>`;
   // 开始冒险按钮（最后一页）
-  html += `<button id="storyStartBtn" style="display:none;margin-top:14px;width:100%;padding:14px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:10px;font-size:16px;font-weight:bold;letter-spacing:3px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;box-shadow:0 0 20px rgba(255,215,0,0.5)">⚔️ 开始冒险</button>`;
-  html += `<button id="storySkipBtn" style="margin-top:10px;padding:6px 16px;background:transparent;color:#8b949e;border:none;font-size:11px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">跳过 ⏭</button>`;
+  html += `<button id="storyStartBtn" style="display:none;margin-top:12px;width:100%;padding:12px;background:linear-gradient(135deg,#ffd970,#d4a020);color:#1a1f2e;border:none;border-radius:10px;font-size:15px;font-weight:bold;letter-spacing:2px;cursor:pointer;font-family:'STKaiti',KaiTi,serif;box-shadow:0 0 20px rgba(255,215,0,0.5)">⚔️ 开始冒险</button>`;
+  html += `<button id="storySkipBtn" style="margin-top:8px;padding:6px 16px;background:transparent;color:#8b949e;border:none;font-size:11px;cursor:pointer;font-family:'STKaiti',KaiTi,serif">跳过 ⏭</button>`;
   html += `</div></div>`;
   document.body.insertAdjacentHTML('beforeend', html);
   renderPage();
@@ -488,7 +488,7 @@ function showUpdateNotice() {
     if (closeBtn) closeBtn.style.display = (currentPage >= totalPages) ? 'block' : 'none';
     if (nextBtn) nextBtn.style.display = (currentPage < totalPages) ? 'block' : 'none';
   };
-  let html = `<div id="noticeOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99998;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)">`;
+  let html = `<div id="noticeOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99998;display:flex;align-items:flex-start;justify-content:center;padding:16px;backdrop-filter:blur(6px);overflow-y:auto;-webkit-overflow-scrolling:touch">`;
   html += `<div style="background:linear-gradient(180deg,#1a1408,#2a1f10);border:2px solid #ffd700;border-radius:14px;max-width:520px;width:100%;max-height:90vh;padding:18px 20px;box-shadow:0 0 40px rgba(255,215,0,0.3);font-family:STKaiti,KaiTi,serif;display:flex;flex-direction:column">`;
   html += `<h2 style="color:#ffd700;text-align:center;letter-spacing:3px;margin:0 0 4px">📜 更新公告</h2>`;
   html += `<div style="text-align:center;color:#bc8cff;font-size:12px;margin-bottom:12px">版本 ${LATEST_NOTICE_VERSION} · 山海经·roug</div>`;
