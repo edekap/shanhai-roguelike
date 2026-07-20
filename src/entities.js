@@ -1145,10 +1145,10 @@ class Player {
   useSkill(){
     const c=getCurrentCharacter(); this.skillCooldown=this.maxSkillCooldown;
     if(c.id==='default'){
-      // 弹幕风暴：32发 + 2秒攻速翻倍
+      // 弹幕风暴：32发带追踪 + 2秒攻速翻倍
       for(let i=0;i<32;i++){
         const a=(i/32)*Math.PI*2;
-        bullets.push(new Bullet(this.x+Math.cos(a)*(this.size+4),this.y+Math.sin(a)*(this.size+4),a,{speed:this.bulletSpeed*0.9,damage:this.bulletDamage,size:this.bulletSize,elementEffects:{...this.elementEffects},finalUpgrades:[...this.finalUpgrades],specialEffects:{...this.specialEffects},finalSpecials:[...this.finalSpecials],weaponId:this.weaponId,bulletExplode:this.bulletExplode||0,bulletSplit:this.bulletSplit||0}));
+        bullets.push(new Bullet(this.x+Math.cos(a)*(this.size+4),this.y+Math.sin(a)*(this.size+4),a,{speed:this.bulletSpeed*0.9,damage:this.bulletDamage,size:this.bulletSize,homing:1.5,elementEffects:{...this.elementEffects},finalUpgrades:[...this.finalUpgrades],specialEffects:{...this.specialEffects},finalSpecials:[...this.finalSpecials],weaponId:this.weaponId,bulletExplode:this.bulletExplode||0,bulletSplit:this.bulletSplit||0}));
       }
       this.fireCooldown*=0.5; this._skillAtkBoost=2; this._skillAtkBoostTime=2;
       spawnParticles(this.x,this.y,'#58a6ff',40);
@@ -1167,9 +1167,9 @@ class Player {
       spawnParticles(this.x,this.y,'#3fb950',35);
       pushFloatingText(this.x,this.y-30,'符箓阵!','#3fb950',1.5);
     }else if(c.id==='monk'){
-      // 武僧：6秒无敌+回满血
+      // 武僧：6秒无敌+回一半血
       this.invincible=6;
-      this.health=this.maxHealth;
+      this.health=Math.min(this.maxHealth,Math.ceil(this.maxHealth*0.5));
       spawnParticles(this.x,this.y,'#f0883e',50);
       pushFloatingText(this.x,this.y-30,'金刚护体!','#f0883e',1.5);
     }else if(c.id==='shaman'){

@@ -2907,13 +2907,13 @@ function showTutorial(force){
   _bindTap(document.getElementById('tutorialSkipBtn'), closeFn);
 }
 function showMainMenu(){
-  if(typeof _clearGameState==='function')_clearGameState(); // 清理 Android 后退键历史记录
-  _runToken++; // 丢弃本局残留的 gameTimeout 回调，防止覆盖主菜单
-  // 清理死亡动画定时器（兜底：showMainMenu 可被多路径调用）
+  if(typeof _clearGameState==='function')_clearGameState();
+  _runToken++;
   if(typeof deathTimeout!=='undefined' && deathTimeout){clearTimeout(deathTimeout); deathTimeout=null;}
   if(typeof deathAnimation!=='undefined')deathAnimation=null;
-  // 清空摇杆/触摸状态（防御性：showMainMenu 可从多路径调用，确保不留残留）
   if(typeof resetTouchState==='function')resetTouchState();
+  // 主菜单BGM
+  if(typeof startBGM==='function' && typeof bgmMode!=='undefined' && bgmMode!=='menu')startBGM('menu');
   // 清理 #trialProgress（防止从 Boss 战暂停→返回主菜单时残留）
   const _tp=document.getElementById('trialProgress');
   if(_tp){_tp.style.display='none';_tp.textContent='';}
