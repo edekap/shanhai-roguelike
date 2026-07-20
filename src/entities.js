@@ -2652,8 +2652,8 @@ const BOSS_LORE = {
   },
   1: { // 毕方
     story:'章峨之山，有鸟焉，其状如鹤，一足，赤文青身而白喙，名曰毕方。其鸣自叫也，见则其邑有讹火。毕方所过之处，烈火燎原。',
-    weakness:'⚠️ 弱点：俯冲攻击有明显前摇，侧向闪避可躲。火雨范围固定，提前站位即可。',
-    skills:['火焰羽毛','火雨轰炸','俯冲轰炸']
+    weakness:"⚠️ 弱点：太阳球在屏幕边缘反弹，注意观察轨迹避免被夹击",
+    skills:["火焰羽毛","火雨轰炸","烈焰太阳球"]
   },
   2: { // 相柳
     story:'共工之臣曰相柳氏，九首，以食于九山。相柳之所抵，厥为泽溪。禹杀相柳，其血腥，不可以树五谷种。其地多水，不可以居。',
@@ -3247,7 +3247,7 @@ class Boss {
       showWaveAnnounce('二阶段！','九尾狐：魅影分身！分身射出幻影子弹',true);
       pushFloatingText(this.x,this.y-50,'✨ 魅影分身!','#ff69b4',2.5);
     }else if(idx===1){
-      // 毕方：浴火重生 — 短暂无敌+恢复15%血量+释放环形火墙
+      // 毕方：浴火重生 — 短暂无敌+恢复15%血量+召唤烈焰太阳球
       this.invulnerable=true; this.invulnerableTimer=2.0;
       const heal=Math.floor(this.maxHealth*0.15);
       this.health=Math.min(this.maxHealth,this.health+heal);
@@ -3261,7 +3261,7 @@ class Boss {
         }
         spawnParticles(this.x,this.y,'#ff4500',80);
       },2000);
-      showWaveAnnounce('二阶段！',`毕方：浴火重生！恢复${heal}血+火墙`,true);
+      showWaveAnnounce('二阶段！',`毕方：浴火重生！恢复${heal}血+太阳球`,true);
       pushFloatingText(this.x,this.y-50,'🔥 浴火重生! +'+heal,'#ff4500',2.5);
     }else if(idx===2){
       // 相柳：九首齐发 — 9个方向同时射出毒弹幕

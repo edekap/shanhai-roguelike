@@ -1403,7 +1403,7 @@ function generateDeathTip(){
     tips.push('💖 九尾狐的魅惑可被「魅狐九尾环」反向利用，凑齐4件神话装备激活圆弧护盾');
   }
   if(/毕方|烈焰|火墙/.test(dc)){
-    tips.push('🔥 毕方二阶段会铺满火墙，装备「凤羽炎冠」+移速符文可走位规避');
+    tips.push('🔥 毕方二阶段召唤反弹太阳球，注意观察弹道躲避');
   }
   if(/相柳|毒|沼/.test(dc)){
     tips.push('☠️ 相柳毒伤持续掉血，「九蛇毒行靴」可反毒制敌，多带回复类强化');
@@ -3049,14 +3049,14 @@ function showMainMenu(){
           ${Object.entries(DIFFICULTIES).map(([k,d])=>{
             const unlocked=isDifficultyUnlocked(k);
             const sel=saveData.difficulty===k;
-            if(unlocked){
+            if(true){
               return `<button class="diff-pill ${sel?'active':''}" data-diff="${k}" style="${sel?`border-color:${d.color};color:${d.color}`:''}">${d.icon} ${d.name}</button>`;
             }else{
               return `<button class="diff-pill" data-diff-lock="${k}" style="opacity:0.5;cursor:not-allowed;border-color:#555;color:#888" title="${getDifficultyUnlockHint(k)}">🔒 ${d.name}</button>`;
             }
           }).join('')}
         </div>
-        ${(!saveData.difficultyCleared||!saveData.difficultyCleared.godslayer)?`<div style="text-align:center;font-size:10px;color:#bc8cff;margin-top:4px;letter-spacing:1px">⚔️ 通关弑神难度Boss试炼解锁特殊称号！</div>`:''}
+        ${(!saveData.difficultyCleared||!saveData.difficultyCleared.godslayer)?` `:''}
         ${saveData.titleGodslayer?`<div style="text-align:center;font-size:min(2.5vw,11px);color:#ffd970;margin-top:4px;letter-spacing:2px;text-shadow:0 0 6px rgba(255,217,112,0.5);font-weight:bold">⚔️ 弑神者 ⚔️</div>`:''}
       </div>
 

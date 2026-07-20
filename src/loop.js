@@ -58,6 +58,14 @@ function gameLoop(timestamp){
 
     // 清屏
     drawBackground(dt);
+    // 相机跟随玩家 (地图480x800，视口同样大小，玩家居中除非碰边)
+    let camX=0, camY=0;
+    if(player&&player.alive&&(gameState==='fighting'||gameState==='boss')){
+      const vw=CONFIG.WIDTH, vh=CONFIG.HEIGHT;
+      camX=clamp(Math.floor(player.x-vw/2), -160, 160);
+      camY=clamp(Math.floor(player.y-vh/2), -200, 200);
+    }
+    ctx.save(); ctx.translate(-camX, -camY);
 
     if(gameState==='fighting'){
       // 关卡倒计时
@@ -367,7 +375,7 @@ function isFullscreenNow(){
   return !!(document.fullscreenElement || document.webkitFullscreenElement);
 }
 
-function enterFullscreen(){
+function enterFullscreen(){ return; /* APK不需要 */
   // TapTap 试玩版容器自动全屏，调用 requestFullscreen 会失败或导致容器异常
   if(isInTapTap) return false;
   const el = document.documentElement;

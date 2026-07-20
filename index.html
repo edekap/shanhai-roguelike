@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d1117">
-<title>我在山海经揍异兽</title>
+<title>痛扁山海</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { touch-action: manipulation; overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -197,7 +197,7 @@
   .upgrade-tier { font-size: 11px; color: #f0a838; margin-top: 4px; font-weight: 600; }
   .upgrade-rarity { font-size: 11px; margin-top: 8px; padding: 3px 12px; border-radius: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); }
   .upgrade-rarity.common { background: rgba(74,85,104,0.5); color: #b0a090; border-color: rgba(74,85,104,0.6); } .upgrade-rarity.rare { background: rgba(88,166,255,0.3); color: #79c0ff; border-color: rgba(88,166,255,0.6); } .upgrade-rarity.epic { background: rgba(188,140,255,0.3); color: #d8b4fe; border-color: rgba(188,140,255,0.6); } .upgrade-rarity.legendary { background: rgba(255,215,0,0.32); color: #ffd700; border-color: rgba(255,215,0,0.7); text-shadow: 0 0 6px rgba(255,215,0,0.6); }
-  #bossHealthBar { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 10; display: block; text-align: center; }
+  #bossHealthBar { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 25; display: block; text-align: center; }
   /* Boss 战时：精简中间 panel（只保留计时器），Boss 血条下移避免重叠 */
   body.boss-active .ui-panel-center > *:not(.timer-bar):not(#timerText):not(#trialProgress) { display: none !important; }
   body.boss-active .ui-panel-center { padding: 0; }
