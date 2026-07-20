@@ -345,8 +345,9 @@ const ATTACK_FRAME_MAP = {
   // 主帧 _a：撕咬/砸地/吐息/扑击/俯冲等核心攻击动作
   charmBullet:'a', fireFeather:'a', fireRain:'a', diveBomb:'a',
   poisonNine:'a', groundShock:'a', lavaPool:'a', lightBeam:'a',
-  devourAtk:'a', tornadoSpin:'a', airDash:'a',
+  devourAtk:'a', tornadoSpin:'a', airDash:'a', dashPause:'a', sunBall:'a2',
   waterJet:'a', rainStorm:'a', chaosBolt:'a', earthCrack:'a',
+  radialPoison:'a2', constrictVines:'a2', trackingStomp:'a2',
   // 副帧 _a2：横扫/光晕/喷毒/抬手/引力/风刃/虚空等特殊动作
   phantomClone:'a2', charmBeam:'a2',
   poisonSwamp:'a2', poisonSpray:'a2',
@@ -903,6 +904,8 @@ class Player {
     this.maxSkillCooldown=c.skillCooldown; this.characterId=c.id;
     if(c.applyPassive)c.applyPassive(this);
     this.critChance+=this.baseCritChance;
+    // 宠物被动加成：已部署的宠物提供属性加成
+    if(typeof applyPetPassives==='function')applyPetPassives(this);
   }
   applyWeaponStats(){
     const ws=getWeaponStats(saveData.currentWeapon);
@@ -2613,17 +2616,17 @@ class Enemy {
 const BOSS_TYPES = [
   { idx:0, name:'九尾狐', color:'#ff69b4', isSuper:false, attack:'charmBullet',  special:'phantomClone', special2:'charmBeam',    special3:'trackingBeam', icon:'🦊', shape:'fox',
     desc:'魅惑与幻影大师，以分身和光波迷惑敌人' },
-  { idx:1, name:'毕方',   color:'#ff4500', isSuper:false, attack:'fireFeather',  special:'fireRain',     special2:'diveBomb',      special3:'trackingBeam', icon:'🐦', shape:'bird',
-    desc:'天降烈火，以多区域轰炸和俯冲攻击著称' },
-  { idx:2, name:'相柳',   color:'#7cfc00', isSuper:false, attack:'poisonNine',   special:'poisonSwamp',  special2:'poisonSpray',   special3:'trackingBeam', icon:'🐍', shape:'snake',
-    desc:'九头毒物，喷射毒液光波与蔓延毒沼' },
-  { idx:3, name:'朱厌',   color:'#daa520', isSuper:false, attack:'rockThrow',    special:'groundShock',  special2:'rockBarrage',   special3:'trackingBeam', icon:'🦍', shape:'ape',
-    desc:'巨猿之力，震地冲击与巨石弹幕齐发' },
+  { idx:1, name:'毕方',   color:'#ff4500', isSuper:false, attack:'fireFeather',  special:'sunBall',      special2:'fireRain',      special3:'trackingBeam', icon:'🐦', shape:'bird',
+    desc:'天降烈火，巨型烈焰球体弹射全图' },
+  { idx:2, name:'相柳',   color:'#7cfc00', isSuper:false, attack:'poisonNine',   special:'constrictVines',special2:'radialPoison',  special3:'trackingBeam', icon:'🐍', shape:'snake',
+    desc:'九头毒物，全图环绕毒辐与缠绕攻击' },
+  { idx:3, name:'朱厌',   color:'#daa520', isSuper:false, attack:'rockThrow',    special:'groundShock',  special2:'trackingStomp', special3:'trackingBeam', icon:'🦍', shape:'ape',
+    desc:'巨猿之力，连续践踏追踪玩家' },
   { idx:4, name:'烛龙',   color:'#ff6347', isSuper:true,  attack:'lavaPool',     special:'lavaFist',     special2:'lightBeam',     special3:'trackingBeam', icon:'🐉', shape:'dragon',
     desc:'熔岩与光束之龙，释放贯穿屏幕的光波' },
   { idx:5, name:'饕餮',   color:'#4b0082', isSuper:true,  attack:'devourAtk',    special:'bulletAbsorb', special2:'gravityWell',   special3:'trackingBeam', icon:'👹', shape:'beast',
     desc:'吞噬万物，以引力井吸引并碾碎敌人' },
-  { idx:6, name:'英招',   color:'#20b2aa', isSuper:false, attack:'windBlade',    special:'tornadoSpin',  special2:'airDash',       special3:'trackingBeam', icon:'🦅', shape:'bird',
+  { idx:6, name:'英招',   color:'#20b2aa', isSuper:false, attack:'windBlade',    special:'tornadoSpin',  special2:'dashPause',       special3:'trackingBeam', icon:'🦅', shape:'bird',
     desc:'人面马身，驾驭风暴与龙卷的飞行神兽' },
   { idx:7, name:'计蒙',   color:'#4682b4', isSuper:false, attack:'waterJet',     special:'rainStorm',    special2:'floodWave',     special3:'trackingBeam', icon:'🐲', shape:'dragon',
     desc:'龙首人身，呼风唤雨召唤洪水与暴雨' },
@@ -3146,10 +3149,13 @@ class Boss {
         const fx=this.x+Math.cos(a)*120, fy=this.y+Math.sin(a)*120;
         // playerHazard让玩家踩入毒雾受到持续伤害
         fireEffects.push({x:fx,y:fy,radius:55,damage:0.6,life:5,maxLife:5,burnDmg:0.6,tick:0,chain:0,playerHazard:true});
-        spawnParticles(fx,fy,'#7cfc00',10);
       }
-      showWaveAnnounce('半血机制！','相柳：毒雾护体！',true);
-      pushFloatingText(this.x,this.y-50,'☠ 毒雾护体!','#7cfc00',2);
+      // 相柳半血：缠绕攻击 — 以玩家为中心生成持续毒藤区域
+      const cx=player?player.x:CONFIG.WIDTH/2, cy=player?player.y:CONFIG.HEIGHT/2;
+      fireEffects.push({x:cx,y:cy,radius:110,damage:1.5,life:5,maxLife:5,burnDmg:1.0,tick:0,chain:0,playerHazard:true,vineConstrict:true});
+      pushFloatingText(cx,cy-50,'🌿 毒藤缠绕!','#7cfc00',2);
+      for(let i=0;i<12;i++){const a=i*Math.PI/6;spawnParticles(cx+Math.cos(a)*80,cy+Math.sin(a)*80,'#7cfc00',8);}
+      showWaveAnnounce('半血机制！','相柳：毒藤缠绕！持续伤害',true);
     }else if(idx===3){
       // 朱厌：石头护盾 — 获得护盾吸收伤害
       this.stoneShield=true;
@@ -3606,17 +3612,17 @@ class Boss {
       // 九尾狐魅惑光波：水平/垂直交替
       this._charmBeamH=!this._charmBeamH;
       this.warningData=this._charmBeamH?{beamType:'horizontal',y:this.y}:{beamType:'vertical',x:this.x};
-    }else if(sp==='diveBomb'){
+    }else if(sp==='sunBall'||sp==='diveBomb'){
       // 毕方俯冲轰炸：多个区域预警后同时打击
       const cnt=4+Math.min(this.level,3);
       const pos=[];
       for(let i=0;i<cnt;i++)pos.push({x:rand(80,CONFIG.WIDTH-80),y:rand(80,CONFIG.HEIGHT-80),radius:70});
       this.warningData={positions:pos};
-    }else if(sp==='poisonSpray'){
+    }else if(sp==='radialPoison'||sp==='poisonSpray'){
       // 相柳毒液喷射：3条扇形光波
       const a0=Math.atan2(player.y-this.y,player.x-this.x);
       this.warningData={beamType:'fan',x:this.x,y:this.y,angles:[a0-0.5,a0,a0+0.5]};
-    }else if(sp==='rockBarrage'){
+    }else if(sp==='trackingStomp'||sp==='rockBarrage'){
       // 朱厌巨石弹幕：多个区域预警后同时打击
       const cnt=5+Math.min(this.level,2);
       const pos=[];
@@ -3628,7 +3634,7 @@ class Boss {
     }else if(sp==='gravityWell'){
       // 饕餮引力井：大范围吸引区域
       this.warningData={beamType:'zone',x:player?player.x:CONFIG.WIDTH/2,y:player?player.y:CONFIG.HEIGHT/2,radius:200};
-    }else if(sp==='airDash'){
+    }else if(sp==='dashPause'||sp==='airDash'){
       // 英招空中冲刺：闪烁到玩家附近造成范围伤害
       this.warningData={beamType:'zone',x:player?player.x:CONFIG.WIDTH/2,y:player?player.y:CONFIG.HEIGHT/2,radius:120};
     }else if(sp==='floodWave'){
@@ -3648,7 +3654,7 @@ class Boss {
       // 九尾狐魅惑光波：水平贯穿光束，持续0.8秒
       this._beamActive=true; this._beamData={...data,duration:0.8,timer:0};
       spawnParticles(this.x,this.y,this.color,40);
-    }else if(sp==='diveBomb'){
+    }else if(sp==='sunBall'||sp==='diveBomb'){
       // 毕方俯冲轰炸：同时打击所有预警区域
       if(data&&data.positions)for(const p of data.positions){
         spawnParticles(p.x,p.y,this.color,35);
@@ -3657,11 +3663,11 @@ class Boss {
         // 少量溅射弹（非弹幕海）
         for(let i=0;i<3;i++){const a=(i/3)*Math.PI*2;enemyBullets.push(new EnemyBullet(p.x,p.y,a,120,7,this.color));}
       }
-    }else if(sp==='poisonSpray'){
+    }else if(sp==='radialPoison'||sp==='poisonSpray'){
       // 相柳毒液喷射：3条扇形光波
       this._beamActive=true; this._beamData={...data,duration:0.7,timer:0};
       spawnParticles(this.x,this.y,this.color,35);
-    }else if(sp==='rockBarrage'){
+    }else if(sp==='trackingStomp'||sp==='rockBarrage'){
       // 朱厌巨石弹幕：同时打击所有预警区域
       if(data&&data.positions)for(const p of data.positions){
         spawnParticles(p.x,p.y,'#daa520',30);
@@ -3676,7 +3682,7 @@ class Boss {
       // 饕餮引力井：大范围吸引+爆炸
       this._wellActive=true; this._wellData={...data,duration:1.5,timer:0};
       spawnParticles(data.x,data.y,this.color,50);
-    }else if(sp==='airDash'){
+    }else if(sp==='dashPause'||sp==='airDash'){
       // 英招空中冲刺：闪烁到玩家附近，造成范围伤害+风刃
       const oldX=this.x,oldY=this.y;
       this.x=clamp(data.x+rand(-30,30),this.size,CONFIG.WIDTH-this.size);

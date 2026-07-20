@@ -677,14 +677,15 @@ function getWeaponStage(weaponId){ return Math.max(0,(saveData.ownedWeapons[weap
 function getWeaponStats(weaponId){
   const w=WEAPONS[weaponId]; if(!w)return WEAPONS.pistol;
   const stage=getWeaponStage(weaponId); const m=WEAPON_STAGE_MULTI[stage];
+  const refineLv=getWeaponRefine(weaponId); const refineMul=1+refineLv*0.02; // 每精炼+2%
   return {
     ...w,
-    bulletDamage:w.bulletDamage?w.bulletDamage*m.dmgMul:0,
+    bulletDamage:Math.ceil((w.bulletDamage?w.bulletDamage*m.dmgMul:0)*refineMul),
     fireCooldown:w.fireCooldown*m.cdMul,
     pierce:(w.pierce||0)+m.extraPierce,
     bulletCount:(w.bulletCount||1)+m.extraBullet,
     bulletSize:w.bulletSize?w.bulletSize*m.sizeMul:5,
-    stage:stage
+    stage:stage, refineLv:refineLv
   };
 }
 
@@ -855,20 +856,43 @@ function getAvailableUpgrades(){
 // ==================== 宠物系统 ====================
 const BOSS_PET_DEFS = [
   // 普通Boss宝宝
-  { bossIdx:0, name:'九尾狐崽', icon:'🦊', attack:'charm', isSuper:false, desc:'魅惑减速周围敌人', evoStats:[{dmgMul:1,rangeMul:1},{dmgMul:1.5,rangeMul:1.3},{dmgMul:2,rangeMul:1.6}] },
-  { bossIdx:1, name:'毕方雏', icon:'🐦', attack:'fireRain', isSuper:false, desc:'天降火雨灼烧敌人', evoStats:[{dmgMul:1,count:3},{dmgMul:1.5,count:5},{dmgMul:2,count:8}] },
-  { bossIdx:2, name:'相柳子', icon:'🐍', attack:'poison', isSuper:false, desc:'九头毒液范围攻击', evoStats:[{dmgMul:1,rangeMul:1},{dmgMul:1.5,rangeMul:1.3},{dmgMul:2,rangeMul:1.6}] },
-  { bossIdx:3, name:'朱厌婴', icon:'🦍', attack:'rockThrow', isSuper:false, desc:'投掷巨石分裂攻击', evoStats:[{dmgMul:1,count:1},{dmgMul:1.5,count:2},{dmgMul:2,count:3}] },
-  // 超级Boss宝宝
-  { bossIdx:4, name:'烛龙幼', icon:'🐉', attack:'lava', isSuper:true, desc:'熔岩池持续范围伤害', evoStats:[{dmgMul:2,count:3},{dmgMul:3,count:5},{dmgMul:4,count:8}] },
-  { bossIdx:5, name:'饕餮仔', icon:'👹', attack:'devour', isSuper:true, desc:'吞噬吸引并伤害敌人', evoStats:[{dmgMul:2,rangeMul:1},{dmgMul:3,rangeMul:1.5},{dmgMul:4,rangeMul:2}] },
-  // 新增Boss宝宝
-  { bossIdx:6, name:'英招雏', icon:'🦅', attack:'wind', isSuper:false, desc:'风刃切割多个敌人', evoStats:[{dmgMul:1,count:2},{dmgMul:1.5,count:3},{dmgMul:2,count:5}] },
-  { bossIdx:7, name:'计蒙子', icon:'🐲', attack:'water', isSuper:false, desc:'水柱范围溅射攻击', evoStats:[{dmgMul:1,rangeMul:1},{dmgMul:1.5,rangeMul:1.3},{dmgMul:2,rangeMul:1.6}] },
-  { bossIdx:8, name:'穷奇崽', icon:'🐅', attack:'chaos', isSuper:true, desc:'混沌弹幕追踪敌人', evoStats:[{dmgMul:2,count:3},{dmgMul:3,count:5},{dmgMul:4,count:8}] }
+  { bossIdx:0, name:'九尾狐崽', icon:'🦊', attack:'charm', isSuper:false, desc:'魅惑减速周围敌人', passive:{type:'dmg',val:1.08,name:'伤害+8%'}, evoStats:[{dmgMul:1,rangeMul:1},{dmgMul:1.5,rangeMul:1.3},{dmgMul:2,rangeMul:1.6}] },
+  { bossIdx:1, name:'毕方雏', icon:'🐦', attack:'fireRain', isSuper:false, desc:'天降火雨灼烧敌人', passive:{type:'spd',val:1.06,name:'移速+6%'}, evoStats:[{dmgMul:1,count:3},{dmgMul:1.5,count:5},{dmgMul:2,count:8}] },
+  { bossIdx:2, name:'相柳子', icon:'🐍', attack:'poison', isSuper:false, desc:'九头毒液范围攻击', passive:{type:'cd',val:0.94,name:'射速+6%'}, evoStats:[{dmgMul:1,rangeMul:1},{dmgMul:1.5,rangeMul:1.3},{dmgMul:2,rangeMul:1.6}] },
+  { bossIdx:3, name:'朱厌婴', icon:'🦍', attack:'rockThrow', isSuper:false, desc:'投掷巨石分裂攻击', passive:{type:'dmg',val:1.08,name:'伤害+8%'}, evoStats:[{dmgMul:1,count:1},{dmgMul:1.5,count:2},{dmgMul:2,count:3}] },
+  { bossIdx:4, name:'烛龙幼', icon:'🐉', attack:'lava', isSuper:true, desc:'熔岩池持续范围伤害', passive:{type:'dmg',val:1.15,name:'伤害+15%'}, evoStats:[{dmgMul:2,count:3},{dmgMul:3,count:5},{dmgMul:4,count:8}] },
+  { bossIdx:5, name:'饕餮仔', icon:'👹', attack:'devour', isSuper:true, desc:'吞噬吸引并伤害敌人', passive:{type:'crit',val:0.08,name:'暴击率+8%'}, evoStats:[{dmgMul:2,rangeMul:1},{dmgMul:3,rangeMul:1.5},{dmgMul:4,rangeMul:2}] },
+  { bossIdx:6, name:'英招雏', icon:'🦅', attack:'wind', isSuper:false, desc:'风刃切割多个敌人', passive:{type:'spd',val:1.06,name:'移速+6%'}, evoStats:[{dmgMul:1,count:2},{dmgMul:1.5,count:3},{dmgMul:2,count:5}] },
+  { bossIdx:7, name:'计蒙子', icon:'🐲', attack:'water', isSuper:false, desc:'水柱范围溅射攻击', passive:{type:'cd',val:0.94,name:'射速+6%'}, evoStats:[{dmgMul:1,rangeMul:1},{dmgMul:1.5,rangeMul:1.3},{dmgMul:2,rangeMul:1.6}] },
+  { bossIdx:8, name:'穷奇崽', icon:'🐅', attack:'chaos', isSuper:true, desc:'混沌弹幕追踪敌人', passive:{type:'crit',val:0.08,name:'暴击率+8%'}, evoStats:[{dmgMul:2,count:3},{dmgMul:3,count:5},{dmgMul:4,count:8}] }
 ];
 function getPetDef(bossIdx){ return BOSS_PET_DEFS.find(p=>p.bossIdx===bossIdx); }
 
+function applyPetPassives(player){
+  const deployed=(saveData.deployedPets||[]).slice(0,3); // 最多3只生效
+  for(const dp of deployed){
+    const pd=getPetDef(dp.def); if(!pd||!pd.passive)continue;
+    const p=pd.passive;
+    if(p.type==='dmg')player.bulletDamage=Math.ceil(player.bulletDamage*p.val);
+    else if(p.type==='spd')player.speed=Math.ceil(player.speed*p.val);
+    else if(p.type==='cd')player.fireCooldown*=p.val;
+    else if(p.type==='crit')player.critChance+=p.val;
+  }
+}
+// 武器精炼：每级提升武器伤害2%，最高20级，积分递增
+function refineWeapon(wid){
+  if(!saveData.weaponRefine)saveData.weaponRefine={};
+  const lv=saveData.weaponRefine[wid]||0;
+  if(lv>=20)return {ok:false,msg:'已达最高精炼等级'};
+  const cost=Math.floor(100*(lv+1)*(lv+1)*1.2);
+  if((saveData.totalScore||0)<cost)return {ok:false,msg:`积分不足(需要${cost})`};
+  saveData.totalScore-=cost;
+  saveData.weaponRefine[wid]=lv+1;
+  saveSave();
+  return {ok:true,msg:`${lv+1}/20级`,cost};
+}
+function getWeaponRefine(wid){ return (saveData.weaponRefine&&saveData.weaponRefine[wid])||0; }
+function getWeaponRefineCost(wid){ const lv=(saveData.weaponRefine&&saveData.weaponRefine[wid])||0; if(lv>=20)return 0; return Math.floor(100*(lv+1)*(lv+1)*1.2); }
 // ==================== 魂器系统 ====================
 const SOUL_ARTIFACTS = [
   { bossIdx:4, id:'zhulong', name:'烛龙魂器', icon:'🔥', color:'#ff6347', desc:'释放技能时召唤火焰风暴，在周围制造6个熔岩区域持续灼烧敌人', skillName:'焚天烈焰' },
